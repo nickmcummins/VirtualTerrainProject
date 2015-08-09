@@ -1,26 +1,37 @@
 Instructions for CMake
 ======================
 
-N.B. These instructions are for the windows GUI. On Linux you should follow a similar process using ccmake or one of the gui versions.
+N.B. These instructions are for the windows GUI. On Linux you should follow a
+similar process using ccmake or one of the gui versions.
 
 1. You need at least CMake vesion 2.8. (Preferably 2.8.4)
 
-2. Launch the cmake-gui program and set the "Where to build the binaries" directory to the root of your VTP source tree. If the "Where is the
-source code" directory is not automatically set to the same directory then set it manually. Once you have run cmake at least once you should
-be able to drag the CMakeCache.txt file from the root of your VTP source tree and drop it on the cmake program and it will start with the
-correct directories. Drag and drop of the top level CMakeLists.txt DOES NOT WORK! Also drag and drop is broken in a number of versions before
-2.8.4. You can fix this on Linux desktops by editing the CMake.desktop file and changing the %f in the Exec key to %d, but beware the %d key
-is deprecated and will not work forever.
+2. Launch the cmake-gui program and set the "Where to build the binaries" 
+directory to the root of your VTP source tree. If the "Where is the source code"
+directory is not automatically set to the same directory then set it manually.
+Once you have run cmake at least once you should be able to drag the 
+CMakeCache.txt file from the root of your VTP source tree and drop it on the 
+cmake program and it will start with the correct directories. Drag and drop of 
+the top level CMakeLists.txt DOES NOT WORK! Also drag and drop is broken in a 
+number of versions before 2.8.4. You can fix this on Linux desktops by editing 
+the CMake.desktop file and changing the %f in the Exec key to %d, but beware the 
+%d key is deprecated and will not work forever.
 
-3. The CMake process is interative. You need to keep pressing configure until all the displayed cache values go grey. Each time you press
-configure you may be presented with dialog boxes asking for some input, when you have finished giving input the list of cache values will be
-updated. Some of these values will be in red. You need to check you are happy with these values or manually enter the value you want. In
-general the ones you need to manually enter will be either the full path to a library file or the full path to a directory containing include
-files, and will be displayed as XXXXXXXXXXXXXXXX-NOTFOUND. When you have finished entering values press configure again. This may result in
-all the values going grey or some new red values being displayed. Keep on fixing the red values and pressing configure until all grey values
-are displayed. The red values will always be displayed at the top of the list.
+3. The CMake process is interative. You need to keep pressing configure until 
+all the displayed cache values go grey. Each time you press configure you may be 
+presented with dialog boxes asking for some input, when you have finished giving 
+input the list of cache values will be updated. Some of these values will be in 
+red. You need to check you are happy with these values or manually enter the 
+value you want. In general the ones you need to manually enter will be either 
+the full path to a library file or the full path to a directory containing 
+include files, and will be displayed as XXXXXXXXXXXXXXXX-NOTFOUND. When you have 
+finished entering values press configure again. This may result in all the 
+values going grey or some new red values being displayed. Keep on fixing the red 
+values and pressing configure until all grey values are displayed. The red 
+values will always be displayed at the top of the list.
 
-4. These are the values you may need to specify as of the time of writing of this note.
+4. These are the values you may need to specify as of the time of writing of 
+this note.
 BZIP2_INCLUDE_DIR
 BZIP2_LIBRARY
 BZIP2_LIBRARY_DEBUG
