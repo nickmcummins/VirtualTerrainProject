@@ -12,6 +12,11 @@ If you only want to run the software, there are [installers for Windows](http://
 
 * For build instructions, see [Directions for Windows](http://vterrain.org/Distrib/win.html) or [Directions for Unix](http://vterrain.org/Distrib/unix.html)
 
+### Dependencies ###
+
+Required: GDAL, libMini, wxWidgets, OpenSceneGraph, libjpeg, libpng.
+Optional: libbzip2, libcurl, QuikGrid, and a few more.
+
 ### Contribution guidelines ###
 
 * Please send feedback to the [mailing list](https://groups.yahoo.com/neo/groups/vtp/info)
