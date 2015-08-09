@@ -14,8 +14,9 @@ If you only want to run the software, there are [installers for Windows](http://
 
 ### Dependencies ###
 
-Required: GDAL, libMini, wxWidgets, OpenSceneGraph, libjpeg, libpng.
-Optional: libbzip2, libcurl, QuikGrid, and a few more.
+* Required: GDAL, libMini, wxWidgets, OpenSceneGraph, libjpeg, libpng.
+
+* Optional: libbzip2, libcurl, QuikGrid, and a few more.
 
 ### Contribution guidelines ###
 
