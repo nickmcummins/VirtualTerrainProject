@@ -1,4 +1,4 @@
-# README #
+# The Virtual Terrain Project Software #
 
 The VTP has a suite of cross-platform applications and libraries for geospatial processing and 3D visualization of terrain. The main applications are:
 
