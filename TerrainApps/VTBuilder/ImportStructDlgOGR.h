@@ -39,7 +39,7 @@ public:
 	wxRadioButton* GetTypeInstance()  { return (wxRadioButton*) FindWindow( ID_TYPE_INSTANCE ); }
 	wxRadioButton* GetTypeLinear()  { return (wxRadioButton*) FindWindow( ID_TYPE_LINEAR ); }
 	wxRadioButton* GetTypeBuilding()  { return (wxRadioButton*) FindWindow( ID_TYPE_BUILDING ); }
-	void SetDatasource(OGRDataSource *pDatasource) { m_pDatasource = pDatasource; }
+	void SetDatasource(GDALDataset *pDatasource) { m_pDatasource = pDatasource; }
 	void UpdateFieldNames();
 	void UpdateEnables();
 	bool GetRadio(int id);
@@ -52,7 +52,7 @@ public:
 
 private:
 	// WDR: member variable declarations for ImportStructOGRDlg
-	OGRDataSource *m_pDatasource;
+	GDALDataset *m_pDatasource;
 
 private:
 	// WDR: handler declarations for ImportStructOGRDlg

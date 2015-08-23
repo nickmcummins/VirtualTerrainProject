@@ -1307,8 +1307,9 @@ GDALWrapper::~GDALWrapper()
 
 	if (m_bOGRFormatsRegistered)
 	{
-		OGRSFDriverRegistrar *reg = OGRSFDriverRegistrar::GetRegistrar();
-		delete reg;
+		// TODO: still necessary to clean up memory with GDAL 2.0?
+		//OGRSFDriverRegistrar *reg = OGRSFDriverRegistrar::GetRegistrar();
+		//delete reg;
 	}
 }
 

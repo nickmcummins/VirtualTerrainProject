@@ -146,8 +146,8 @@ public:
 
 	// Access values
 	int NumPrims() const;
-	int NumIndices() const { return getVertexIndices()->getNumElements(); }
-	short GetIndex(int i) const { return getIndices()->at(i); }
+	//int NumIndices() const { return getVertexIndices()->getNumElements(); }
+	//short GetIndex(int i) const { return getIndices()->at(i); }
 	int GetPrimLen(int i) const { return dynamic_cast<const osg::DrawArrayLengths*>(getPrimitiveSet(0))->at(i); }
 
 	void SetNormalsFromPrimitives();
@@ -173,8 +173,8 @@ protected:
 	const osg::DrawArrays *getDrawArrays() const { return dynamic_cast<const osg::DrawArrays*>(getPrimitiveSet(0)); }
 	const osg::DrawArrayLengths *getDrawArrayLengths() const { return dynamic_cast<const osg::DrawArrayLengths*>(getPrimitiveSet(0)); }
 
-	osg::UIntArray *getIndices() { return (osg::UIntArray*) getVertexIndices(); }
-	const osg::UIntArray *getIndices() const { return (const osg::UIntArray*) getVertexIndices(); }
+	//osg::UIntArray *getIndices() { return (osg::UIntArray*) getVertexIndices(); }
+	//const osg::UIntArray *getIndices() const { return (const osg::UIntArray*) getVertexIndices(); }
 
 	osg::Vec3Array *getVerts() { return (osg::Vec3Array*) getVertexArray(); }
 	const osg::Vec3Array *getVerts() const { return (const osg::Vec3Array*) getVertexArray(); }

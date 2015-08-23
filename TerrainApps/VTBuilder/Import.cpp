@@ -1610,7 +1610,7 @@ vtLayerPtr Builder::ImportVectorsWithOGR(const wxString &strFileName, LayerType 
 	// OGR doesn't yet support utf-8 or wide filenames, so convert
 	vtString fname_local = UTF8ToLocal(strFileName.mb_str(wxConvUTF8));
 
-	OGRDataSource *datasource = OGRSFDriverRegistrar::Open(fname_local);
+	GDALDataset *datasource = (GDALDataset *)GDALOpen(fname_local, GA_ReadOnly);
 	if (!datasource)
 		return NULL;
 
@@ -1699,10 +1699,11 @@ int Builder::ImportDataFromTIGER(const wxString &strDirName)
 	// OGR doesn't yet support utf-8 or wide filenames, so convert
 	vtString fname_local = UTF8ToLocal(strDirName.mb_str(wxConvUTF8));
 
-	OGRDataSource *pDatasource = OGRSFDriverRegistrar::Open(fname_local);
+	GDALDataset *pDatasource = (GDALDataset *)GDALOpen(fname_local, GA_ReadOnly);
 	if (!pDatasource)
 		return 0;
 
+#if 0	// TODO: port this to GDAL 2.0
 	int i, j, feature_count;
 	OGRLayer		*pOGRLayer;
 	OGRFeature		*pFeature;
@@ -1893,6 +1894,9 @@ int Builder::ImportDataFromTIGER(const wxString &strDirName)
 		layer_count++;
 
 	return layer_count;
+#else
+	return 0;
+#endif
 }
 
 void Builder::ImportDataFromNTF(const wxString &strFileName, LayerArray &layers)
@@ -1902,7 +1906,7 @@ void Builder::ImportDataFromNTF(const wxString &strFileName, LayerArray &layers)
 	// OGR doesn't yet support utf-8 or wide filenames, so convert
 	vtString fname_local = UTF8ToLocal(strFileName.mb_str(wxConvUTF8));
 
-	OGRDataSource *pDatasource = OGRSFDriverRegistrar::Open(fname_local);
+	GDALDataset *pDatasource = (GDALDataset *)GDALOpen(fname_local, GA_ReadOnly);
 	if (!pDatasource)
 		return;
 
@@ -2043,7 +2047,7 @@ void Builder::ImportDataFromS57(const wxString &strDirName)
 	// OGR doesn't yet support utf-8 or wide filenames, so convert
 	vtString fname_local = UTF8ToLocal(strDirName.mb_str(wxConvUTF8));
 
-	OGRDataSource *pDatasource = OGRSFDriverRegistrar::Open(fname_local);
+	GDALDataset *pDatasource = (GDALDataset *)GDALOpen(fname_local, GA_ReadOnly);
 	if (!pDatasource)
 		return;
 

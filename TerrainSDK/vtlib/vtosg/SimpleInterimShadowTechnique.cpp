@@ -21,9 +21,15 @@
 #include <osg/PolygonOffset>
 #include <osg/CullFace>
 #include <osg/io_utils>
+#include <osg/FrameBufferObject>
+#include <osg/GLExtensions>
 #include <sstream>
 
 using namespace osgShadow;
+
+// TODO: figure out to query this from OSG. If we had State, we could use get the GLExtensions
+// and ask it, but how do we get the global State?
+static bool haveShadowAmbient = true;
 
 CSimpleInterimShadowTechnique::CSimpleInterimShadowTechnique():
     m_ShadowTextureUnit(1),
@@ -61,7 +67,11 @@ void CSimpleInterimShadowTechnique::SetShadowDarkness(const float Darkness)
 	osg::Uniform *pUniform;
 	if (!_dirty)
 	{
-		if (m_pTexture.valid() && osg::Texture::getExtensions(0, true)->isShadowAmbientSupported())
+		//const GLExtensions* extensions = m_pTexture-> get<GLExtensions>();
+		//bool haveShadowAmbient = osg::Texture::getExtensions(0, true)->isShadowAmbientSupported();
+		//bool haveShadowAmbient = osg::isGLExtensionSupported(contextID, "GL_ARB_shadow_ambient");
+
+		if (m_pTexture.valid() && haveShadowAmbient)
 		{
 			m_pTexture->setShadowAmbient(1.0 - m_ShadowDarkness);
 			osg::TexEnv *pTexEnv = new osg::TexEnv;
@@ -97,7 +107,7 @@ void CSimpleInterimShadowTechnique::init()
     m_pTexture->setInternalFormat(GL_DEPTH_COMPONENT);
     m_pTexture->setShadowComparison(true);
     m_pTexture->setShadowTextureMode(osg::Texture2D::LUMINANCE);
-	if ((m_ShadowDarkness != 1.0f) && osg::Texture::getExtensions(0, true)->isShadowAmbientSupported())
+	if ((m_ShadowDarkness != 1.0f) && haveShadowAmbient)
 		m_pTexture->setShadowAmbient(1.0 - m_ShadowDarkness);
     m_pTexture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::LINEAR);
     m_pTexture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::LINEAR);
@@ -117,20 +127,18 @@ void CSimpleInterimShadowTechnique::init()
 		m_pCamera->setViewport(0, 0, m_ShadowTextureResolution, m_ShadowTextureResolution);
         m_pCamera->setRenderOrder(osg::Camera::PRE_RENDER);
 		// Defeat OSG fall back options to avoid problems with osg's graphics contexts
-#if OSG_VERSION_MAJOR == 1 && OSG_VERSION_MINOR > 0 || OSG_VERSION_MAJOR > 1
-		// We are probably OSG 1.1 or newer
-		osg::FBOExtensions* fbo_ext = osg::FBOExtensions::instance(0, true);
-#else
-		osg::FBOExtensions* fbo_ext = osg::FBOExtensions::instance(0);
-#endif
-		if (fbo_ext && fbo_ext->isSupported())
+
+		//osg::FBOExtensions* fbo_ext = osg::FBOExtensions::instance(0, true);
+		//osg::GLExtensions *extensions = osg::GLExtensions::???
+
+		//if (fbo_ext && fbo_ext->isSupported())
 			m_pCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::FRAME_BUFFER_OBJECT);
-		else
-		{
-			VTLOG("SimpleInterimShadowTechnique - Frame buffer objects not available, using the live frame buffer\n");
-			m_UsingFrameBuffer = true;
-			m_pCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER, osg::Camera::FRAME_BUFFER);
-		}
+		//else
+		//{
+		//	VTLOG("SimpleInterimShadowTechnique - Frame buffer objects not available, using the live frame buffer\n");
+		//	m_UsingFrameBuffer = true;
+		//	m_pCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER, osg::Camera::FRAME_BUFFER);
+		//}
 
         m_pCamera->attach(osg::Camera::DEPTH_BUFFER, m_pTexture.get());
 
@@ -163,7 +171,7 @@ void CSimpleInterimShadowTechnique::init()
 		}
 
 
-		if ((m_ShadowDarkness != 1.0f) && !osg::Texture::getExtensions(0, true)->isShadowAmbientSupported())
+		if (m_ShadowDarkness != 1.0f && !haveShadowAmbient)
 		{
 			// Set up dummy texture
 			osg::Image* pImage = new osg::Image;

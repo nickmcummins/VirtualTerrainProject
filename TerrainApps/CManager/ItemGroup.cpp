@@ -13,7 +13,7 @@
 #endif
 
 #include "vtlib/vtlib.h"
-#include "vtlib/core/GeomUtil.h"
+#include "vtlib/core/GeomUtil.h"	// For Create3DCursor
 #include "vtdata/vtLog.h"
 #include "frame.h"
 #include "ItemGroup.h"

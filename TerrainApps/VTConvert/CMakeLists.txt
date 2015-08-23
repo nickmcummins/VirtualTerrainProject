@@ -7,11 +7,10 @@ install(TARGETS VTConvert RUNTIME DESTINATION bin)
 target_link_libraries(VTConvert vtdata)
 
 # Specify debug preprocessor definitions for this target
-set_property(TARGET VTConvert APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG VTDEBUG)
+#set_property(TARGET VTConvert APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG VTDEBUG)
 
 # Windows specific stuff
 if (WIN32)
-	set_property(TARGET VTConvert APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
 	set_property(TARGET VTConvert APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt)
 endif (WIN32)
 

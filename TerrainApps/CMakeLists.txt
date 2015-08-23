@@ -1,8 +1,10 @@
 include_directories(${TERRAIN_SDK_ROOT})
-include_directories(${TERRAIN_SDK_ROOT}/vtlib)
-include_directories(${CMAKE_SOURCE_DIR})
+# include_directories(${CMAKE_SOURCE_DIR})
 
 add_subdirectory(VTBuilder)
+
+include_directories(${TERRAIN_SDK_ROOT}/vtlib)
+
 add_subdirectory(Enviro)
 add_subdirectory(CManager)
 add_subdirectory(glutSimple)

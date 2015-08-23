@@ -17,7 +17,9 @@ class LogCatcher : public wxLog
 		VTLOG1("\n");
 	}
 
-	virtual void DoLogString(const wxChar *msg, time_t timestamp)
+	virtual void DoLogRecord(wxLogLevel level,
+		const wxString& msg,
+		const wxLogRecordInfo& info)
 	{
 	    wxString message(msg);
 	    DoLogText(message);

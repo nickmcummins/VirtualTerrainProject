@@ -14,6 +14,7 @@
 #define FELKELINTERSECTIONH
 
 #include <queue>
+#include <functional>     // std::greater
 
 #include "FelkelComponents.h"
 class CSkeleton;

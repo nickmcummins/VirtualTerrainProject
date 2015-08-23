@@ -457,7 +457,7 @@ public:
 	virtual const char* className() const { return "OsgDynMesh"; }
 
 	// Implement OSG::Drawable's computeBound.
-	virtual osg::BoundingBox computeBound() const;
+	virtual osg::BoundingBox computeBoundingBox() const;
 	virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
 
 	class vtDynGeom		*m_pDynGeom;

@@ -28,12 +28,8 @@ if(ZLIB_FOUND)
 	include_directories(${ZLIB_INCLUDE_DIR})
 endif (ZLIB_FOUND)
 
-# Windows specific stuff
-if (WIN32)
-	set_property(TARGET wxosg APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
-endif (WIN32)
-
 if(OSG_FOUND)
 	include_directories(${OSG_INCLUDE_DIR})
+	include_directories(${OSG_INSTALL_DIR}/include)
 endif(OSG_FOUND)
 

@@ -35,8 +35,9 @@ GraphicsWindowWX::GraphicsWindowWX(wxGLCanvas *pCanvas, osg::DisplaySettings *pS
 	// Set up a new context ID - I don't think we make use of this at the moment
 	setState( new osg::State );
 	getState()->setGraphicsContext(this);
-    if (_traits.valid() && _traits->sharedContext)
-    {
+    // if (_traits.valid() && _traits->sharedContext)
+	if (_traits.valid() && _traits->sharedContext.valid())
+	{
 		// I left this code in just in case we want shared contexts in the future
 		// they would need to be passed in and set up in the traits object above
         getState()->setContextID( _traits->sharedContext->getState()->getContextID() );

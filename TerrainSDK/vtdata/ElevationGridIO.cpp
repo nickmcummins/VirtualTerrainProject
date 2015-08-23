@@ -1808,7 +1808,7 @@ bool vtElevationGrid::LoadWithGDAL(const char *szFileName,
 	return true;
 }
 
-bool vtElevationGrid::ParseNTF5(OGRDataSource *pDatasource, vtString &msg,
+bool vtElevationGrid::ParseNTF5(GDALDataset *pDatasource, vtString &msg,
 								bool progress_callback(int))
 {
 	// Time Test
@@ -1878,7 +1878,7 @@ bool vtElevationGrid::ParseNTF5(OGRDataSource *pDatasource, vtString &msg,
 
 	// Get number of features. In this case the total number of cells
 	// in the elevation matrix
-	int iTotalCells = pLayer->GetFeatureCount();
+	int iTotalCells = (int) pLayer->GetFeatureCount();
 
 	pLayer->ResetReading();
 
@@ -2006,7 +2006,7 @@ bool vtElevationGrid::LoadFromNTF5(const char *szFileName,
 
 	vtString msg;
 	bool bSuccess = false;
-	OGRDataSource *pDatasource = OGRSFDriverRegistrar::Open(fname_local);
+	GDALDataset *pDatasource = (GDALDataset*) GDALOpen(fname_local, GA_ReadOnly);
 	if (pDatasource)
 		bSuccess = ParseNTF5(pDatasource, msg, progress_callback);
 

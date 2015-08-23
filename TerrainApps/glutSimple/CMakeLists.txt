@@ -63,6 +63,7 @@ if(GLUT_FOUND)
 	include_directories(${GLUT_INCLUDE_DIR})
 	if(OSG_FOUND)
 		include_directories(${OSG_INCLUDE_DIR})
+		include_directories(${OSG_INSTALL_DIR}/include)
 	endif(OSG_FOUND)
 
 	if (OSGEARTH_FOUND)

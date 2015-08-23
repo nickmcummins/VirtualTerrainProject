@@ -1476,7 +1476,7 @@ void vtGeode::RemoveMesh(vtMesh *pMesh)
 void vtGeode::RemoveAllMeshes()
 {
 	// This is a vector of ref_ptrs, so it will free meshes as appropriate.
-	_drawables.clear();
+	removeDrawables(0, getNumDrawables());
 }
 
 uint vtGeode::NumMeshes() const
@@ -1548,7 +1548,7 @@ OsgDynMesh::OsgDynMesh()
 	setDataVariance(osg::Object::DYNAMIC);
 }
 
-osg::BoundingBox OsgDynMesh::computeBound() const
+osg::BoundingBox OsgDynMesh::computeBoundingBox() const
 {
 	FBox3 box;
 	m_pDynGeom->DoCalcBoundBox(box);

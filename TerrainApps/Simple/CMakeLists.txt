@@ -7,7 +7,6 @@ target_link_libraries(Simple vtlib minidata vtdata xmlhelper)
 
 # Windows specific stuff
 if (WIN32)
-	set_property(TARGET Simple APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
 	set_property(TARGET Simple APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt)
 endif (WIN32)
 
@@ -55,6 +54,7 @@ endif(GDAL_FOUND)
 
 if(OSG_FOUND)
 	include_directories(${OSG_INCLUDE_DIR})
+	include_directories(${OSG_INSTALL_DIR}/include)
 endif(OSG_FOUND)
 
 if(ZLIB_FOUND)

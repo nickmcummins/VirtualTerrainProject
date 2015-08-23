@@ -5,8 +5,7 @@
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef TERRAINH
-#define TERRAINH
+#pragma once
 
 #include "vtdata/vtTime.h"
 #include "vtdata/FilePath.h"
@@ -80,7 +79,7 @@ typedef bool (*ProgFuncPtrType)(int);
   of the earth.
  
  It is generally described by a set of parameters such as elevation,
- vegetation, and time of day.  These terrain parameters are contained
+ vegetation, and built structures.  These terrain parameters are contained
  in the class TParams.
  
  To create a new terrain, first construct a vtTerrain and set its
@@ -235,7 +234,6 @@ public:
 	// Structure layers
 	vtStructureLayer *GetStructureLayer() const;
 	vtStructureLayer *NewStructureLayer();
-	vtStructureLayer *LoadStructuresFromXML(const vtString &strFilename);
 	void CreateStructures(vtStructureArray3d *structures);
 	bool CreateStructure(vtStructureArray3d *structures, int index);
 	int DeleteSelectedStructures(vtStructureLayer *st_layer);
@@ -245,6 +243,7 @@ public:
 							  double &closest, float fMaxInstRadius,
 							  float fLinearWidthBuffer);
 	void DeselectAllStructures();
+	void WriteStructuresToOBJ(const char *filename);
 
 	bool AddNodeToStructGrid(osg::Node *pNode);
 	void RemoveNodeFromStructGrid(osg::Node *pNode);
@@ -499,8 +498,8 @@ protected:
 
 	// A useful value for computing "local time", the location of the
 	//  center of the terrain in Geographic coords.
-	DPoint2			m_CenterGeoLocation;
-	int m_iDifferenceFromGMT;
+	DPoint2		m_CenterGeoLocation;
+	int			m_iDifferenceFromGMT;
 
 	// hold an informative message in case anything goes wrong
 	vtString	m_strErrorMsg;
@@ -513,4 +512,3 @@ protected:
 
 /*@}*/	// Group terrain
 
-#endif	// TERRAINH

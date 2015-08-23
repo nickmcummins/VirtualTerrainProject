@@ -21,23 +21,33 @@ add_library(vtdata
 
 if(ZLIB_FOUND)
 	include_directories(${ZLIB_INCLUDE_DIR})
+	message(ZLIB_INCLUDE_DIR)
+	message(${ZLIB_INCLUDE_DIR})
 endif(ZLIB_FOUND)
 
 if(JPEG_FOUND)
 	include_directories(${JPEG_INCLUDE_DIR})
+	message(JPEG_INCLUDE_DIR)
+	message(${JPEG_INCLUDE_DIR})
 endif(JPEG_FOUND)
 
 if(PNG_FOUND)
 	include_directories(${PNG_INCLUDE_DIR})
+	message(PNG_INCLUDE_DIR)
+	message(${PNG_INCLUDE_DIR})
 endif(PNG_FOUND)
 
 if(GDAL_FOUND)
 	include_directories(${GDAL_INCLUDE_DIR})
+	message(GDAL_INCLUDE_DIR)
+	message(${GDAL_INCLUDE_DIR})
 endif (GDAL_FOUND)
 
 if(BZIP2_FOUND)
 	include_directories(${BZIP2_INCLUDE_DIR})
 	set_property(TARGET vtdata APPEND PROPERTY COMPILE_DEFINITIONS SUPPORT_BZIP2)
+	message(BZIP2_INCLUDE_DIR)
+	message(${BZIP2_INCLUDE_DIR})
 endif(BZIP2_FOUND)
 
 if(CURL_FOUND)
@@ -46,16 +56,14 @@ if(CURL_FOUND)
 	if(CURL_IS_STATIC)
 		set_property(TARGET vtdata APPEND PROPERTY COMPILE_DEFINITIONS CURL_STATICLIB)
 	endif(CURL_IS_STATIC)
+	message(CURL_INCLUDE_DIR)
+	message(${CURL_INCLUDE_DIR})
 endif (CURL_FOUND)
 
 if(QUIKGRID_FOUND)
 	include_directories(${QUIKGRID_INCLUDE_DIR})
 	set_property(TARGET vtdata APPEND PROPERTY COMPILE_DEFINITIONS SUPPORT_QUIKGRID)
+	message(QUIKGRID_INCLUDE_DIR)
+	message(${QUIKGRID_INCLUDE_DIR})
 endif(QUIKGRID_FOUND)
-
-# Windows specific stuff
-if (WIN32)
-	set_property(TARGET vtdata APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
-endif (WIN32)
-
 

@@ -11,6 +11,7 @@
 #include "ElevationGrid.h"
 #include "vtLog.h"
 #include "FilePath.h"
+#include <algorithm>	// for std::min/max
 
 #if VTDEBUG
 #define DEBUG_DEM true

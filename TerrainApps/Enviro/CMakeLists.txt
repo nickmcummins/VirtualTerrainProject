@@ -47,13 +47,12 @@ endif(NVPERFSDK_FOUND AND VTP_NVIDIA_PERFORMANCE_MONITORING)
 
 # Windows specific stuff
 if (WIN32)
-	set_property(TARGET Enviro APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
 	set_property(TARGET Enviro APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt;wxpngd;wxtiffd;wxjpegd;wxzlibd)
 	set_property(TARGET Enviro APPEND PROPERTY LINK_FLAGS /NODEFAULTLIB:wxpng;wxtiff;wxjpeg;wxzlib)
 endif (WIN32)
 
 # Specify debug preprocessor definitions for this target
-set_property(TARGET Enviro APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG VTDEBUG)
+#set_property(TARGET Enviro APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG VTDEBUG)
 
 # External libraries for this target
 if(wxWidgets_FOUND)
@@ -120,6 +119,7 @@ endif(GDAL_FOUND)
 
 if(OSG_FOUND)
 	include_directories(${OSG_INCLUDE_DIR})
+	include_directories(${OSG_INSTALL_DIR}/include)
 endif(OSG_FOUND)
 
 if(ZLIB_FOUND)

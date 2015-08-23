@@ -12,6 +12,8 @@
 #include "wx/wx.h"
 #endif
 
+#include <algorithm>	// For std::min/max
+
 #include "ProfileDlg.h"
 #include "vtdata/FileFilters.h"
 #include "vtdata/vtString.h"

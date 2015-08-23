@@ -553,7 +553,7 @@ bool RoadMapEdit::extract_road_attributes(const char *strEntity, int &lanes,
 }
 
 
-void RoadMapEdit::AddElementsFromOGR(OGRDataSource *pDatasource,
+void RoadMapEdit::AddElementsFromOGR(GDALDataset *pDatasource,
 									 bool progress_callback(int))
 {
 	int i, j, feature_count, count;

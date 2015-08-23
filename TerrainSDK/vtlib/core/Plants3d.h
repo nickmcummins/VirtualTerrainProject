@@ -49,9 +49,9 @@ public:
 		}
 	}
 
-	virtual osg::BoundingBox computeBound() const
+	virtual osg::BoundingBox computeBoundingBox() const
 	{
-		osg::BoundingBox geom_box = _geometry->getBound();
+		osg::BoundingBox geom_box = _geometry->getBoundingBox();
 		osg::BoundingBox bb;
 		for (VecVec4::const_iterator itr = _psizelist.begin();
 			 itr != _psizelist.end(); ++itr)

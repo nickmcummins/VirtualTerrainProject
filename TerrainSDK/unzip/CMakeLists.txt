@@ -10,8 +10,3 @@ endif(ZLIB_FOUND)
 
 # Specify preprocessor definitions for this target
 set_property(TARGET unzip APPEND PROPERTY COMPILE_DEFINITIONS NOUNCRYPT)
-
-# Windows specific stuff
-if (WIN32)
-	set_property(TARGET unzip APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
-endif (WIN32)

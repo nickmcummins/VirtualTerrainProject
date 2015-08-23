@@ -32,12 +32,6 @@ endif(MSVC)
 # Specify common preprocessor definitions for this target
 set_property(TARGET BuilderLib APPEND PROPERTY COMPILE_DEFINITIONS USE_OPENGL=1)
 
-# Windows specific stuff
-if (WIN32)
-	set_property(TARGET BuilderLib APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
-endif (WIN32)
-
-
 set(VTBUILDER_SOURCE_FILES
 	App.cpp Frame.cpp FrameMenus.cpp Geocode.cpp RoadFix.cpp Special.cpp
 	StatusBar.cpp TreeView.cpp)
@@ -76,11 +70,9 @@ set_property(TARGET VTBuilder APPEND PROPERTY COMPILE_DEFINITIONS USE_OPENGL=1)
 
 # Windows specific stuff
 if (WIN32)
-	set_property(TARGET VTBuilder APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE) 
 	set_property(TARGET VTBuilder APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt;wxpngd;wxtiffd;wxjpegd;wxzlibd)
 	set_property(TARGET VTBuilder APPEND PROPERTY LINK_FLAGS /NODEFAULTLIB:wxpng;wxtiff;wxjpeg;wxzlib)
 endif (WIN32)
-
 
 # External libraries for this target
 if(wxWidgets_FOUND)

@@ -622,6 +622,7 @@ vtOBJFile *OBJFileBegin(vtGeode *geode, const char *filename)
 
 void OBJFileWriteGeom(vtOBJFile *file, vtGeode *geode)
 {
+#if 0 // TODO make it work without indices
 	uint i, j, k;
 	uint num_mesh = geode->NumMeshes();
 	for (i = 0; i < num_mesh; i++)
@@ -732,6 +733,7 @@ void OBJFileWriteGeom(vtOBJFile *file, vtGeode *geode)
 		}
 		file->verts_written += num_vert;
 	}
+#endif
 }
 
 /**

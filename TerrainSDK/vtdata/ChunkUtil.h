@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <new>	// for placement new
+#include <algorithm>	// for std::min/max
 
 #include "vtdata/MathTypes.h"
 

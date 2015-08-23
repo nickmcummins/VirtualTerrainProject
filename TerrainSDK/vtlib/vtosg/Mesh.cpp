@@ -898,7 +898,7 @@ void vtMesh::TransformVertices(const FMatrix4 &mat)
 // Override with ability to get OSG bounding box
 void vtMesh::GetBoundBox(FBox3 &box) const
 {
-	const osg::BoundingBox &osg_box = getBound();
+	const osg::BoundingBox &osg_box = getBoundingBox();
 	s2v(osg_box, box);
 }
 
@@ -1695,7 +1695,7 @@ vtTextMesh::vtTextMesh(osgText::Font *font, float fSize, bool bCenter)
 // Override with ability to get OSG bounding box
 void vtTextMesh::GetBoundBox(FBox3 &box) const
 {
-	const osg::BoundingBox &osg_box = getBound();
+	const osg::BoundingBox &osg_box = getBoundingBox();
 	s2v(osg_box, box);
 }
 

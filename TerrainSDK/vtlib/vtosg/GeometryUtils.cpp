@@ -1371,17 +1371,15 @@ int GeometryBuilder::FindVertex(const FPoint3 &Point, const FLine3 &RoofSection3
 class osg::Geometry* FindOrCreateGeometryObject(osg::Geode *pGeode,
 	vtMaterial& Material, const int ArraysRequired)
 {
-	const osg::Geode::DrawableList& Drawables = pGeode->getDrawableList();
-
 	osg::Array *pVertexArray = NULL;
 	osg::Array *pNormalArray = NULL;
 	osg::Array *pColorArray = NULL;
 	osg::Array *pTexCoordArray = NULL;
 
-	osg::Geode::DrawableList::const_iterator Drawable;
-	for (Drawable = Drawables.begin(); Drawable != Drawables.end(); Drawable++)
+	for (size_t i = 0; i < pGeode->getNumDrawables(); i++)
 	{
-		osg::Geometry* pGeometry = dynamic_cast<osg::Geometry*>((*Drawable).get());
+		osg::Drawable* pDrawable = pGeode->getDrawable(i);
+		osg::Geometry* pGeometry = dynamic_cast<osg::Geometry*>(pDrawable);
 		if (NULL != pGeometry)
 		{
 			// First check if this object has the arrays we require
@@ -1433,12 +1431,10 @@ class osg::Geometry* FindOrCreateGeometryObject(osg::Geode *pGeode,
 			{
 				// This does a compare with compareAttributeContents = false
 				if (*pStateSet == Material)
-					break;
+					return pGeometry;
 			}
 		}
 	}
-	if (Drawable != Drawables.end())
-		return dynamic_cast<osg::Geometry*>((*Drawable).get());
 
 	osg::Geometry *pGeometry = new osg::Geometry;
 

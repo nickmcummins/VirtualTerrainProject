@@ -89,6 +89,8 @@ float vtGetFrameTime()
 	return g_Scene.GetFrameTime();
 }
 
+#include <osg/GLExtensions>
+
 int vtGetMaxTextureSize()
 {
 	osg::GraphicsContext *context = vtGetScene()->GetGraphicsContext();
@@ -97,14 +99,16 @@ int vtGetMaxTextureSize()
 		return 0;
 	}
 
-    // Do not try to create an Extensions object if one does not already exist
-    // as we cannot guarantee a valid rendering context at this point.
-	osg::ref_ptr<osg::Texture::Extensions> pTextureExtensions =
-		osg::Texture::getExtensions(context->getState()->getContextID(), false);
-    if (pTextureExtensions.valid())
-        return pTextureExtensions->maxTextureSize();
-    else
-        return 0;
+	osg::State *state = context->getState();
+	if (!state)
+		return 0;
+
+	// get extension object
+	const osg::GLExtensions* extensions = state->get<osg::GLExtensions>();
+	if (!extensions)
+		return 0;
+
+	return extensions->maxTextureSize;
 }
 
 #if 0

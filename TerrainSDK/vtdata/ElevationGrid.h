@@ -15,7 +15,7 @@
 #include "vtString.h"
 
 class vtDIB;
-class OGRDataSource;
+class GDALDataset;
 
 /**
  * The vtElevationGrid class represents a generic grid of elevation data.
@@ -188,7 +188,7 @@ protected:
 	void SetupMembers();
 	void ComputeExtentsFromCorners();
 	void ComputeCornersFromExtents();
-	bool ParseNTF5(OGRDataSource *pDatasource, vtString &msg, bool progress_callback(int));
+	bool ParseNTF5(GDALDataset *pDatasource, vtString &msg, bool progress_callback(int));
 	bool GetXYZLine(const char *buf, const char *pattern, const char *format,
 					int components, double *x, double *y, double *z);
 	void SetError(vtElevError *err, vtElevError::ErrorType type, const char *szFormat, ...);

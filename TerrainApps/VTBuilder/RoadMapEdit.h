@@ -151,7 +151,7 @@ public:
 		bool progress_callback(int) = NULL);
 
 	// Import from OGR, for formats like SDTS
-	void AddElementsFromOGR(class OGRDataSource *datasource,
+	void AddElementsFromOGR(class GDALDataset *datasource,
 		bool progress_callback(int) = NULL);
 	LinkEdit *AddRoadSegment(class OGRLineString *pLineString);
 

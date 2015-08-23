@@ -12,6 +12,8 @@
 #include "wx/wx.h"
 #endif
 
+#include <algorithm>	// For std::min/max
+
 #include "FeatureTableDlg.h"
 #include "vtdata/vtLog.h"
 #include "vtdata/Features.h"
@@ -102,7 +104,7 @@ void FeatureTableDlg::SetFeatureSet(vtFeatureSet *pFeatures)
 		wxString name(pField->m_name, wxConvUTF8);
 		int width1 = pField->m_width * 6;
 		int width2 = name.Length() * 8;
-		int width = max(width1, width2);
+		int width = std::max(width1, width2);
 		if (width < 20)
 			width = 20;
 		GetList()->InsertColumn(field++, name, wxLIST_FORMAT_LEFT, width);

@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <wchar.h>
+#include <algorithm>	// for std::min/max
 
 #define InterlockInc(i) (*(i))++
 #define InterlockDec(i) --(*(i))

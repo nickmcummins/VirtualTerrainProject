@@ -83,12 +83,12 @@ public:
 
 	bool ReadSHP(const char *pathname, StructImportOptions &opt,
 		bool progress_callback(int) = NULL);
-	void AddElementsFromOGR(class OGRDataSource *datasource,
+	void AddElementsFromOGR(class GDALDataset *datasource,
 		StructImportOptions &opt, bool progress_callback(int) = NULL);
 
-	void AddElementsFromOGR_SDTS(class OGRDataSource *datasource,
+	void AddElementsFromOGR_SDTS(class GDALDataset *datasource,
 		bool progress_callback(int) = NULL);
-	void AddElementsFromOGR_RAW(class OGRDataSource *datasource,
+	void AddElementsFromOGR_RAW(class GDALDataset *datasource,
 		StructImportOptions &opt, bool progress_callback(int) = NULL);
 
 	void AddBuildingsFromOGR(class OGRLayer *pLayer,

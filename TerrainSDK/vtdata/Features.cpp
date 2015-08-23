@@ -224,7 +224,7 @@ OGRwkbGeometryType GetTypeFromOGR(const char *filename)
 	// OGR doesn't yet support utf-8 or wide filenames, so convert
 	vtString fname_local = UTF8ToLocal(filename);
 
-	OGRDataSource *pDatasource = OGRSFDriverRegistrar::Open(fname_local);
+	GDALDataset *pDatasource = (GDALDataset *) GDALOpen(fname_local, GA_ReadOnly);
 	if (!pDatasource)
 	{
 		VTLOG("unknown Datasource!");
@@ -549,7 +549,7 @@ vtFeatureSet *vtFeatureLoader::LoadWithOGR(const char *filename,
 	// OGR doesn't yet support utf-8 or wide filenames, so convert
 	vtString fname_local = UTF8ToLocal(filename);
 
-	OGRDataSource *pDatasource = OGRSFDriverRegistrar::Open(fname_local);
+	GDALDataset *pDatasource = (GDALDataset *)GDALOpen(fname_local, GA_ReadOnly);
 	if (!pDatasource)
 	{
 		VTLOG("LoadWithOGR: data source is NULL.\n");
@@ -584,7 +584,7 @@ bool vtFeatureSet::LoadFromOGR(OGRLayer *pLayer,
 
 	// get information from the datasource
 	OGRFeatureDefn *defn = pLayer->GetLayerDefn();
-	int feature_count = pLayer->GetFeatureCount();
+	int feature_count = (int) pLayer->GetFeatureCount();
 	int num_fields = defn->GetFieldCount();
 
 	// Get the projection (SpatialReference) from this layer, if we can.

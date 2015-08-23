@@ -7,6 +7,8 @@
 // Free for all uses, see license.txt for details.
 //
 
+#include <algorithm>	// for std::min/max
+
 #include "vtTin.h"
 #include "vtLog.h"
 #include "DxfParser.h"

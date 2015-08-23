@@ -449,7 +449,7 @@ bool vtStructureArray::ReadSHP(const char *pathname, StructImportOptions &opt,
 	return true;
 }
 
-void vtStructureArray::AddElementsFromOGR(OGRDataSource *pDatasource,
+void vtStructureArray::AddElementsFromOGR(GDALDataset *pDatasource,
 		StructImportOptions &opt, bool progress_callback(int))
 {
 	if (opt.m_strLayerName == "")
@@ -458,7 +458,7 @@ void vtStructureArray::AddElementsFromOGR(OGRDataSource *pDatasource,
 		AddElementsFromOGR_RAW(pDatasource, opt, progress_callback);
 }
 
-void vtStructureArray::AddElementsFromOGR_SDTS(OGRDataSource *pDatasource,
+void vtStructureArray::AddElementsFromOGR_SDTS(GDALDataset *pDatasource,
 		bool progress_callback(int))
 {
 	int i, j, feature_count, count;
@@ -485,7 +485,7 @@ void vtStructureArray::AddElementsFromOGR_SDTS(OGRDataSource *pDatasource,
 		if (!pLayer)
 			continue;
 
-		feature_count = pLayer->GetFeatureCount();
+		feature_count = (int) pLayer->GetFeatureCount();
 		pLayer->ResetReading();
 
 		OGRFeatureDefn *pLayerDefn = pLayer->GetLayerDefn();
@@ -604,7 +604,7 @@ void vtStructureArray::AddElementsFromOGR_SDTS(OGRDataSource *pDatasource,
 // 2. extra import fields for fences and structures.
 // 3. Handle tags
 
-void vtStructureArray::AddElementsFromOGR_RAW(OGRDataSource *pDatasource,
+void vtStructureArray::AddElementsFromOGR_RAW(GDALDataset *pDatasource,
 		StructImportOptions &opt, bool progress_callback(int))
 {
 	OGRLayer		*pLayer;
@@ -637,7 +637,7 @@ void vtStructureArray::AddElementsFromOGR_RAW(OGRDataSource *pDatasource,
 void vtStructureArray::AddBuildingsFromOGR(OGRLayer *pLayer,
 		StructImportOptions &opt, bool progress_callback(int))
 {
-	int feature_count = pLayer->GetFeatureCount();
+	int feature_count = (int) pLayer->GetFeatureCount();
 	pLayer->ResetReading();
 
 	OGRFeatureDefn *pLayerDefn = pLayer->GetLayerDefn();
@@ -883,7 +883,7 @@ void vtStructureArray::AddLinearsFromOGR(OGRLayer *pLayer,
 	vtFence *pFence;
 	vtFence *pDefaultFence;
 
-	iFeatureCount = pLayer->GetFeatureCount();
+	iFeatureCount = (int) pLayer->GetFeatureCount();
 	pLayer->ResetReading();
 
 	pLayerDefn = pLayer->GetLayerDefn();
@@ -992,7 +992,7 @@ void vtStructureArray::AddInstancesFromOGR(OGRLayer *pLayer,
 	OGRGeometry	*pGeom;
 	int			iFilenameIndex = -1;
 
-	iFeatureCount = pLayer->GetFeatureCount();
+	iFeatureCount = (int) pLayer->GetFeatureCount();
 	pLayer->ResetReading();
 
 	OGRFeatureDefn *pLayerDefn = pLayer->GetLayerDefn();

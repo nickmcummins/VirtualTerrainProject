@@ -357,13 +357,62 @@ void wxDC2::StretchBlit(const wxBitmap &bmp,
 
 #if WIN32
 
-#define BUFSIZE 80
+#pragma comment(lib, "Version.lib")
 
 //
 // This code comes from Microsoft; it's the gnarly way of finding out
 //  at runtime exactly what version of Windows we are running on.
 //
 bool LogWindowsVersion()
+{
+	WCHAR path[_MAX_PATH];
+	if (!GetSystemDirectoryW(path, _MAX_PATH))
+		return false;
+
+	wcscat_s(path, L"\\kernel32.dll");
+
+	//
+	// Based on example code from this article
+	// http://support.microsoft.com/kb/167597
+	//
+
+	DWORD handle;
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	DWORD len = GetFileVersionInfoSizeExW(FILE_VER_GET_NEUTRAL, path, &handle);
+#else
+	DWORD len = GetFileVersionInfoSizeW(path, &handle);
+#endif
+	if (!len)
+		return false;
+
+	uint8_t buff[2048];
+
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	if (!GetFileVersionInfoExW(FILE_VER_GET_NEUTRAL, path, 0, len, buff))
+#else
+	if (!GetFileVersionInfoW(path, 0, len, buff.get()))
+#endif
+		return false;
+
+	VS_FIXEDFILEINFO *vInfo = nullptr;
+	UINT infoSize;
+
+	if (!VerQueryValueW(buff, L"\\", reinterpret_cast<LPVOID*>(&vInfo), &infoSize))
+		return false;
+
+	if (!infoSize)
+		return false;
+
+	VTLOG("Windows %u.%u.%u.%u\n",
+		HIWORD(vInfo->dwFileVersionMS),
+		LOWORD(vInfo->dwFileVersionMS),
+		HIWORD(vInfo->dwFileVersionLS),
+		LOWORD(vInfo->dwFileVersionLS));
+
+	return true;
+}
+
+/*
 {
 	OSVERSIONINFOEX osvi;
 	BOOL bOsVersionInfoEx;
@@ -531,7 +580,7 @@ bool LogWindowsVersion()
 	}
 	return true;
 }
-
+*/
 #endif // WIN32
 
 /////////////////////////////////

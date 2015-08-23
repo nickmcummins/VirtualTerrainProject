@@ -46,6 +46,7 @@ endif(ZLIB_FOUND)
 
 if(OSG_FOUND)
 	include_directories(${OSG_INCLUDE_DIR})
+	include_directories(${OSG_INSTALL_DIR}/include)
 endif(OSG_FOUND)
 
 if(OSGEARTH_FOUND)
@@ -62,11 +63,6 @@ if (GLEXT_INCLUDE_DIR)
 	# Add the glext include directory to the compilers search path
 	include_directories(${GLEXT_INCLUDE_DIR})
 endif (GLEXT_INCLUDE_DIR)
-
-# Windows specific stuff
-if (WIN32)
-	set_property(TARGET vtlib APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
-endif (WIN32)
 
 # Specify normal preprocessor definition for this target
 if(OSGEARTH_FOUND)

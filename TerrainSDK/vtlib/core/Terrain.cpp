@@ -939,6 +939,13 @@ void vtTerrain::DeselectAllStructures()
 	}
 }
 
+void vtTerrain::WriteStructuresToOBJ(const char *filename)
+{
+	vtStructureLayer *slay = vtTerrain::GetStructureLayer();
+	if (!slay)
+		return;
+}
+
 /**
  * Loads an external 3D model as a movable node.  The file will be looked for
  * on the Terrain's data path, and wrapped with a vtTransform so that it can

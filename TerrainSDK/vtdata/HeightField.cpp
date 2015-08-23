@@ -5,6 +5,8 @@
 // Free for all uses, see license.txt for details.
 //
 
+#include <algorithm>	// for std::min/max
+
 #include "HeightField.h"
 #include "vtDIB.h"
 #include "vtLog.h"

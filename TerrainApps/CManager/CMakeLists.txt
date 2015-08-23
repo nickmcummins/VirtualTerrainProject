@@ -26,7 +26,6 @@ target_link_libraries(CManager wxosg vtlib vtdata vtui xmlhelper minidata)
 
 # Windows specific stuff
 if (WIN32)
-	set_property(TARGET CManager APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
 	set_property(TARGET CManager APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt;wxpngd;wxtiffd;wxjpegd;wxzlibd)
 	set_property(TARGET CManager APPEND PROPERTY LINK_FLAGS /NODEFAULTLIB:wxpng;wxtiff;wxjpeg;wxzlib)
 endif (WIN32)
@@ -89,6 +88,7 @@ endif(GDAL_FOUND)
 
 if(OSG_FOUND)
 	include_directories(${OSG_INCLUDE_DIR})
+	include_directories(${OSG_INSTALL_DIR}/include)
 endif(OSG_FOUND)
 
 if(ZLIB_FOUND)

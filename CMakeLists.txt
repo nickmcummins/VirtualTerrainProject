@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 project(VTP)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -26,7 +26,7 @@ set(TERRAIN_SDK_ROOT "${CMAKE_SOURCE_DIR}/TerrainSDK")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
 # Top level preprocessor definitions
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG VTDEBUG)
+set_property(DIRECTORY APPEND PROPERTY $<$<CONFIG:Debug>:VTDEBUG)
 if(UNIX)
 	set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS VTUNIX=1)
 endif(UNIX)
@@ -58,6 +58,12 @@ if(NVPERFSDK_INCLUDE_DIR)
 		option(VTP_NVIDIA_PERFORMANCE_MONITORING "Enable NVIDIA peformance monitoring dialog")
 	endif(NVPERFSDK_LIBRARY)
 endif(NVPERFSDK_INCLUDE_DIR)
+
+# Windows specific stuff
+if (WIN32)
+	set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE)
+	#add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+endif (WIN32)
 
 add_subdirectory(TerrainSDK)
 add_subdirectory(TerrainApps)

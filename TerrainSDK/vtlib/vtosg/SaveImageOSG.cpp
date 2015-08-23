@@ -59,6 +59,7 @@ void CSaveImageOSG::operator () (osg::RenderInfo& renderInfo) const
 
 bool CSaveImageOSG::SaveImage(std::string& FilePath, int Width, int Height)
 {
+#if 0	// TODO update for new OSG
 	osg::FBOExtensions* fbo_ext = osg::FBOExtensions::instance(vtGetScene()->GetGraphicsContext()->getState()->getContextID(), true);
     if (!(fbo_ext && fbo_ext->isSupported()))
 		return false;
@@ -137,5 +138,8 @@ bool CSaveImageOSG::SaveImage(std::string& FilePath, int Width, int Height)
 	((osgViewer::Renderer*)pCamera->getRenderer())->setCompileOnNextDraw(false);
 
 	return true;
+#else
+	return false;
+#endif
 }
 

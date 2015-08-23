@@ -49,7 +49,7 @@ public:
 	void AddElementsFromSHP(const wxString &filename, const vtProjection &proj);
 
 	// Import from SDTS via OGR
-	void AddElementsFromOGR(class OGRDataSource *datasource,
+	void AddElementsFromOGR(class GDALDataset *datasource,
 		bool progress_callback(int) = NULL);
 
 protected:
