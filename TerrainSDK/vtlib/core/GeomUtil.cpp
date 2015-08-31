@@ -3,7 +3,7 @@
 //
 // Useful classes and functions for working with geometry and meshes.
 //
-// Copyright (c) 2001-2013 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
@@ -12,178 +12,6 @@
 #include "vtdata/HeightField.h"
 #include "vtdata/vtString.h"
 #include "GeomUtil.h"
-
-
-//////////////////////////////////////////////////////////////
-
-/**
- * Constructor.
- *
- * \param pGeode	The geometry node which will receive the mesh object(s)
- *		that this factory will produce.
- * \param ePrimType	The type of mesh to produce.
- * \param iVertType	The vertex attributes for the meshes to produce.
- * \param iMaxVertsPerMesh	The largest number of vertices to allow in a single
- *		mesh.  When this number is exceeded, the current mesh will be finished
- *		and another mesh begun.
- * \param iMatIndex	The material index of the mesh when it is added to the
- *		geometry node.
- * \param iExpectedVerts If you know how many vertices will be mesh ahead of
- *		time, you can save a little time and memory by passing the number.
- */
-vtGeomFactory::vtGeomFactory(vtGeode *pGeode, vtMesh::PrimType ePrimType,
-							 int iVertType, int iMaxVertsPerMesh, int iMatIndex,
-							 int iExpectedVerts)
-{
-	m_pGeode = pGeode;
-	m_ePrimType = ePrimType;
-	m_iVertType = iVertType;
-	m_iMaxVertsPerMesh = iMaxVertsPerMesh;
-	m_iMatIndex = iMatIndex;
-
-	if (iExpectedVerts == -1)
-		m_iExpectedVerts = m_iMaxVertsPerMesh;
-	else
-		m_iExpectedVerts = iExpectedVerts;
-
-	m_pMesh = NULL;
-	m_iPrimStart = -1;
-	m_iPrimVerts = -1;
-	m_fLineWidth = 1;
-
-	m_bSimple = false;
-}
-
-/**
- * Alternate, simpler constructor.
- *
- * \param pMesh The mesh which will receive all the vertices that this factory
- *		produces.
- */
-vtGeomFactory::vtGeomFactory(vtMesh *pMesh)
-{
-	m_pGeode = NULL;
-	m_pMesh = pMesh;
-	m_iPrimStart = -1;
-	m_iPrimVerts = -1;
-	m_fLineWidth = 1;
-
-	m_bSimple = true;
-}
-
-void vtGeomFactory::NewMesh()
-{
-	m_pMesh = new vtMesh(m_ePrimType, m_iVertType, m_iExpectedVerts);
-	m_pGeode->AddMesh(m_pMesh, m_iMatIndex);
-
-	if (m_fLineWidth != 1)
-		m_pMesh->SetLineWidth(m_fLineWidth);
-
-	// Keep a list of all the meshes made in this factory
-	m_Meshes.push_back(m_pMesh);
-}
-
-/** Tell the factory to start a primitive. */
-void vtGeomFactory::PrimStart()
-{
-	if (!m_pMesh)
-		NewMesh();
-	m_iPrimStart = m_pMesh->NumVertices();
-	m_iPrimVerts = 0;
-}
-
-/** Tell the factory to add a vertex to the current primitive. */
-void vtGeomFactory::AddVertex(const FPoint3 &p)
-{
-	if (!m_bSimple)
-	{
-		int count = m_pMesh->NumVertices();
-		if (count == m_iMaxVertsPerMesh)
-		{
-			// repeat vertex; it needs to appear in both meshes
-			m_pMesh->AddVertex(p);
-			m_iPrimVerts++;
-
-			// close that primitive and start another on a new mesh
-			PrimEnd();
-			NewMesh();
-			PrimStart();
-		}
-	}
-	m_pMesh->AddVertex(p);
-	m_iPrimVerts++;
-}
-
-/** Tell the factory to end a primitive. */
-void vtGeomFactory::PrimEnd()
-{
-	if (m_iPrimVerts > 0)
-		m_pMesh->AddStrip2(m_iPrimVerts, m_iPrimStart);
-	m_iPrimStart = -1;
-	m_iPrimVerts = -1;
-}
-
-void vtGeomFactory::SetLineWidth(float width)
-{
-	m_fLineWidth = width;
-}
-
-void vtGeomFactory::SetMatIndex(int iIdx)
-{
-	if (iIdx != m_iMatIndex)
-	{
-		// Material is changing, we must start a new mesh
-		PrimEnd();
-		m_iMatIndex = iIdx;
-		NewMesh();
-		PrimStart();
-	}
-}
-
-/**
- * Create geometry for a 2D line by draping the point on a heightfield.
- *
- * \param pHF	The heightfield to drape on.
- * \param line	The 2D line to drape, in Earth coordinates.
- * \param fSpacing	The approximate spacing of the surface tessellation, used to
- *		decide how finely to tessellate the line.
- * \param fOffset	An offset to elevate each point in the resulting geometry,
- *		useful for keeping it visibly above the ground.
- * \param bInterp	True to interpolate between the vertices of the input
- *		line. This is generally desirable when the ground is much more finely
- *		spaced than the input line.
- * \param bCurve	True to interpret the vertices of the input line as
- *		control points of a curve.  The created geometry will consist of
- *		a draped line which passes through the control points.
- * \param bTrue		True to use the true elevation of the terrain, ignoring
- *		whatever scale factor is being used to exaggerate elevation for
- *		display.
- * \return The approximate length of the resulting 3D line mesh.
- *
- * \par Example:
-	\code
-	DLine2 line = ...;
-	vtTerrain *pTerr = ...;
-	vtGeode *pLineGeom = new vtGeode;
-	pTerr->AddNode(pLineGeom);
-	vtGeomFactory mf(pLineGeom, osg::PrimitiveSet::LINE_STRIP, 0, 30000, 1);
-	float length = mf.AddSurfaceLineToMesh(pTerr->GetHeightfield(), dline, 1, 10, true);
-	\endcode
- */
-float vtGeomFactory::AddSurfaceLineToMesh(vtHeightField3d *pHF,
-	const DLine2 &line, float fSpacing, float fOffset, bool bInterp, bool bCurve, bool bTrue)
-{
-	FLine3 tessellated;
-	float fTotalLength = pHF->LineOnSurface(line, fSpacing, fOffset, bInterp, bCurve, bTrue, tessellated);
-
-	PrimStart();
-	for (uint i = 0; i < tessellated.GetSize(); i++)
-		AddVertex(tessellated[i]);
-	PrimEnd();
-
-	return fTotalLength;
-}
-
 
 ///////////////////////////////////////////////////////////////////////
 // vtDimension
@@ -562,19 +390,17 @@ void vtDynBoundBox::SetBox(const FBox3 &box)
 
 ///////////////////////////////////////////////////////////////////////
 
-vtOBJFile *OBJFileBegin(vtGeode *geode, const char *filename)
+bool vtOBJFile::Begin(const vtMaterialArray *materials, const char *filename)
 {
-	FILE *fp = vtFileOpen(filename, "wb");
-	if (!fp)
-		return NULL;
+	m_fp = vtFileOpen(filename, "wb");
+	if (!m_fp)
+		return false;
 
-	fprintf(fp, "#  Wavefront OBJ generated by the VTP software (http://vterrain.org/)\n\n");
+	fprintf(m_fp, "#  Wavefront OBJ generated by the VTP software (http://vterrain.org/)\n\n");
 
-	uint i;
-	const vtMaterialArray *mats = geode->GetMaterials();
 	uint num_mats = 0;
-	if (mats)
-		num_mats = mats->size();
+	if (materials)
+		num_mats = materials->size();
 	if (num_mats > 0)
 	{
 		// Write corresponding material file
@@ -585,14 +411,14 @@ vtOBJFile *OBJFileBegin(vtGeode *geode, const char *filename)
 		path += ".mtl";
 		fname += ".mtl";
 
-		fprintf(fp, "mtllib %s\n\n", (const char *) fname);
+		fprintf(m_fp, "mtllib %s\n\n", (const char *) fname);
 
 		FILE *fp2 = vtFileOpen(path, "wb");
 		fprintf(fp2, "#  Wavefront MTL generated by the VTP software (http://vterrain.org/)\n");
 
-		for (i = 0; i < num_mats; i++)
+		for (uint i = 0; i < num_mats; i++)
 		{
-			const vtMaterial *mat = mats->at(i).get();
+			const vtMaterial *mat = materials->at(i).get();
 			vtString matname;
 			matname.Format("mat%03d", i);
 			fprintf(fp2, "\nnewmtl %s\n", (const char *) matname);
@@ -613,142 +439,182 @@ vtOBJFile *OBJFileBegin(vtGeode *geode, const char *filename)
 		}
 		fclose(fp2);
 	}
-
-	vtOBJFile *file = new vtOBJFile;
-	file->fp  = fp;
-	file->verts_written = 0;
-	return file;
+	m_VertsWritten = 0;
+	return true;
 }
 
-void OBJFileWriteGeom(vtOBJFile *file, vtGeode *geode)
+void vtOBJFile::WriteGeode(vtGeode *geode, const FPoint3 &vertexOffset)
 {
-#if 0 // TODO make it work without indices
-	uint i, j, k;
 	uint num_mesh = geode->NumMeshes();
-	for (i = 0; i < num_mesh; i++)
+	for (uint m = 0; m < num_mesh; m++)
 	{
-		vtMesh *mesh = geode->GetMesh(i);
+		vtMesh *mesh = geode->GetMesh(m);
 		if (!mesh)
 			continue;
 
 		vtMesh::PrimType ptype = mesh->getPrimType();
 
-		// For now, this method only does tristrips, fans, and individual triangles
-		if (ptype != osg::PrimitiveSet::TRIANGLE_STRIP && ptype != osg::PrimitiveSet::TRIANGLE_FAN
-			 && ptype != osg::PrimitiveSet::TRIANGLES)
+		// For now, this method only does tristrips, fans, and individual triangles.
+		if (ptype != osg::PrimitiveSet::TRIANGLE_STRIP &&
+			ptype != osg::PrimitiveSet::TRIANGLE_FAN &&
+			ptype != osg::PrimitiveSet::TRIANGLES)
 			continue;
 
 		// First write the vertices
-		int base_vert = file->verts_written;
+		int base_vert = m_VertsWritten;
 
 		uint num_vert = mesh->NumVertices();
-		fprintf(file->fp, "# %d vertices\n", num_vert);
-		for (j = 0; j < num_vert; j++)
+		fprintf(m_fp, "# %d vertices\n", num_vert);
+		for (uint j = 0; j < num_vert; j++)
 		{
-			FPoint3 pos = mesh->GetVtxPos(j);
-			fprintf(file->fp, "v %f %f %f\n", pos.x, pos.y, pos.z);
+			FPoint3 pos = mesh->GetVtxPos(j) + vertexOffset;
+			fprintf(m_fp, "v %f %f %f\n", pos.x, pos.y, pos.z);
 		}
 		if (mesh->hasVertexTexCoords())
 		{
-			for (j = 0; j < num_vert; j++)
+			for (uint j = 0; j < num_vert; j++)
 			{
 				FPoint2 uv = mesh->GetVtxTexCoord(j);
-				fprintf(file->fp, "vt %f %f\n", uv.x, uv.y);
+				fprintf(m_fp, "vt %f %f\n", uv.x, uv.y);
 			}
 		}
 		if (mesh->hasVertexNormals())
 		{
-			for (j = 0; j < num_vert; j++)
+			for (uint j = 0; j < num_vert; j++)
 			{
 				FPoint3 norm = mesh->GetVtxNormal(j);
-				fprintf(file->fp, "vn %f %f %f\n", norm.x, norm.y, norm.z);
+				fprintf(m_fp, "vn %f %f %f\n", norm.x, norm.y, norm.z);
 			}
 		}
 
 		int matidx = mesh->GetMatIndex();
 		vtString matname;
 		matname.Format("mat%03d", matidx);
-		fprintf(file->fp, "usemtl %s\n", (const char *) matname);
+		fprintf(m_fp, "usemtl %s\n", (const char *) matname);
 
 		uint num_prims = mesh->NumPrims();
 		int idx0, idx1, idx2;
 		if (ptype == osg::PrimitiveSet::TRIANGLES)
 		{
-			for (k = 0; k < num_prims; k++)
+			osg::DrawElements *pDrawElements = mesh->getPrimitiveSet(0)->getDrawElements();
+			for (uint k = 0; k < num_prims; k++)
 			{
-				idx0 = mesh->GetIndex(k*3);
-				idx1 = mesh->GetIndex(k*3+1);
-				idx2 = mesh->GetIndex(k*3+2);
-				fprintf(file->fp, "f %d %d %d\n",
+				idx0 = base_vert + pDrawElements->index(k * 3);
+				idx1 = base_vert + pDrawElements->index(k * 3 + 1);
+				idx2 = base_vert + pDrawElements->index(k * 3 + 2);
+				fprintf(m_fp, "f %d %d %d\n",
 					idx0+1, idx1+1, idx2+1);	// Wavefront indices are actually 1-based!
-
 			}
 		}
-		if (ptype == osg::PrimitiveSet::TRIANGLE_STRIP || ptype == osg::PrimitiveSet::TRIANGLE_FAN)
+		else if (ptype == osg::PrimitiveSet::TRIANGLE_STRIP)
 		{
-			// OBJ doesn't do strips, so break them into individual triangles
-			int prim_start = 0;
-			for (k = 0; k < num_prims; k++)
+			// The OBJ format doesn't do strips, so break them into individual triangles.
+			uint NumPrimitiveSets = mesh->getNumPrimitiveSets();
+			uint v0 = 0, v1 = 0, v2 = 0;
+
+			for (uint i = 0; i < NumPrimitiveSets; i++)
 			{
-				int len = mesh->GetPrimLen(k);
-				for (int t = 0; t < len-2; t++)
+				osg::DrawElements *pDrawElements = mesh->getPrimitiveSet(i)->getDrawElements();
+
+				// This actually just returns the size of the element list in this case
+				const uint len = pDrawElements->getNumIndices();
+
+				for (uint j = 0; j < len; j++)
 				{
-					if (ptype == osg::PrimitiveSet::TRIANGLE_STRIP)
+					v0 = v1;
+					v1 = v2;
+					v2 = pDrawElements->index(j);
+					
+					if (j < 2) continue;
+
+					// Direction alternates
+					if (j & 1)
 					{
-						idx0 = mesh->GetIndex(prim_start + t);
-						// unwind strip: even and odd faces
-						if (t & 1)
-						{
-							idx1 = mesh->GetIndex(prim_start + t+1);
-							idx2 = mesh->GetIndex(prim_start + t+2);
-						}
-						else
-						{
-							idx2 = mesh->GetIndex(prim_start + t+1);
-							idx1 = mesh->GetIndex(prim_start + t+2);
-						}
+						// Wavefront indices are actually 1-based!
+						idx0 = base_vert + v0 + 1;
+						idx1 = base_vert + v1 + 1;
+						idx2 = base_vert + v2 + 1;
 					}
-					else if (ptype == osg::PrimitiveSet::TRIANGLE_FAN)
+					else
 					{
-						idx0 = mesh->GetIndex(prim_start);
-						idx1 = mesh->GetIndex(prim_start + t+1);
-						idx2 = mesh->GetIndex(prim_start + t+2);
+						idx0 = base_vert + v1 + 1;
+						idx1 = base_vert + v0 + 1;
+						idx2 = base_vert + v2 + 1;
 					}
-					// Wavefront indices are actually 1-based!
-					idx0 = idx0 + base_vert + 1;
-					idx1 = idx1 + base_vert + 1;
-					idx2 = idx2 + base_vert + 1;
+
 					if (mesh->hasVertexNormals() && mesh->hasVertexTexCoords())
-						fprintf(file->fp, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+						fprintf(m_fp, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
 						idx0, idx0, idx0, idx1, idx1, idx1, idx2, idx2, idx2);
 					else if (mesh->hasVertexNormals() || mesh->hasVertexTexCoords())
-						fprintf(file->fp, "f %d/%d %d/%d %d/%d\n",
+						fprintf(m_fp, "f %d/%d %d/%d %d/%d\n",
 						idx0, idx0, idx1, idx1, idx2, idx2);
 					else
-						fprintf(file->fp, "f %d %d %d\n",
+						fprintf(m_fp, "f %d %d %d\n",
 						idx0, idx1, idx2);
 				}
-				prim_start += len;
 			}
 		}
-		file->verts_written += num_vert;
+		else if (ptype == osg::PrimitiveSet::TRIANGLE_FAN)
+		{
+			// The OBJ format doesn't do fans, so break them into individual triangles.
+			uint NumPrimitiveSets = mesh->getNumPrimitiveSets();
+
+			for (uint i = 0; i < NumPrimitiveSets; i++)
+			{
+				osg::DrawElements *pDrawElements = mesh->getPrimitiveSet(i)->getDrawElements();
+
+				// This actually just returns the size of the element list in this case
+				const uint len = pDrawElements->getNumIndices();
+
+				// It takes at least 3 vertices for a fan to have a triangle.
+				if (len < 3)
+					continue;
+
+				for (uint j = 1; j < len - 1; j++)
+				{
+					const uint v0 = pDrawElements->index(0);
+					const uint v1 = pDrawElements->index(j);
+					const uint v2 = pDrawElements->index(j+1);
+
+					// Wavefront indices are actually 1-based!
+					const uint idx0 = base_vert + v0 + 1;
+					const uint idx1 = base_vert + v1 + 1;
+					const uint idx2 = base_vert + v2 + 1;
+
+					if (mesh->hasVertexNormals() && mesh->hasVertexTexCoords())
+						fprintf(m_fp, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+							idx0, idx0, idx0, idx1, idx1, idx1, idx2, idx2, idx2);
+					else if (mesh->hasVertexNormals() || mesh->hasVertexTexCoords())
+						fprintf(m_fp, "f %d/%d %d/%d %d/%d\n",
+							idx0, idx0, idx1, idx1, idx2, idx2);
+					else
+						fprintf(m_fp, "f %d %d %d\n",
+							idx0, idx1, idx2);
+				}
+			}
+		}
+		m_VertsWritten += num_vert;
 	}
-#endif
+}
+
+void vtOBJFile::Close()
+{
+	fclose(m_fp);
 }
 
 /**
  * Write a geometry node to a old-fashioned Wavefront OBJ file.
  */
-bool WriteGeomToOBJ(vtGeode *geode, const char *filename)
+bool WriteGeodeToOBJ(vtGeode *geode, const char *filename)
 {
-	vtOBJFile *file = OBJFileBegin(geode, filename);
-	if (!file)
+	vtOBJFile file;
+	if (!file.Begin(geode->GetMaterials(), filename))
 		return false;
 
 	// Now write the geometry itself
-	OBJFileWriteGeom(file, geode);
-	fclose(file->fp);
-	delete file;
+	file.WriteGeode(geode, FPoint3(0, 0, 0));
+
+	file.Close();
 	return true;
 }
 

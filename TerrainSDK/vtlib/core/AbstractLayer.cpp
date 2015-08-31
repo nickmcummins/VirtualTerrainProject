@@ -7,8 +7,8 @@
 
 #include "vtlib/vtlib.h"
 #include "vtlib/vtosg/MultiTexture.h"
-#include "vtlib/core/TParams.h"
-#include "vtlib/core/GeomUtil.h"
+#include "TParams.h"
+#include "GeomFactory.h"
 
 #include "AbstractLayer.h"
 

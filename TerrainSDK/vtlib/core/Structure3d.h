@@ -173,6 +173,9 @@ public:
 	// Be informed when a structure is deleted
 	virtual void DestroyStructure(int i);
 
+	// Experimental
+	void WriteStructuresToOBJ(const char *filename);
+
 protected:
 	vtTerrain *m_pTerrain;
 };

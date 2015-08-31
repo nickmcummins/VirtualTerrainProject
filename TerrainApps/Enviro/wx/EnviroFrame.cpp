@@ -1634,8 +1634,13 @@ bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
 //
 void EnviroFrame::DoTestCode()
 {
+	vtTerrain *pTerr = g_App.GetCurrentTerrain();
+	if (!pTerr)
+		return;
+	pTerr->WriteStructuresToOBJ("c:/temp/structures.obj");
+#if 0
 	SetMode(MM_SLOPE);
-
+#endif
 #if 0
 	// Shadow tests
 	const int ReceivesShadowTraversalMask = 0x1;

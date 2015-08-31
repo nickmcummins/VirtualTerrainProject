@@ -944,6 +944,7 @@ void vtTerrain::WriteStructuresToOBJ(const char *filename)
 	vtStructureLayer *slay = vtTerrain::GetStructureLayer();
 	if (!slay)
 		return;
+	slay->WriteStructuresToOBJ(filename);
 }
 
 /**

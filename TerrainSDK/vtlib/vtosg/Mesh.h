@@ -5,8 +5,7 @@
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef VTOSG_MESHH
-#define VTOSG_MESHH
+#pragma once
 
 #include <osg/PrimitiveSet>
 #include <osg/Geometry>
@@ -17,9 +16,6 @@
 #ifdef VTP_AVOID_OSG_INDICES
 //#define USE_OPENGL_BUFFER_OBJECTS
 #endif
-
-// Shorthand
-#define FAB		osg::Material::FRONT_AND_BACK
 
 // Vertex values
 #define VT_Normals		1
@@ -49,29 +45,8 @@ class vtMesh : public osg::Geometry
 public:
 	typedef osg::PrimitiveSet::Mode PrimType;
 
+	// Constructor.
 	vtMesh(PrimType ePrimType, int VertType, int NumVertices);
-
-	// Get bounding box
-	void GetBoundBox(FBox3 &box) const;
-
-	// Adding primitives
-	void AddTri(int p0, int p1, int p2);
-	void AddFan(int p0, int p1, int p2 = -1, int p3 = -1, int p4 = -1, int p5 = -1);
-	void AddFan(int *idx, int iNVerts);
-	void AddStrip(int iNVerts, unsigned short *pIndices);
-	void AddLine(int p0, int p1);
-	int  AddLine(const FPoint3 &pos1, const FPoint3 &pos2);
-	void AddQuad(int p0, int p1, int p2, int p3);
-
-	// Accessors
-#ifdef VTP_AVOID_OSG_INDICES
-	PrimType getPrimType() const { return m_PrimType; }
-#else
-	PrimType getPrimType() const { return (PrimType) getPrimSet()->getMode(); }
-#endif
-
-	void SetMatIndex(int i) { m_iMatIdx = i; }
-	int GetMatIndex() const { return m_iMatIdx; }
 
 	// Adding vertices
 	int AddVertex(float x, float y, float z);
@@ -84,27 +59,40 @@ public:
 	int AddVertexUV(const FPoint3 &p, const FPoint2 &uv);
 	int AddVertexNUV(const FPoint3 &p, const FPoint3 &n, const FPoint2 &uv);
 
-	// Adding primitives
+	// Adding primitives.
+	void AddTri(int p0, int p1, int p2);
+	void AddFan(int p0, int p1, int p2 = -1, int p3 = -1, int p4 = -1, int p5 = -1);
+	void AddFan(int *idx, int iNVerts);
+	void AddStrip(int iNVerts, unsigned short *pIndices);
 	void AddStrip2(int iNVerts, int iStartIndex);
+	void AddLine(int p0, int p1);
+	int  AddLine(const FPoint3 &pos1, const FPoint3 &pos2);
+	void AddQuad(int p0, int p1, int p2, int p3);
 
-	void TransformVertices(const FMatrix4 &mat);
+	// Accessors
+	PrimType getPrimType() const { return m_PrimType; }
+#if 0
+	// TODO - why can't we just do this? Because there may be many primsets?
+	PrimType getPrimType() const { return (PrimType) getPrimSet()->getMode(); }
+#endif
+	void SetMatIndex(int i) { m_iMatIdx = i; }
+	int GetMatIndex() const { return m_iMatIdx; }
 
-	void CreateEllipsoid(const FPoint3 &center, const FPoint3 &size,
-		int res, bool hemi = false, bool bNormalsIn = false);
+	// Create multiple primitives.
 	void CreateBlock(const FPoint3& size);
 	void CreateOptimizedBlock(const FPoint3& size);
 	void CreatePrism(const FPoint3 &base, const FPoint3 &vector_up,
-					 const FPoint2 &size1, const FPoint2 &size2);
+		const FPoint2 &size1, const FPoint2 &size2);
 	void CreateRectangularMesh(int xsize, int ysize, bool bReverseNormals = false);
+	void CreateEllipsoid(const FPoint3 &center, const FPoint3 &size,
+		int res, bool hemi = false, bool bNormalsIn = false);
 	void CreateCylinder(float height, float radius, int res,
 		bool bTop = true, bool bBottom = true, bool bCentered = true,
 		int direction = 1);
 	void CreateTetrahedron(const FPoint3 &center, float fRadius);
-
 	void AddRectangleXZ(float xsize, float zsize);
 	void AddRectangleXY(float x, float y, float xsize, float ysize,
 		float z=0.0f, bool bCentered=false);
-
 	void CreateConicalSurface(const FPoint3 &tip, double radial_angle,
 							  double theta1, double theta2,
 							  double r1, double r2, int res = 40);
@@ -112,8 +100,14 @@ public:
 		int Axis1, int Axis2, int Axis3,
 		const FPoint2 &min1, const FPoint2 &max1, float fLevel, float fTiling);
 
-	// Access vertex properties
+	// Modify vertices.
+	void TransformVertices(const FMatrix4 &mat);
+
+	// Access properties.
 	uint NumVertices() const;
+	int NumPrims() const;
+	void GetBoundBox(FBox3 &box) const;
+	int GetPrimLen(int i) const;
 
 	void SetVtxPos(uint, const FPoint3&);
 	FPoint3 GetVtxPos(uint i) const;
@@ -141,14 +135,8 @@ public:
 	}
 
 	// Control rendering optimization ("display lists")
-	void ReOptimize();
 	void AllowOptimize(bool bAllow);
-
-	// Access values
-	int NumPrims() const;
-	//int NumIndices() const { return getVertexIndices()->getNumElements(); }
-	//short GetIndex(int i) const { return getIndices()->at(i); }
-	int GetPrimLen(int i) const { return dynamic_cast<const osg::DrawArrayLengths*>(getPrimitiveSet(0))->at(i); }
+	void ReOptimize();
 
 	void SetNormalsFromPrimitives();
 
@@ -165,16 +153,6 @@ protected:
 
 	osg::PrimitiveSet *getPrimSet() { return getPrimitiveSet(0); }
 	const osg::PrimitiveSet *getPrimSet() const { return getPrimitiveSet(0); }
-
-	// might not need dynamic_cast here; could be simpler/faster with static cast?
-	osg::DrawArrays *getDrawArrays() { return dynamic_cast<osg::DrawArrays*>(getPrimitiveSet(0)); }
-	osg::DrawArrayLengths *getDrawArrayLengths() { return dynamic_cast<osg::DrawArrayLengths*>(getPrimitiveSet(0)); }
-
-	const osg::DrawArrays *getDrawArrays() const { return dynamic_cast<const osg::DrawArrays*>(getPrimitiveSet(0)); }
-	const osg::DrawArrayLengths *getDrawArrayLengths() const { return dynamic_cast<const osg::DrawArrayLengths*>(getPrimitiveSet(0)); }
-
-	//osg::UIntArray *getIndices() { return (osg::UIntArray*) getVertexIndices(); }
-	//const osg::UIntArray *getIndices() const { return (const osg::UIntArray*) getVertexIndices(); }
 
 	osg::Vec3Array *getVerts() { return (osg::Vec3Array*) getVertexArray(); }
 	const osg::Vec3Array *getVerts() const { return (const osg::Vec3Array*) getVertexArray(); }
@@ -239,6 +217,4 @@ protected:
 };
 
 /*@}*/	// Group sg
-
-#endif	// VTOSG_MESHH
 

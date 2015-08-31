@@ -452,6 +452,36 @@ void vtStructureArray3d::DestroyStructure(int i)
 	st3d->DeleteNode();
 }
 
+void vtStructureArray3d::WriteStructuresToOBJ(const char *filename)
+{
+	vtOBJFile file;
+	bool initialized = false;
+	FPoint3 origin;
+
+	for (uint i = 0; i < size(); i++)
+	{
+		//vtBuilding3d *bld = GetBuilding(i);
+		vtStructure3d *s3d = GetStructure3d(i);
+		if (!s3d)
+			continue;
+		vtTransform *trans = s3d->GetContainer();
+		if (!trans)
+			continue;
+		vtGeode *geode = s3d->GetGeom();
+		if (!geode)
+			continue;
+		if (!initialized)
+		{
+			if (!file.Begin(geode->GetMaterials(), filename))
+				return;
+			origin = trans->GetTrans();
+			initialized = true;
+		}
+		FPoint3 offset = trans->GetTrans() - origin;
+		file.WriteGeode(geode, offset);
+	}
+	file.Close();
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Methods for vtStructure3d

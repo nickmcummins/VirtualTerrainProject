@@ -9,6 +9,7 @@
 #include "Engine.h"
 #include "Terrain.h"
 #include "TerrainScene.h"	// For iterating terrains
+#include "GeomFactory.h"
 
 #include "vtdata/shapelib/shapefil.h"
 

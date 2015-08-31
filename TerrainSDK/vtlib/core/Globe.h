@@ -12,9 +12,9 @@
 #include "vtdata/Features.h"
 #include "vtdata/FilePath.h"
 #include "TimeEngines.h"
-#include "GeomUtil.h"
 
 class vtTerrainScene;
+class vtGeomFactory;
 
 /**
  A GIS-style feature layer, on the globe.

@@ -2,7 +2,7 @@
 // Name:	 vtTest/app.cpp
 // Purpose:  Test code for vtlib, using OSG as a framework.
 //
-// Copyright (c) 2007-2011 Virtual Terrain Project
+// Copyright (c) 2007-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
@@ -78,6 +78,8 @@ public:
 	void MakeTest8();
 	void MakeTest9();
 	void MakeTest10();
+
+	void MeshAndOBJTest();
 
 public:
 	vtScene *m_pScene;
@@ -451,6 +453,38 @@ void App::MakeTest10()
 	grp->addChild(ball5);
 }
 
+void App::MeshAndOBJTest()
+{
+	// Make a minimal shape, 6 vertices, 2 rectangles side by side, 3 strips.
+	vtMesh *mesh = new vtMesh(osg::PrimitiveSet::TRIANGLE_STRIP, 0, 6);
+	mesh->AddVertex(FPoint3(0, 0, 0));
+	mesh->AddVertex(FPoint3(1, 0, 0));
+	mesh->AddVertex(FPoint3(2, 0, 0));
+	mesh->AddVertex(FPoint3(0, 1, 0));
+	mesh->AddVertex(FPoint3(1, 1, 0));
+	mesh->AddVertex(FPoint3(2, 1, 0));
+	mesh->AddFan(1, 0, 4, 3);
+	mesh->AddFan(2, 1, 5, 4);
+	mesh->AddFan(3, 0, 4, 1, 5, 2);
+
+	// And one with fans.
+	vtMesh *mesh2 = new vtMesh(osg::PrimitiveSet::TRIANGLE_FAN, 0, 6);
+	mesh2->AddVertex(FPoint3(0, 0, 0));
+	mesh2->AddVertex(FPoint3(1, 0, 0));
+	mesh2->AddVertex(FPoint3(2, 0, 0));
+	mesh2->AddVertex(FPoint3(0, 1, 0));
+	mesh2->AddVertex(FPoint3(1, 1, 0));
+	mesh2->AddVertex(FPoint3(2, 1, 0));
+	mesh2->AddFan(0, 1, 4, 3);
+	mesh2->AddFan(1, 2, 5, 4);
+
+	osg::ref_ptr<vtGeode> geode(new vtGeode);
+	geode->addDrawable(mesh);
+	geode->addDrawable(mesh2);
+
+	WriteGeomToOBJ(geode, "C:/temp/mesh_test.obj");
+}
+
 void App::SetTest(int test)
 {
 	m_iTest = test;
@@ -518,6 +552,10 @@ int App::main(int argc, char **argv)
 	// Add a handler for GUI events
 	osg::ref_ptr<vtOSGEventHandler> pHandler = new vtOSGEventHandler;
 	viewer->addEventHandler(pHandler);
+
+	// Basic test of the mesh and OBJ functionality.
+	MeshAndOBJTest();
+	return 0;
 
 	VTLOG1("Creating the terrain..\n");
 	if (!CreateScene())

@@ -12,6 +12,7 @@ set(VTLIB_CORE_SOURCE_FILES
 		../core/Elastic.cpp
 		../core/Engine.cpp
 		../core/Fence3d.cpp
+		../core/GeomFactory.cpp
 		../core/GeomUtil.cpp
 		../core/Globe.cpp
 		../core/ImageSprite.cpp
@@ -67,6 +68,7 @@ set(VTLIB_CORE_HEADER_FILES
 		../core/FelkelStraightSkeleton.h
 		../core/Fence3d.h
 		../core/FP8.h
+		../core/GeomFactory.h
 		../core/GeomUtil.h
 		../core/Globe.h
 		../core/ImageSprite.h

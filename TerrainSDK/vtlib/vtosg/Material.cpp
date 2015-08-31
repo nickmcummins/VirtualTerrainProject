@@ -289,6 +289,8 @@ osg::Image *vtMaterial::GetTextureImage(int unit) const
 {
 	// It is valid to return a non-const pointer to the image, since the image
 	//  can be modified entirely independently of the material.
+	if (unit < 0 || unit >= (int) m_Images.size())
+		return nullptr;
 	return m_Images[unit].get();
 }
 

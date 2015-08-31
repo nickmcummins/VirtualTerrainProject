@@ -8,6 +8,7 @@
 #include "vtlib/vtlib.h"
 #include "Terrain.h"
 #include "Elastic.h"
+#include "GeomFactory.h"
 
 ElasticPolyline::ElasticPolyline()
 {
