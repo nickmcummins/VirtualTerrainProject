@@ -29,6 +29,8 @@
 // Visitor class, for XML parsing of an OpenStreetMap file.
 //
 
+typedef long long NodeIdType;
+
 struct OSMNode {
 	DPoint2 p;
 	bool signal_lights;
@@ -67,16 +69,16 @@ private:
 		PS_WAY
 	} m_state;
 
-	typedef std::map<int, OSMNode> NodeMap;
+	typedef std::map<NodeIdType, OSMNode> NodeMap;
 	NodeMap m_nodes;
-	std::vector<int> m_refs;
+	std::vector<NodeIdType> m_refs;
 
 	vtProjection m_proj;
 
 	vtString	m_Name, m_URL;
 	LayerType	m_WayType;
 	bool		m_bIsArea;
-	int			m_id;
+	NodeIdType	m_id;
 
 	int			m_iRoadLanes;
 	int			m_iRoadFlags;
@@ -130,7 +132,7 @@ void VisitorOSM::startElement(const char *name, const XMLAttributes &atts)
 
 			val = atts.getValue("id");
 			if (val)
-				m_id = atoi(val);
+				m_id = std::stoull(val);
 			else
 				m_id = -1;	// Shouldn't happen.
 
@@ -157,7 +159,7 @@ void VisitorOSM::startElement(const char *name, const XMLAttributes &atts)
 			m_state = PS_WAY;
 			val = atts.getValue("id");
 			if (val)
-				m_id = atoi(val);
+				m_id = std::stoull(val);
 			else
 				m_id = -1;	// Shouldn't happen.
 
@@ -212,7 +214,7 @@ void VisitorOSM::startElement(const char *name, const XMLAttributes &atts)
 			val = atts.getValue("ref");
 			if (val)
 			{
-				int ref = atoi(val);
+				NodeIdType ref = std::stoull(val);
 				m_refs.push_back(ref);
 			}
 		}
@@ -245,8 +247,6 @@ void VisitorOSM::endElement(const char *name)
 	else if (m_state == PS_WAY && !strcmp(name, "way"))
 	{
 		// Look at the referenced nodes, turn them into a vt link
-		uint refs = m_refs.size();
-
 		// must have at least 2 refs
 		if (m_refs.size() >= 2)
 		{
@@ -539,8 +539,8 @@ void VisitorOSM::MakeRoad()
 	link->m_iFlags = m_iRoadFlags;
 	link->m_Surface = m_eSurfaceType;
 
-	int ref_first = m_refs[0];
-	int ref_last = m_refs[m_refs.size() - 1];
+	NodeIdType ref_first = m_refs[0];
+	NodeIdType ref_last = m_refs[m_refs.size() - 1];
 
 	// Make nodes at the first and last points.
 	NodeEdit *node0 = (NodeEdit *) m_road_layer->FindNodeByID(ref_first);
@@ -562,9 +562,9 @@ void VisitorOSM::MakeRoad()
 	link->ConnectNodes(node0, node1);
 
 	// Copy all the points
-	for (uint r = 0; r < m_refs.size(); r++)
+	for (size_t r = 0; r < m_refs.size(); r++)
 	{
-		int idx = m_refs[r];
+		NodeIdType idx = m_refs[r];
 		link->Append(m_nodes[idx].p);
 	}
 	link->Dirtied();
@@ -674,9 +674,9 @@ void VisitorOSM::MakeBuilding()
 
 	// Apply footprint
 	DLine2 foot(m_refs.size());
-	for (uint r = 0; r < m_refs.size(); r++)
+	for (size_t r = 0; r < m_refs.size(); r++)
 	{
-		int idx = m_refs[r];
+		NodeIdType idx = m_refs[r];
 		foot[r] = m_nodes[idx].p;
 	}
 	// The order of vertices in OSM does not seem to have a consistent
@@ -727,7 +727,7 @@ void VisitorOSM::MakeBuilding()
 	if (m_id != -1)
 	{
 		char id_string[40];
-		sprintf(id_string, "%d", m_id);
+		sprintf(id_string, "%lld", m_id);
 		bld->AddTag("id", id_string);
 	}
 }
@@ -742,9 +742,9 @@ void VisitorOSM::MakeLinear()
 
 	// Apply footprint
 	DLine2 foot(m_refs.size());
-	for (uint r = 0; r < m_refs.size(); r++)
+	for (size_t r = 0; r < m_refs.size(); r++)
 	{
-		int idx = m_refs[r];
+		NodeIdType idx = m_refs[r];
 		foot[r] = m_nodes[idx].p;
 	}
 	ls->SetFencePoints(foot);
@@ -755,7 +755,7 @@ void VisitorOSM::MakeLinear()
 	if (m_id != -1)
 	{
 		char id_string[40];
-		sprintf(id_string, "%d", m_id);
+		sprintf(id_string, "%lld", m_id);
 		ls->AddTag("id", id_string);
 	}
 }
@@ -783,9 +783,9 @@ void VisitorOSM::MakePowerLine()
 	m_line = m_util_layer->AddNewLine();
 
 	m_line->m_poles.resize(m_refs.size());
-	for (uint r = 0; r < m_refs.size(); r++)
+	for (size_t r = 0; r < m_refs.size(); r++)
 	{
-		int idx = m_refs[r];
+		NodeIdType idx = m_refs[r];
 
 		// Look for that node by id; if we don't find it, then it wasn't a tower;
 		// it was probably a start or end point at a non-tower feature.
