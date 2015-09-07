@@ -276,7 +276,7 @@ void vtRoadLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 		int closest_i = -1;
 		double dist;
 		ui.m_pEditingRoad->NearestPoint(ui.m_DownLocation, closest_i, dist);
-		if (dist < pView->world_delta(8).x)
+		if (dist < pView->PixelsToWorld(8).x)
 		{
 			// begin dragging point
 			ui.m_iEditingPoint = closest_i;
@@ -287,7 +287,7 @@ void vtRoadLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 	}
 	if (ui.mode == LB_Dir)
 	{
-		LinkEdit *pLink = FindLink(ui.m_DownLocation, pView->world_delta(5).x);
+		LinkEdit *pLink = FindLink(ui.m_DownLocation, pView->PixelsToWorld(5).x);
 		if (pLink)
 		{
 			ToggleLinkDirection(pLink);
@@ -297,7 +297,7 @@ void vtRoadLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 	if (ui.mode == LB_LinkEdit)
 	{
 		// see if there is a link or node at m_DownPoint
-		const float epsilon = pView->world_delta(5).x;
+		const float epsilon = pView->PixelsToWorld(5).x;
 
 		LinkEdit *pLink = FindLink(ui.m_DownLocation, epsilon);
 		if (pLink != ui.m_pEditingRoad)
@@ -384,7 +384,7 @@ void vtRoadLayer::OnLeftDoubleClick(BuilderView *pView, UIContext &ui)
 	DRECT world_bound, bound2;
 
 	// epsilon is how close to the link/node can we be off by?
-	double epsilon = pView->world_delta(5).x;
+	double epsilon = pView->PixelsToWorld(5).x;
 	bool bRefresh = false;
 
 	if (ui.mode == LB_Node)
@@ -417,7 +417,7 @@ void vtRoadLayer::OnMouseMove(BuilderView *pView, UIContext &ui)
 			double dist;
 			ui.m_pEditingRoad->NearestPoint(ui.m_CurLocation, closest_i, dist);
 
-			if (dist < pView->world_delta(8).x)
+			if (dist < pView->PixelsToWorld(8).x)
 				ui.m_pEditingRoad->m_iHighlightPoint = closest_i;
 			else
 				ui.m_pEditingRoad->m_iHighlightPoint = -1;

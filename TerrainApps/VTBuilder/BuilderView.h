@@ -166,7 +166,6 @@ protected:
 	// Pan handlers
 	void BeginPan();
 	void EndPan();
-	void DoPan();
 
 	// Box handlers
 	void BeginBox();

@@ -145,15 +145,36 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 	SetCurrent(*m_context);
 	wxPaintDC dc(this);
 
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	static bool bFirstDraw = true;
 	if (bFirstDraw)
 	{
 		bFirstDraw = false;
 		VTLOG("First View OnDraw\n");
 	}
+
+	wxSize clientSize = GetClientSize();
+
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glViewport(0, 0, clientSize.x, clientSize.y);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	VTLOG("client size %d, %d\n", clientSize.x, clientSize.y);
+	glOrtho(0.0f, clientSize.x, 0.0f, clientSize.y, 0.0f, 1.0f);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glScaled(m_dScale, m_dScale, 1.0);
+	glTranslated(m_offset.x, m_offset.y, 0.0);
+
+	glColor3f(1, 0, 0);
+	DrawLine(DPoint2(0, 0), DPoint2(1, 0));
+	glColor3f(0, 1, 0);
+	DrawLine(DPoint2(0, 0), DPoint2(0, 1));
+	glColor3f(0, 0, 1);
+	DrawLine(DPoint2(0, 0), DPoint2(100, 100));
 
 	// no point in drawing until the Idle events have made it to the splitter
 	if (!m_bGotFirstIdle)
@@ -301,12 +322,12 @@ void BuilderView::DrawUTMBounds()
 		ScopedOCTransform trans1(CreateCoordTransform(&proj, &geo));
 
 		// Avoid zones that are too far from our location.
-		world(wxPoint(0, height/2), proj_point);
+		ClientToWorld(wxPoint(0, height/2), proj_point);
 		trans1->Transform(1, &proj_point.x, &proj_point.y);
 		zone = GuessZoneFromGeo(proj_point);
 		if (zone-1 > zone_start) zone_start = zone-1;
 
-		world(wxPoint(width, height/2), proj_point);
+		ClientToWorld(wxPoint(width, height/2), proj_point);
 		trans1->Transform(1, &proj_point.x, &proj_point.y);
 		zone = GuessZoneFromGeo(proj_point);
 		if (zone+1 < zone_end) zone_end = zone+1;
@@ -545,11 +566,6 @@ void BuilderView::EndPan()
 		RefreshRect(m_ScaleBarArea);
 }
 
-void BuilderView::DoPan()
-{
-	m_offset += m_ui.m_CurLocation - m_ui.m_LastLocation;
-}
-
 
 //////////////////////////////////////////////////////////
 // Box handlers
@@ -695,7 +711,7 @@ void BuilderView::DrawAreaTool(const DRECT &area)
 	// dashed-line rectangle
 	DrawInverseRect(area, true);
 
-	DPoint2 d = world_delta(3);
+	DPoint2 d = PixelsToWorld(3);
 
 	// four small rectangles, for the handles at each corner
 	DPoint2 top(area.left, area.top);
@@ -844,7 +860,7 @@ void BuilderView::HighlightArea(const DRECT &rect)
 
 	const double sx = rect.Width() / 3;
 	const double sy = rect.Height() / 3;
-	const DPoint2 d = world_delta(2), e = world_delta(4);
+	const DPoint2 d = PixelsToWorld(2), e = PixelsToWorld(4);
 
 	DrawLine(rect.left - e.x, rect.top - d.y, rect.left - e.x, rect.top + sy);
 	DrawLine(rect.left - d.x, rect.top - e.y, rect.left + sx, rect.top - e.y);
@@ -934,7 +950,7 @@ void BuilderView::BeginArea()	// in canvas coordinates
 
 	// check to see if they've clicked near one of the sides of the area
 	m_iDragSide = 0;
-	DPoint2 epsilon = world_delta(10);	// epsilon in pixels
+	DPoint2 epsilon = PixelsToWorld(10);	// epsilon in pixels
 
 	double d0 = abs(m_ui.m_CurLocation.x - area.left);
 	double d1 = abs(m_ui.m_CurLocation.x - area.right);
@@ -1136,7 +1152,7 @@ void BuilderView::OnLeftDown(wxMouseEvent& event)
 	m_ui.m_LastPoint = m_ui.m_DownPoint;
 
 	// "points" are in window pixels, "locations" are in the current CRS
-	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
+	ClientToWorld(m_ui.m_DownPoint, m_ui.m_DownLocation);
 
 	// Remember modifier key state
 	m_ui.m_bShift = event.ShiftDown();
@@ -1213,7 +1229,7 @@ void BuilderView::OnLeftDoubleClick(wxMouseEvent& event)
 {
 	m_ui.m_DownPoint = event.GetPosition();
 	m_ui.m_CurPoint = m_ui.m_LastPoint = m_ui.m_DownPoint;
-	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
+	ClientToWorld(m_ui.m_DownPoint, m_ui.m_DownLocation);
 
 	vtLayer *pL = g_bld->GetActiveLayer();
 	if (pL)
@@ -1227,7 +1243,7 @@ void BuilderView::OnLButtonClick(wxMouseEvent& event)
 
 	m_ui.m_DownPoint = event.GetPosition();
 	m_ui.m_CurPoint = m_ui.m_LastPoint = m_ui.m_DownPoint;
-	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
+	ClientToWorld(m_ui.m_DownPoint, m_ui.m_DownLocation);
 
 	if (pL->GetType() == LT_ROAD)
 	{
@@ -1278,7 +1294,7 @@ void BuilderView::OnLButtonClickElement(vtRoadLayer *pRL)
 	DRECT world_bound;
 
 	// error is how close to the road/node can we be off by?
-	DPoint2 epsilon = world_delta(5);
+	DPoint2 epsilon = PixelsToWorld(5);
 
 	bool returnVal = false;
 	if (m_ui.mode == LB_Node)
@@ -1320,7 +1336,7 @@ void BuilderView::OnLButtonClickFeature(vtLayerPtr pL)
 		// first do a deselect-all
 		pSL->DeselectAll();
 
-		DPoint2 epsilon = world_delta(5);
+		DPoint2 epsilon = PixelsToWorld(5);
 
 		// see if there is a building at m_ui.m_DownPoint
 		int building;
@@ -1356,7 +1372,7 @@ void BuilderView::OnMiddleDown(wxMouseEvent& event)
 	// save the point where the user clicked
 	m_ui.m_DownPoint = event.GetPosition();
 	m_ui.m_CurPoint = m_ui.m_DownPoint;
-	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
+	ClientToWorld(m_ui.m_DownPoint, m_ui.m_DownLocation);
 
 	if (!m_bMouseCaptured)
 	{
@@ -1433,10 +1449,9 @@ void BuilderView::OnRightUpStructure(vtStructureLayer *pSL)
 void BuilderView::OnMouseMove(wxMouseEvent& event)
 {
 	wxPoint pointp = event.GetPosition();
-	VTLOG("MouseMove(%d %d)\n", pointp.x, pointp.y);
 
 	m_ui.m_CurPoint = event.GetPosition();
-	world(m_ui.m_CurPoint, m_ui.m_CurLocation);
+	ClientToWorld(m_ui.m_CurPoint, m_ui.m_CurLocation);
 
 	if (m_ui.m_bLMouseButton || m_ui.m_bMMouseButton || m_ui.m_bRMouseButton)
 	{
@@ -1447,7 +1462,12 @@ void BuilderView::OnMouseMove(wxMouseEvent& event)
 	}
 
 	if (m_bPanning)
-		DoPan();
+	{
+		VTLOG("pan offset %lf %lf -> ", m_offset.x, m_offset.y);
+		m_offset += (m_ui.m_CurLocation - m_ui.m_LastLocation);
+		VTLOG("%lf %lf\n", m_offset.x, m_offset.y);
+		Refresh();
+	}
 
 	// left button click and drag
 	if (m_ui.m_bLMouseButton)
@@ -1552,6 +1572,9 @@ void BuilderView::OnIdle(wxIdleEvent& event)
 
 void BuilderView::OnSize(wxSizeEvent& event)
 {
+	// Remember it.
+	m_clientSize = event.GetSize();
+
 	// Attempt to avoid unnecessary redraws on shrinking the window.
 	// Unfortunately using Skip() alone appears to have no effect,
 	//  we still get the Refresh-Draw event.

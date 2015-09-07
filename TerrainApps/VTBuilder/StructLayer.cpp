@@ -502,7 +502,7 @@ void vtStructureLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 
 void vtStructureLayer::OnLeftDownEditBuilding(BuilderView *pView, UIContext &ui)
 {
-	double epsilon = pView->world_delta(6).x;  // 6 pixels as world coord
+	double epsilon = pView->PixelsToWorld(6).x;  // 6 pixels as world coord
 
 	int building1, building2,  corner;
 	double dist1, dist2;
@@ -543,7 +543,7 @@ void vtStructureLayer::OnLeftDownEditBuilding(BuilderView *pView, UIContext &ui)
 
 void vtStructureLayer::OnLeftDownBldAddPoints(BuilderView *pView, UIContext &ui)
 {
-	double dEpsilon = pView->world_delta(6).x;  // 6 pixels as world coord
+	double dEpsilon = pView->PixelsToWorld(6).x;  // 6 pixels as world coord
 	double dClosest;
 	int iStructure;
 
@@ -591,7 +591,7 @@ void vtStructureLayer::OnLeftDownBldAddPoints(BuilderView *pView, UIContext &ui)
 
 void vtStructureLayer::OnLeftDownBldDeletePoints(BuilderView *pView, UIContext &ui)
 {
-	double dEpsilon = pView->world_delta(6).x;  // 6 pixels as world coord
+	double dEpsilon = pView->PixelsToWorld(6).x;  // 6 pixels as world coord
 	double dClosest;
 	int iStructure;
 
@@ -635,7 +635,7 @@ void vtStructureLayer::OnLeftDownBldDeletePoints(BuilderView *pView, UIContext &
 
 void vtStructureLayer::OnLeftDownEditLinear(BuilderView *pView, UIContext &ui)
 {
-	double epsilon = pView->world_delta(6).x;  // 6 pixels as world coord
+	double epsilon = pView->PixelsToWorld(6).x;  // 6 pixels as world coord
 
 	int structure, corner;
 	double dist1;

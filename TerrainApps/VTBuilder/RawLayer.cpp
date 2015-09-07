@@ -437,7 +437,7 @@ void vtRawLayer::GetPropertyText(wxString &strIn)
 void vtRawLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 {
 	int iEnt;
-	DPoint2 epsilon = pView->world_delta(6);  // calculate what 6 pixels is as world coord
+	DPoint2 epsilon = pView->PixelsToWorld(6);  // calculate what 6 pixels is as world coord
 
 	if (NULL == m_pSet)		// safety check
 		return;

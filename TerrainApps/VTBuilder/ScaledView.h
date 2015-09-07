@@ -20,35 +20,14 @@ public:
 		const wxString& name = _T(""));
 
 	void SetScale(double scale);
-	double GetScale();
+	double GetScale() const;
 
 	void ZoomToPoint(const DPoint2 &p);
 	void ZoomToRect(const DRECT &geo_rect, float margin);
 
-	// transform world space -> screen space
-	void screen(const DPoint2 &p, DPoint2 &sp) const
-	{
-		sp = (p - m_offset)*m_dScale;
-	}
-	void screen(const OGRPoint *p, DPoint2 &sp) const
-	{
-		sp = (DPoint2(p->getX(), p->getY()) - m_offset) * m_dScale;
-	}
-	DPoint2 screen_delta(const DPoint2 &p) const
-	{
-		return p * m_dScale;
-	}
-
-	// transform screen space -> world space
-	void world(const wxPoint &sp, DPoint2 &p) const
-	{
-		p = DPoint2(sp.x, sp.y) / m_dScale + m_offset;
-	}
-	DPoint2 world_delta(const DPoint2 &p)
-	{
-		return p / m_dScale;
-	}
-	DPoint2 world_delta(int pixels)
+	// transform integer mouse x, y to world coordinates
+	void ClientToWorld(const wxPoint &sp, DPoint2 &p) const;
+	DPoint2 PixelsToWorld(int pixels) const
 	{
 		return DPoint2(pixels / m_dScale, pixels / m_dScale);
 	}
@@ -74,5 +53,6 @@ public:
 protected:
 	double	m_dScale;	// pixels per geographic unit
 	DPoint2 m_offset;
+	wxSize  m_clientSize;
 };
 

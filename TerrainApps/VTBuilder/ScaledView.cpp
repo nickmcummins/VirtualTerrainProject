@@ -28,6 +28,13 @@ vtScaledView::vtScaledView(wxWindow *parent, wxWindowID id, const wxPoint& pos,
 	m_dScale = 1.0f;
 }
 
+void vtScaledView::ZoomToPoint(const DPoint2 &p)
+{
+	wxSize clientSize = GetClientSize();
+	wxSize halfSize = clientSize / 2;
+	m_offset.Set(halfSize.x / m_dScale, halfSize.y / m_dScale);
+}
+
 void vtScaledView::ZoomToRect(const DRECT &geo_rect, float margin)
 {
 	VTLOG(" ZoomToRect LRTB(%lg, %lg, %lg, %lg)\n", geo_rect.left, geo_rect.right, geo_rect.top, geo_rect.bottom);
@@ -46,33 +53,34 @@ void vtScaledView::ZoomToRect(const DRECT &geo_rect, float margin)
 	DPoint2 scale;
 	scale.x = (float) client.GetWidth() / rect.Width();
 	scale.y = (float) client.GetHeight() / rect.Height();
-	m_dScale = std::min(scale.x, scale.y);
-	m_dScale *= (1.0f - margin);
+	double smaller = std::min(scale.x, scale.y);
+	smaller *= (1.0f - margin);
+	SetScale(smaller);
 
 	DPoint2 center;
 	rect.GetCenter(center);
 	ZoomToPoint(center);
 }
 
-void vtScaledView::ZoomToPoint(const DPoint2 &p)
+// From pixels to world: subtract offset
+// From world to pixels: add offset
+
+void vtScaledView::ClientToWorld(const wxPoint &sp, DPoint2 &p) const
 {
-	DPoint2 offset;
-	screen(p, offset);
-
-	int w, h;
-	GetClientSize(&w, &h);
-	offset.x -= (w / 2);
-	offset.y -= (h / 2);
-
+	VTLOG("ClientToWorld(%d %d, scale %lf, offset %lf %lf)\n",
+		sp.x, sp.y, m_dScale, m_offset.x, m_offset.y);
+	p.x = sp.x / m_dScale - m_offset.x;
+	p.y = (m_clientSize.y - 1 - sp.y) / m_dScale - m_offset.y;
 }
 
 void vtScaledView::SetScale(double scale)
 {
 	m_dScale = scale;
+	// m_dScale = 1;
 	Refresh();
 }
 
-double vtScaledView::GetScale()
+double vtScaledView::GetScale() const
 {
 	return m_dScale;
 }
@@ -100,7 +108,7 @@ void vtScaledView::DrawLine(double p1x, double p1y, double p2x, double p2y)
 
 void vtScaledView::DrawXHair(const DPoint2 &p, int pixelSize)
 {
-	DPoint2 hairsize = world_delta(pixelSize);
+	DPoint2 hairsize = PixelsToWorld(pixelSize);
 	glBegin(GL_LINES);
 	glVertex2d(p.x - hairsize.x, p.y);
 	glVertex2d(p.x + hairsize.x, p.y);
