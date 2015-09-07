@@ -1644,7 +1644,7 @@ void MainFrame::OnViewMagnifier(wxCommandEvent &event)
 
 void MainFrame::OnUpdateMagnifier(wxUpdateUIEvent& event)
 {
-	event.Check( m_pView->GetMode() == LB_Mag );
+	event.Check(m_pView && m_pView->GetMode() == LB_Mag);
 }
 
 void MainFrame::OnViewPan(wxCommandEvent &event)
@@ -1655,7 +1655,7 @@ void MainFrame::OnViewPan(wxCommandEvent &event)
 
 void MainFrame::OnUpdatePan(wxUpdateUIEvent& event)
 {
-	event.Check( m_pView->GetMode() == LB_Pan );
+	event.Check(m_pView && m_pView->GetMode() == LB_Pan);
 }
 
 void MainFrame::OnViewDistance(wxCommandEvent &event)
@@ -1667,7 +1667,7 @@ void MainFrame::OnViewDistance(wxCommandEvent &event)
 
 void MainFrame::OnUpdateDistance(wxUpdateUIEvent& event)
 {
-	event.Check( m_pView->GetMode() == LB_Dist );
+	event.Check(m_pView && m_pView->GetMode() == LB_Dist);
 }
 
 void MainFrame::OnViewSetArea(wxCommandEvent& event)
@@ -1677,7 +1677,7 @@ void MainFrame::OnViewSetArea(wxCommandEvent& event)
 
 void MainFrame::OnUpdateViewSetArea(wxUpdateUIEvent& event)
 {
-	event.Check(m_pView->GetMode() == LB_Box);
+	event.Check(m_pView && m_pView->GetMode() == LB_Box);
 }
 
 void MainFrame::OnViewZoomIn(wxCommandEvent &event)

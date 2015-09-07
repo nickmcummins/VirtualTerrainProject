@@ -224,15 +224,13 @@ struct stat &dir_iter::get_stat()
  */
 vtString FindFileOnPaths(const vtStringArray &paths, const char *filename)
 {
-	FILE *fp;
-
 	if (!strcmp(filename, ""))
 		return vtString("");
 
 	// it's possible that the filename is already resolvable without
 	// searching the data paths
 	LOGFIND("Searching for file... '%s'\n", filename);
-	fp = vtFileOpen(filename, "r");
+	FILE *fp = vtFileOpen(filename, "r");
 	if (fp != NULL)
 	{
 		fclose(fp);
@@ -755,20 +753,10 @@ void VTCompress::close()
 
 ///////////////////////////////////////////////////////////////////////
 // Excapsulation of Zlib's gzip input functions
-// adds support for utf-8 filenames
 //
 gzFile vtGZOpen(const char *path, const char *mode)
 {
-	FILE *fp = vtFileOpen(path, mode);
-	if (!fp)
-		return NULL;
-
-#ifdef _MSC_VER
-	int fd = _fileno(fp);
-#else
-	int fd = fileno(fp);
-#endif
-	return gzdopen(fd, mode);
+	return gzopen(path, mode);
 }
 
 ///////////////////////////////////////////////////////////////////////

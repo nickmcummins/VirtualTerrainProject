@@ -209,11 +209,7 @@ void MainFrame::SetupUI()
 				  Left());
 	m_mgr.Update();
 
-	// The following makes the views match, but it looks funny on Linux
-//	m_pTree->SetBackgroundColour(*wxLIGHT_GREY);
-
 	CreateView();
-	m_pView->SetBackgroundColour(*wxLIGHT_GREY);
 	m_pView->Show(FALSE);
 
 	// Read INI file after creating the view
@@ -246,6 +242,7 @@ void MainFrame::SetupUI()
 		DisplayAndLog("The building materials file (Culture/materials.xml) was not found\n"
 			" on your Data Path.  Without this file, materials will not be handled\n"
 			" correctly.  Please check your Data Paths to avoid this problem.");
+
 	SetupDefaultStructures(FindFileOnPaths(vtGetDataPath(), "BuildingData/DefaultStructures.vtst"));
 
 	// Load content files, which might be referenced by structure layers
@@ -461,7 +458,8 @@ void MainFrame::SetProjection(const vtProjection &p)
 	Builder::SetProjection(p);
 
 	// inform the world map view
-	GetView()->SetWMProj(p);
+	if (GetView())
+		GetView()->SetWMProj(p);
 
 	// inform the dialogs that care, if they're open
 	if (m_pDistanceDlg)
@@ -600,6 +598,9 @@ bool MainFrame::ReadXML(const char *fname)
 
 void MainFrame::ApplyOptions()
 {
+	if (!m_pView)
+		return;
+
 	// Apply all the options, from g_Options the rest of the application
 	m_pView->SetShowMap(g_Options.GetValueBool(TAG_SHOW_MAP));
 	m_pView->m_bShowUTMBounds = g_Options.GetValueBool(TAG_SHOW_UTM);
@@ -627,6 +628,9 @@ void MainFrame::ApplyOptions()
 
 bool MainFrame::WriteXML(const char *fname)
 {
+	if (!m_pView)
+		return false;
+
 	// Gather all the options into g_Options
 	g_Options.SetValueBool(TAG_SHOW_MAP, m_pView->GetShowMap());
 	g_Options.SetValueBool(TAG_SHOW_UTM, m_pView->m_bShowUTMBounds);
