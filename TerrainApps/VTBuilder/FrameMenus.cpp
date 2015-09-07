@@ -1682,13 +1682,20 @@ void MainFrame::OnUpdateViewSetArea(wxUpdateUIEvent& event)
 
 void MainFrame::OnViewZoomIn(wxCommandEvent &event)
 {
-	m_pView->SetScale(m_pView->GetScale() * sqrt(2.0));
+	// Directly towards center of view.
+	const wxSize client = m_pView->GetClientSize();
+	DPoint2 p;
+	m_pView->ClientToWorld(wxPoint(client.x / 2, client.y / 2), p);
+	m_pView->ScaleAroundPoint(p, m_pView->GetScale() * sqrt(2.0));
 	RefreshStatusBar();
 }
 
 void MainFrame::OnViewZoomOut(wxCommandEvent &event)
 {
-	m_pView->SetScale(m_pView->GetScale() / sqrt(2.0));
+	const wxSize client = m_pView->GetClientSize();
+	DPoint2 p;
+	m_pView->ClientToWorld(wxPoint(client.x / 2, client.y / 2), p);
+	m_pView->ScaleAroundPoint(p, m_pView->GetScale() / sqrt(2.0));
 	RefreshStatusBar();
 }
 

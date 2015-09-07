@@ -757,7 +757,7 @@ DPoint2 Builder::EstimateGeoDataCenter()
 	if (!m_proj.IsGeographic())
 	{
 		vtProjection geo;
-		CreateSimilarGeographicProjection(m_proj, geo);
+		CreateSimilarGeographicCRS(m_proj, geo);
 		ScopedOCTransform trans(CreateTransformIgnoringDatum(&m_proj, &geo));
 		if (trans)
 			trans->Transform(1, &pos.x, &pos.y);

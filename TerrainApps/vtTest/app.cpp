@@ -482,7 +482,7 @@ void App::MeshAndOBJTest()
 	geode->addDrawable(mesh);
 	geode->addDrawable(mesh2);
 
-	WriteGeomToOBJ(geode, "C:/temp/mesh_test.obj");
+	WriteGeodeToOBJ(geode, "C:/temp/mesh_test.obj");
 }
 
 void App::SetTest(int test)

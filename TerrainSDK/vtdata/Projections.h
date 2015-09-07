@@ -129,7 +129,7 @@ void SetupEPSGDatums();
 
 StatePlaneInfo *GetStatePlaneTable();
 int NumStatePlanes();
-void CreateSimilarGeographicProjection(const vtProjection &source, vtProjection &geo);
+void CreateSimilarGeographicCRS(const vtProjection &source, vtProjection &geo);
 OCTransform *CreateTransformIgnoringDatum(const vtProjection *pSource, vtProjection *pTarget);
 OCTransform *CreateCoordTransform(const vtProjection *pSource,
 						  const vtProjection *pTarget, bool bLog = false);

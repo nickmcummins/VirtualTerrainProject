@@ -115,7 +115,7 @@ void DistanceDlg::SetProjection(const vtProjection &proj)
 
 		// We may need degrees later, but don't have them, prepare to compute them.
 		vtProjection geo;
-		CreateSimilarGeographicProjection(m_proj, geo);
+		CreateSimilarGeographicCRS(m_proj, geo);
 		m_pTransformToGeo = CreateCoordTransform(&m_proj, &geo);
 	}
 	ShowValues();

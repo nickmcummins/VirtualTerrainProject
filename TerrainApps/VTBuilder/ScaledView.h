@@ -21,6 +21,7 @@ public:
 
 	void SetScale(double scale);
 	double GetScale() const;
+	void ScaleAroundPoint(const DPoint2 &p, double scale);
 
 	void ZoomToPoint(const DPoint2 &p);
 	void ZoomToRect(const DRECT &geo_rect, float margin);
@@ -37,6 +38,7 @@ public:
 	void DrawLine(double p1x, double p1y, double p2x, double p2y);
 	void DrawXHair(const DPoint2 &p, int pixelSize);
 	void DrawRectangle(const DRECT &rect);
+	void DrawRectangle(const DPoint2 &p0, const DPoint2 &p1);
 	void DrawPolyLine(const DLine2 &line, bool bClose);
 	void DrawPolygon(const DPolygon2 &poly, bool bFill);
 
@@ -56,3 +58,10 @@ protected:
 	wxSize  m_clientSize;
 };
 
+// Helpers
+struct PushLogicOp
+{
+	PushLogicOp(GLenum opcode);
+	~PushLogicOp();
+	GLint stored;
+};

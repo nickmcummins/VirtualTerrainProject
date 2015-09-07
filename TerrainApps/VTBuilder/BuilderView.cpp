@@ -150,12 +150,14 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 	{
 		bFirstDraw = false;
 		VTLOG("First View OnDraw\n");
+		glEnable(GL_COLOR_LOGIC_OP);
 	}
 
 	wxSize clientSize = GetClientSize();
 
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	const float greyLevel = 0.7f;
+	glClearColor(greyLevel, greyLevel, greyLevel, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);	// | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(0, 0, clientSize.x, clientSize.y);
 
@@ -169,12 +171,13 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 	glScaled(m_dScale, m_dScale, 1.0);
 	glTranslated(m_offset.x, m_offset.y, 0.0);
 
-	glColor3f(1, 0, 0);
-	DrawLine(DPoint2(0, 0), DPoint2(1, 0));
-	glColor3f(0, 1, 0);
-	DrawLine(DPoint2(0, 0), DPoint2(0, 1));
-	glColor3f(0, 0, 1);
-	DrawLine(DPoint2(0, 0), DPoint2(100, 100));
+	// Test axes
+	//glColor3f(1, 0, 0);
+	//DrawLine(DPoint2(0, 0), DPoint2(10, 0));
+	//glColor3f(0, 1, 0);
+	//DrawLine(DPoint2(0, 0), DPoint2(0, 10));
+	//glColor3f(0, 0, 1);
+	//DrawLine(DPoint2(0, 0), DPoint2(100, 100));
 
 	// no point in drawing until the Idle events have made it to the splitter
 	if (!m_bGotFirstIdle)
@@ -229,6 +232,12 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 		DrawGridMarks();	// erase
 
 	DrawDistanceTool();
+
+	if (m_bBoxing)
+	{
+		glColor3f(1, 1, 1);
+		DrawInverseRect(m_ui.m_DownLocation, m_ui.m_CurLocation);
+	}
 
 	SwapBuffers();
 }
@@ -317,7 +326,7 @@ void BuilderView::DrawUTMBounds()
 		DPoint2 proj_point;
 
 		vtProjection geo;
-		CreateSimilarGeographicProjection(proj, geo);
+		CreateSimilarGeographicCRS(proj, geo);
 
 		ScopedOCTransform trans1(CreateCoordTransform(&proj, &geo));
 
@@ -448,7 +457,7 @@ void BuilderView::SetWMProj(const vtProjection &proj)
 
 	// Otherwise, must convert from Geo to whatever project is desired
 	vtProjection Source;
-	CreateSimilarGeographicProjection(proj, Source);
+	CreateSimilarGeographicCRS(proj, Source);
 
 #if VTDEBUG
 	// Check projection text
@@ -560,10 +569,7 @@ void BuilderView::EndPan()
 
 	m_bPanning = false;
 	SetCorrectCursor();
-
-	// redraw scale bar when done panning
-	if (m_bScaleBar)
-		RefreshRect(m_ScaleBarArea);
+	Refresh();
 }
 
 
@@ -573,24 +579,24 @@ void BuilderView::EndPan()
 void BuilderView::DrawInverseRect(const DRECT &r, bool bDashed)
 {
 	DrawInverseRect(DPoint2(r.left, r.top),
-		DPoint2(r.right, r.bottom), bDashed);
+					DPoint2(r.right, r.bottom), bDashed);
 }
 
 void BuilderView::DrawInverseRect(const DPoint2 &one,
 	const DPoint2 &two, bool bDashed)
 {
-	glLogicOp(GL_INVERT);
-	// TODO	if (bDashed)
-
-	glBegin(GL_LINE_STRIP);
-	glVertex2d(one.x, one.y);
-	glVertex2d(one.x, two.y);
-	glVertex2d(two.x, two.y);
-	glVertex2d(two.x, one.y);
-	glVertex2d(one.x, one.y);
-	glEnd();
-
-	glLogicOp(GL_COPY);
+	PushLogicOp(GL_XOR);
+	if (bDashed)
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glLineStipple(1, 0xAAAA);
+		glEnable(GL_LINE_STIPPLE);
+	}
+	DrawRectangle(one, two);
+	if (bDashed)
+	{
+		glPopAttrib();
+	}
 }
 
 void BuilderView::BeginBox()
@@ -605,23 +611,22 @@ void BuilderView::EndBox(const wxMouseEvent& event)
 	if (!m_bMouseMoved)
 		return;
 
-	m_world_rect = DRECT(m_ui.m_DownLocation, m_ui.m_LastLocation);
+	DRECT worldRect(m_ui.m_DownLocation, m_ui.m_LastLocation);
 	switch (m_ui.mode)
 	{
 	case LB_Mag:
-		ZoomToRect(m_world_rect, 0.0f);
+		ZoomToRect(worldRect, 0.0f);
 		break;
 	case LB_Box:
-		DrawAreaTool(g_bld->GetAtArea());
-		g_bld->SetArea(m_world_rect);
-		DrawAreaTool(g_bld->GetAtArea());
+		g_bld->SetArea(worldRect);
+		Refresh();
 		break;
 	case LB_Node:
 	case LB_Link:
 		{
 			// select everything in the highlighted box.
 			vtRoadLayer *pRL = g_bld->GetActiveRoadLayer();
-			if (pRL->SelectArea(m_world_rect, (m_ui.mode == LB_Node),
+			if (pRL->SelectArea(worldRect, (m_ui.mode == LB_Node),
 				m_bCrossSelect))
 			{
 				Refresh();
@@ -634,13 +639,13 @@ void BuilderView::EndBox(const wxMouseEvent& event)
 		Refresh();
 		break;
 	case LB_FSelect:
-		EndBoxFeatureSelect(event);
+		EndBoxFeatureSelect(event, worldRect);
 	default:	// Keep picky compilers quiet.
 		break;
 	}
 }
 
-void BuilderView::EndBoxFeatureSelect(const wxMouseEvent& event)
+void BuilderView::EndBoxFeatureSelect(const wxMouseEvent& event, const DRECT &worldRect)
 {
 	VTLOG1("EndBoxFeatureSelect:");
 
@@ -676,14 +681,14 @@ void BuilderView::EndBoxFeatureSelect(const wxMouseEvent& event)
 	{
 		VTLOG1(" Doing structure box select\n");
 		vtStructureLayer *pSL = (vtStructureLayer *)pL;
-		changed = pSL->DoBoxSelect(m_world_rect, st);
+		changed = pSL->DoBoxSelect(worldRect, st);
 		selected = pSL->NumSelected();
 	}
 	if (pL->GetType() == LT_RAW)
 	{
 		VTLOG1(" Doing raw box select\n");
 		vtRawLayer *pRL = (vtRawLayer *)pL;
-		changed = pRL->GetFeatureSet()->DoBoxSelect(m_world_rect, st);
+		changed = pRL->GetFeatureSet()->DoBoxSelect(worldRect, st);
 		selected = pRL->GetFeatureSet()->NumSelected();
 	}
 	wxString msg;
@@ -708,19 +713,22 @@ void BuilderView::DrawAreaTool(const DRECT &area)
 	if (area.IsEmpty())
 		return;
 
+	VTLOG("DrawAreaTool %lf %lf %lf %lf\n", area.left, area.top, area.right, area.bottom);
+
 	// dashed-line rectangle
+	glColor3f(1, 1, 1);
 	DrawInverseRect(area, true);
 
-	DPoint2 d = PixelsToWorld(3);
+	DPoint2 d = PixelsToWorld(2);
 
 	// four small rectangles, for the handles at each corner
-	DPoint2 top(area.left, area.top);
+	DPoint2 bottom(area.left, area.bottom);
 	DPoint2 width(area.Width(), 0.0), height(0.0, area.Height());
 
-	DrawInverseRect(top - d, top + d);
-	DrawInverseRect(top + width - d, top + width - d);
-	DrawInverseRect(top + height - d, top + height - d);
-	DrawInverseRect(top + width + height - d, top + width + height - d);
+	DrawInverseRect(bottom - d, bottom + d);
+	DrawInverseRect(bottom + width - d, bottom + width + d);
+	DrawInverseRect(bottom + height - d, bottom + height + d);
+	DrawInverseRect(bottom + width + height - d, bottom + width + height + d);
 }
 
 
@@ -1463,9 +1471,8 @@ void BuilderView::OnMouseMove(wxMouseEvent& event)
 
 	if (m_bPanning)
 	{
-		VTLOG("pan offset %lf %lf -> ", m_offset.x, m_offset.y);
-		m_offset += (m_ui.m_CurLocation - m_ui.m_LastLocation);
-		VTLOG("%lf %lf\n", m_offset.x, m_offset.y);
+		wxPoint diff = m_ui.m_CurPoint - m_ui.m_LastPoint;
+		m_offset += DPoint2(diff.x / m_dScale, -diff.y / m_dScale);
 		Refresh();
 	}
 
@@ -1474,15 +1481,15 @@ void BuilderView::OnMouseMove(wxMouseEvent& event)
 	{
 		if (m_bBoxing)
 		{
-			DrawInverseRect(m_ui.m_DownLocation, m_ui.m_CurLocation);
+			Refresh();
 		}
 		if (m_iDragSide)
+		{
 			UpdateAreaTool(m_ui.m_CurLocation - m_ui.m_LastLocation);
+			Refresh();
+		}
 		if (m_ui.mode == LB_Dist)
 		{
-			wxClientDC dc(this);
-			PrepareDC(dc);
-
 			OnDragDistance();		// update
 			Refresh();
 		}
@@ -1509,9 +1516,9 @@ void BuilderView::OnMouseWheel(wxMouseEvent& event)
 {
 	VTLOG("OnMouseWheel %d\n", event.m_wheelRotation);
 	if (event.m_wheelRotation > 0)
-		SetScale(GetScale() * sqrt(2.0));
+		ScaleAroundPoint(m_ui.m_CurLocation, GetScale() * sqrt(2.0));
 	else
-		SetScale(GetScale() / sqrt(2.0));
+		ScaleAroundPoint(m_ui.m_CurLocation, GetScale() / sqrt(2.0));
 
 	// update scale in status bar
 	g_bld->RefreshStatusBar();

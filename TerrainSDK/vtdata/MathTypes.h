@@ -777,7 +777,7 @@ public:
 	// retrieves the width
 	double Width() const { return right - left; }
 	// returns the height, assumes upward increasing coordinate system
-	double Height() const { return top - bottom; };
+	double Height() const { return top - bottom; }
 	// return true if null (all 0)
 	bool IsNull() const { return (left == 0.0 && top == 0.0 && right == 0.0 && bottom == 0.0); }
 	// return true if empty

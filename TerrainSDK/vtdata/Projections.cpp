@@ -709,7 +709,7 @@ int vtProjection::GuessEPSGCode() const
  * Given a non-geographic projection, produce a geographic projection which
  * has the same datum/ellipsoid values.
  */
-void CreateSimilarGeographicProjection(const vtProjection &source,
+void CreateSimilarGeographicCRS(const vtProjection &source,
 	vtProjection &geo)
 {
 	geo.SetWellKnownGeogCS("WGS84");

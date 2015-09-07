@@ -10,18 +10,18 @@
 #  include <ieeefp.h>
 #endif
 
-#ifdef __DARWIN_OSX__
- #import <GLUT/glut.h>
-#else
- #include <GL/glut.h>
-#endif
-
 #include "vtlib/vtlib.h"
 #include "vtlib/core/Terrain.h"
 #include "vtlib/core/TerrainScene.h"
 #include "vtlib/core/NavEngines.h"
 #include "vtdata/DataPath.h"
 #include "vtdata/vtLog.h"
+
+#ifdef __DARWIN_OSX__
+ #import <GLUT/glut.h>
+#else
+ #include <GL/glut.h>
+#endif
 
 // Enable bits of example code
 #define EXAMPLE_SNOW		0

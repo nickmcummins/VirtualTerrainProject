@@ -170,7 +170,7 @@ protected:
 	// Box handlers
 	void BeginBox();
 	void EndBox(const wxMouseEvent& event);
-	void EndBoxFeatureSelect(const wxMouseEvent& event);
+	void EndBoxFeatureSelect(const wxMouseEvent& event, const DRECT &worldRect);
 	void BeginArea();
 	void UpdateAreaTool(const DPoint2 &delta);
 
@@ -207,7 +207,6 @@ protected:
 	bool m_bSkipNextDraw;
 	bool m_bSkipNextRefresh;
 	wxSize m_previous_size;
-	DRECT m_world_rect;		// rectangle box drawn by mouse
 	DPoint2 m_distance_p1, m_distance_p2;
 	DLine2 m_distance_path;
 
