@@ -15,18 +15,6 @@
 
 // WDR: class declarations
 
-class NodeDlgView : public vtScaledView
-{
-public:
-	NodeDlgView(wxWindow *parent, wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize, long style = wxHSCROLL | wxVSCROLL, const wxString& name = _T("")) :
-	vtScaledView(parent, id, pos, size, style, name) {}
-
-	NodeEdit *m_pNode;
-
-	void OnDraw(wxDC &dc);
-};
-
 //----------------------------------------------------------------------------
 // NodeDlg
 //----------------------------------------------------------------------------
@@ -40,7 +28,6 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = wxDEFAULT_DIALOG_STYLE );
 
-	void SetScale(float fScale);
 	void SetNode(NodeEdit *pSingleLink, vtRoadLayer *pLayer);
 	void ApplyVisualToNode(NodeEdit *pNode, VisualIntersectionType vitype);
 

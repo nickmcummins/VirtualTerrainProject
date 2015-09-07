@@ -23,7 +23,7 @@ public:
 
 	// overrides for vtLayer methods
 	bool GetExtent(DRECT &rect);
-	void DrawLayer(wxDC *pDC, vtScaledView *pView);
+	void DrawLayer(vtScaledView *pView);
 	bool TransformCoords(vtProjection &proj);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();

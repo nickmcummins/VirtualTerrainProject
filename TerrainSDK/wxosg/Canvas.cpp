@@ -164,7 +164,7 @@ void EnableContinuousRendering(bool bTrue)
 }
 
 #ifndef __WXMAC__
-void vtGLCanvas::OnPaint( wxPaintEvent& event )
+void vtGLCanvas::OnPaint(wxPaintEvent& event)
 {
 	if (m_bFirstPaint) VTLOG1("vtGLCanvas: first OnPaint\n");
 

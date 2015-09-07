@@ -805,7 +805,7 @@ bool Builder::SampleElevationToTileset(BuilderView *pView, TilingOptions &opts,
 
 			// draw our progress in the main view
 			if (bShowGridMarks && pView)
-				pView->ShowGridMarks(m_area, opts.cols, opts.rows, i, j);
+				pView->SetGridMarks(m_area, opts.cols, opts.rows, i, j);
 
 			DRECT tile_area;
 			tile_area.left =	m_area.left + tile_dim.x * i;
@@ -1184,7 +1184,7 @@ bool Builder::SampleImageryToTileset(BuilderView *pView, TilingOptions &opts,
 
 			// draw our progress in the main view
 			if (bShowGridMarks && pView)
-				pView->ShowGridMarks(m_area, opts.cols, opts.rows, i, j);
+				pView->SetGridMarks(m_area, opts.cols, opts.rows, i, j);
 
 			DRECT tile_area;
 			tile_area.left =	m_area.left + tile_dim.x * i;

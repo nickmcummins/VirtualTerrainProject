@@ -5,8 +5,7 @@
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef VTBUILDERFRAMEH
-#define VTBUILDERFRAMEH
+#pragma once
 
 #include "Builder.h"
 #include "wx/aui/aui.h"
@@ -268,7 +267,6 @@ protected:
 	void OnRawSelectCondition(wxCommandEvent& event);
 	void OnRawGenerateTIN(wxCommandEvent& event);
 	void OnRawConvertToPolygons(wxCommandEvent& event);
-	void OnRawExportImageMap(wxCommandEvent& event);
 	void OnRawExportKML(wxCommandEvent& event);
 	void OnRawGenElevation(wxCommandEvent& event);
 	void OnRawStyle(wxCommandEvent& event);
@@ -355,7 +353,6 @@ public:
 	virtual bool AddLayerWithCheck(vtLayer *pLayer, bool bRefresh = true);
 	virtual void RemoveLayer(vtLayer *lp);
 	virtual void SetActiveLayer(vtLayer *lp, bool refresh = false);
-	void RefreshLayerInView(vtLayer *pLayer);
 	void ShowLayerProperties(vtLayer *lp);
 
 	// UI
@@ -393,6 +390,8 @@ public:
 	// Web Access
 	OGCServerArray m_wms_servers;
 	OGCServerArray m_wfs_servers;
+
+	void RefreshView();
 
 protected:
 	// INI File
@@ -453,6 +452,4 @@ wxString GetImportFilterString(LayerType ltype);
 float ElevLayerArrayValue(std::vector<vtElevLayer*> &elevs, const DPoint2 &p);
 void ElevLayerArrayRange(std::vector<vtElevLayer*> &elevs,
 						 float &minval, float &maxval);
-
-#endif	// VTBUILDERFRAMEH
 

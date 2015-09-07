@@ -84,27 +84,34 @@ bool vtStructureLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtStructureLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
+void vtStructureLayer::DrawLayer(vtScaledView *pView)
 {
-	m_size = pView->sdx(20);
-	if (m_size > 5) m_size = 5;
-	if (m_size < 1) m_size = 1;
-
 	uint structs = size();
-	pDC->SetBrush(*wxTRANSPARENT_BRUSH);
-	pDC->SetPen(orangePen);
-	DrawStructures(pDC, pView, false);	// unselected
+	pView->SetColor(RGBi(255, 128, 0));
+	DrawStructures(pView, false);	// unselected
 
-	pDC->SetPen(yellowPen);
-	DrawStructures(pDC, pView, true);	// selected
+	pView->SetColor(RGBi(255, 255, 0));
+	DrawStructures(pView, true);	// selected
 
-	DrawBuildingHighlight(pDC, pView);
+	DrawBuildingHighlight(pView);
+
+#if 0 // TODO
+	// Rubber-banding
+	if (ui.m_bLMouseButton && ui.mode == LB_BldEdit && ui.m_bRubber)
+	{
+		DrawBuilding(pView, &ui.m_EditBuilding);
+	}
+	if (ui.mode == LB_EditLinear && ui.m_bRubber)
+	{
+		DrawLinear(pView, &ui.m_EditLinear);
+	}
+#endif
 
 	// Remember for next time
 	m_pLastView = pView;
 }
 
-void vtStructureLayer::DrawStructures(wxDC *pDC, vtScaledView *pView, bool bOnlySelected)
+void vtStructureLayer::DrawStructures(vtScaledView *pView, bool bOnlySelected)
 {
 	uint structs = size();
 	for (unsigned i = 0; i < structs; i++)
@@ -116,97 +123,80 @@ void vtStructureLayer::DrawStructures(wxDC *pDC, vtScaledView *pView, bool bOnly
 
 		vtBuilding *bld = str->GetBuilding();
 		if (bld)
-			DrawBuilding(pDC, pView, bld);
+			DrawBuilding(pView, bld);
 
 		vtFence *fen = str->GetFence();
 		if (fen)
-			DrawLinear(pDC, pView, fen);
+			DrawLinear(pView, fen);
 
 		vtStructInstance *inst = str->GetInstance();
 		if (inst)
 		{
-			wxPoint origin;
-			pView->screen(inst->GetPoint(), origin);
+			const DPoint2 &origin = inst->GetPoint();
 
-			pDC->DrawLine(origin.x-m_size, origin.y, origin.x+m_size+1, origin.y);
-			pDC->DrawLine(origin.x, origin.y-m_size, origin.x, origin.y+m_size+1);
+			pView->DrawXHair(origin, 3);
 
 			if (inst->GetItem())
 			{
 				FRECT ext = inst->GetItem()->m_extents;
 				if (!ext.IsEmpty())
 				{
-					pView->screen(inst->GetPoint() + ext.Center(), origin);
-					int radius = pView->sdx(ext.Width() / 2);
-					pDC->DrawCircle(origin, radius);
+					// TODO
 				}
 			}
 		}
 	}
 }
 
-void vtStructureLayer::DrawBuildingHighlight(wxDC *pDC, vtScaledView *pView)
+void vtStructureLayer::DrawBuildingHighlight(vtScaledView *pView)
 {
 	if (m_pEditBuilding)
 	{
-		pDC->SetLogicalFunction(wxINVERT);
-		pDC->SetPen(thickPen);
+		glLogicOp(GL_INVERT);
+		glLineWidth(3.0f);
 
 		const DPolygon2 &dl = m_pEditBuilding->GetFootprint(m_iEditLevel);
 		int j = m_iEditEdge;
 		int ring = dl.WhichRing(j);
 		const DLine2 &dline = dl[ring];
 		int sides = dline.GetSize();
-		wxPoint p[2];
-		pView->screen(dline[j], p[0]);
-		pView->screen(dline[(j+1)%sides], p[1]);
-		pDC->DrawLines(2, p);
+		pView->DrawLine(dline[j], dline[(j + 1) % sides]);
+
+		glLogicOp(GL_COPY);
 	}
 }
 
-void vtStructureLayer::DrawBuilding(wxDC *pDC, vtScaledView *pView,
-									vtBuilding *bld)
+void vtStructureLayer::DrawBuilding(vtScaledView *pView, vtBuilding *bld)
 {
 	DPoint2 center;
 
-	wxPoint origin;
 	bld->GetBaseLevelCenter(center);
-	pView->screen(center, origin);
 
 	// crosshair at building center
-	pDC->DrawLine(origin.x-m_size, origin.y, origin.x+m_size+1, origin.y);
-	pDC->DrawLine(origin.x, origin.y-m_size, origin.x, origin.y+m_size+1);
+	pView->DrawXHair(center, 5);
 
 	// draw building footprint for all levels
 	int levs = bld->NumLevels();
 
-	// unless we're XORing, in which case multiple overlapping level would
-	// cancel each other out
-	if (pDC->GetLogicalFunction() == wxINVERT)
-		levs = 1;
-
 	for (int i = 0; i < levs; i++)
 	{
 		const DPolygon2 &dp = bld->GetFootprint(i);
-		pView->DrawDPolygon2(pDC, dp, false, true);	// yes fill, yes circles
+		pView->DrawDPolygon2(dp, false, true);	// no fill, yes circles
 	}
 }
 
-void vtStructureLayer::DrawLinear(wxDC *pDC, vtScaledView *pView, vtFence *fen)
+void vtStructureLayer::DrawLinear(vtScaledView *pView, vtFence *fen)
 {
 	uint j;
 
 	// draw the line itself
 	DLine2 &pts = fen->GetFencePoints();
-	pView->DrawPolyLine(pDC, pts, false);
+	pView->DrawPolyLine(pts, false);
 
 	// draw a small crosshair on each vertex
 	for (j = 0; j < pts.GetSize(); j++)
 	{
-		pDC->DrawLine(g_screenbuf[j].x-2, g_screenbuf[j].y,
-			g_screenbuf[j].x+2, g_screenbuf[j].y);
-		pDC->DrawLine(g_screenbuf[j].x, g_screenbuf[j].y-2,
-			g_screenbuf[j].x, g_screenbuf[j].y+2);
+		pView->DrawXHair(pts[j], 2);
 	}
 }
 
@@ -464,16 +454,7 @@ void vtStructureLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 {
 	if (ui.mode == LB_BldEdit && ui.m_bRubber)
 	{
-		DRECT extent_old, extent_new;
-		ui.m_pCurBuilding->GetExtents(extent_old);
-		ui.m_EditBuilding.GetExtents(extent_new);
-		wxRect screen_old = pView->WorldToWindow(extent_old);
-		wxRect screen_new = pView->WorldToWindow(extent_new);
-		screen_old.Inflate(1);
-		screen_new.Inflate(1);
-
-		pView->Refresh(true, &screen_old);
-		pView->Refresh(true, &screen_new);
+		pView->Refresh();
 
 		// copy back from temp building to real building
 		*ui.m_pCurBuilding = ui.m_EditBuilding;
@@ -483,14 +464,7 @@ void vtStructureLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 	}
 	if (ui.mode == LB_EditLinear && ui.m_bRubber)
 	{
-		DRECT extent_old, extent_new;
-		ui.m_pCurLinear->GetExtents(extent_old);
-		ui.m_EditLinear.GetExtents(extent_new);
-		wxRect screen_old = pView->WorldToWindow(extent_old);
-		wxRect screen_new = pView->WorldToWindow(extent_new);
-
-		pView->Refresh(true, &screen_old);
-		pView->Refresh(true, &screen_new);
+		pView->Refresh();
 
 		// copy back from temp building to real building
 		*ui.m_pCurLinear = ui.m_EditLinear;
@@ -528,7 +502,7 @@ void vtStructureLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 
 void vtStructureLayer::OnLeftDownEditBuilding(BuilderView *pView, UIContext &ui)
 {
-	double epsilon = pView->odx(6);  // 6 pixels as world coord
+	double epsilon = pView->world_delta(6).x;  // 6 pixels as world coord
 
 	int building1, building2,  corner;
 	double dist1, dist2;
@@ -569,7 +543,7 @@ void vtStructureLayer::OnLeftDownEditBuilding(BuilderView *pView, UIContext &ui)
 
 void vtStructureLayer::OnLeftDownBldAddPoints(BuilderView *pView, UIContext &ui)
 {
-	double dEpsilon = pView->odx(6);  // 6 pixels as world coord
+	double dEpsilon = pView->world_delta(6).x;  // 6 pixels as world coord
 	double dClosest;
 	int iStructure;
 
@@ -577,14 +551,6 @@ void vtStructureLayer::OnLeftDownBldAddPoints(BuilderView *pView, UIContext &ui)
 		return;
 
 	vtBuilding *pBuilding = at(iStructure)->GetBuilding();
-
-	// Find extent of building and refresh that area of the window
-	DRECT Extent;
-	wxRect Redraw;
-	pBuilding->GetExtents(Extent);
-	Redraw = pView->WorldToWindow(Extent);
-	Redraw.Inflate(3);
-	pView->Refresh(true, &Redraw);
 
 	// Variables for levels and edges
 	vtLevel *pLevel;
@@ -620,16 +586,12 @@ void vtStructureLayer::OnLeftDownBldAddPoints(BuilderView *pView, UIContext &ui)
 		}
 	}
 
-	// Find new extent of building and refresh that area of the window
-	pBuilding->GetExtents(Extent);
-	Redraw = pView->WorldToWindow(Extent);
-	Redraw.Inflate(3);
-	pView->Refresh(true, &Redraw);
+	pView->Refresh();
 }
 
 void vtStructureLayer::OnLeftDownBldDeletePoints(BuilderView *pView, UIContext &ui)
 {
-	double dEpsilon = pView->odx(6);  // 6 pixels as world coord
+	double dEpsilon = pView->world_delta(6).x;  // 6 pixels as world coord
 	double dClosest;
 	int iStructure;
 
@@ -668,16 +630,12 @@ void vtStructureLayer::OnLeftDownBldDeletePoints(BuilderView *pView, UIContext &
 		pLevel->DeleteEdge(iIndex);
 	}
 
-	// Refresh area of the window with original building extent
-	wxRect Redraw;
-	Redraw = pView->WorldToWindow(Extent);
-	Redraw.Inflate(3);
-	pView->Refresh(true, &Redraw);
+	pView->Refresh();
 }
 
 void vtStructureLayer::OnLeftDownEditLinear(BuilderView *pView, UIContext &ui)
 {
-	double epsilon = pView->odx(6);  // 6 pixels as world coord
+	double epsilon = pView->world_delta(6).x;  // 6 pixels as world coord
 
 	int structure, corner;
 	double dist1;
@@ -724,43 +682,26 @@ void vtStructureLayer::OnRightDown(BuilderView *pView, UIContext &ui)
 
 void vtStructureLayer::OnMouseMove(BuilderView *pView, UIContext &ui)
 {
-	// create rubber (xor) pen
-	wxClientDC dc(pView);
-	pView->PrepareDC(dc);
-	wxPen pen(*wxBLACK_PEN);
-	dc.SetPen(pen);
-	dc.SetLogicalFunction(wxINVERT);
-
 	if (ui.m_bLMouseButton && ui.mode == LB_BldEdit && ui.m_bRubber)
 	{
 		// rubber-band a building
-		DrawBuilding(&dc, pView, &ui.m_EditBuilding);
-
 		if (ui.m_bDragCenter)
 			UpdateMove(ui);
 		else if (ui.m_bRotate)
 			UpdateRotate(ui);
 		else
 			UpdateResizeScale(pView, ui);
-
-		DrawBuilding(&dc, pView, &ui.m_EditBuilding);
+		pView->Refresh();
 	}
 	if (ui.mode == LB_AddLinear && ui.m_bRubber)
 	{
-		wxPoint p1, p2;
-		DLine2 &pts = ui.m_pCurLinear->GetFencePoints();
-		pView->screen(pts[pts.GetSize()-1], p1);
-		dc.DrawLine(p1, ui.m_LastPoint);
-		dc.DrawLine(p1, ui.m_CurPoint);
+		//dc.DrawLine(pts[pts.GetSize() - 1], ui.m_CurPoint);
 	}
 	if (ui.mode == LB_EditLinear && ui.m_bRubber)
 	{
 		// rubber-band a linear
-		DrawLinear(&dc, pView, &ui.m_EditLinear);
-
 		ui.m_EditLinear.GetFencePoints().SetAt(ui.m_iCurCorner, ui.m_CurLocation);
-
-		DrawLinear(&dc, pView, &ui.m_EditLinear);
+		//DrawLinear(pView, &ui.m_EditLinear);
 	}
 }
 
@@ -1050,23 +991,7 @@ int vtStructureLayer::DoBoxSelect(const DRECT &rect, SelectionType st)
 
 void vtStructureLayer::SetEditedEdge(vtBuilding *bld, int lev, int edge)
 {
-	if (m_pLastView != NULL)
-	{
-		wxClientDC dc(m_pLastView);
-		m_pLastView->PrepareDC(dc);
-		DrawBuildingHighlight(&dc, m_pLastView);
-
-		vtStructureArray::SetEditedEdge(bld, lev, edge);
-
-		DrawBuildingHighlight(&dc, m_pLastView);
-	}
-	else
-		vtStructureArray::SetEditedEdge(bld, lev, edge);
-
-	// Trigger re-draw of the building
-//	bound = WorldToWindow(world_bounds[n]);
-//	IncreaseRect(bound, BOUNDADJUST);
-//	Refresh(TRUE, &bound);
+	vtStructureArray::SetEditedEdge(bld, lev, edge);
 }
 
 

@@ -1,7 +1,7 @@
 //
 // UtilityLayer.cpp
 //
-// Copyright (c) 2001-2008 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
@@ -15,22 +15,11 @@
 #include "UtilityLayer.h"
 #include "ScaledView.h"
 
-wxPen greenPen;
-wxPen bluePen;
-static bool g_bInitializedPens = false;
-
 //////////////////////////////////////////////////////////////////////////
 
 vtUtilityLayer::vtUtilityLayer() : vtLayer(LT_UTILITY)
 {
 	SetLayerFilename(_T("Untitled.osm"));
-
-	if (!g_bInitializedPens)
-	{
-		g_bInitializedPens = true;
-		greenPen.SetColour(25,128,0);
-		bluePen.SetColour(25,25,200);
-	}
 }
 
 bool vtUtilityLayer::GetExtent(DRECT &rect)
@@ -43,7 +32,7 @@ bool vtUtilityLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtUtilityLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
+void vtUtilityLayer::DrawLayer(vtScaledView *pView)
 {
 	uint i;
 	uint npoles = m_Poles.size();
@@ -52,57 +41,30 @@ void vtUtilityLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
 	if (!npoles)
 		return;
 
-	pDC->SetPen(greenPen);
-	pDC->SetBrush(*wxTRANSPARENT_BRUSH);
+	glColor3f(0, 1, 0);
 
-	if (m_proj.IsGeographic())
-		m_size = pView->sdx(2E-4);	// ~20 meters, in degrees.
-	else
-		m_size = pView->sdx(20);	// 20 meters
-	if (m_size > 5) m_size = 5;
-	if (m_size < 1) m_size = 1;
+	m_size = 3;
 
-	pDC->SetPen(bluePen);
+	glColor3f(0, 0, 1);
 	for (i = 0; i < npoles; i++)
 	{
 		// draw each Pole
 		vtPole *pole = m_Poles[i];
-
-/*		if (pole->IsSelected())
-		{
-			if (!bSel)
-			{
-				pDC->SetPen(bluePen);
-				bSel = true;
-			}
-		}
-		else
-		{
-			if (bSel)
-			{
-				pDC->SetPen(greenPen);
-				bSel = false;
-			}
-		} */
-		DrawPole(pDC, pView, pole);
+		DrawPole(pView, pole);
 	}
-	pDC->SetPen(greenPen);
+	glColor3f(0, 1, 0);
 	DLine2 polyline;
 	for (i = 0; i < nlines; i++)
 	{
 		vtLine *line = m_Lines[i];
 		line->MakePolyline(polyline);
-		pView->DrawPolyLine(pDC, polyline, false);
+		pView->DrawPolyLine(polyline, false);
 	}
 }
 
-void vtUtilityLayer::DrawPole(wxDC *pDC, vtScaledView *pView, vtPole *pole)
+void vtUtilityLayer::DrawPole(vtScaledView *pView, vtPole *pole)
 {
-	wxPoint center;
-	pView->screen(pole->m_p, center);
-
-	pDC->DrawLine(center.x-m_size, center.y, center.x+m_size+1, center.y);
-	pDC->DrawLine(center.x, center.y-m_size, center.x, center.y+m_size+1);
+	pView->DrawXHair(pole->m_p, m_size);
 }
 
 bool vtUtilityLayer::OnSave(bool progress_callback(int))

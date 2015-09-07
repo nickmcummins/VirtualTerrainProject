@@ -247,22 +247,22 @@ bool vtElevLayer::NeedsDraw()
 	return false;
 }
 
-void vtElevLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
+void vtElevLayer::DrawLayer(vtScaledView *pView)
 {
 	if (m_pGrid)
 	{
 		if (m_draw.m_bShowElevation)
-			DrawLayerBitmap(pDC, pView);
+			DrawLayerBitmap(pView);
 		else
-			DrawLayerOutline(pDC, pView);
+			DrawLayerOutline(pView);
 	}
 	if (m_pTin)
 	{
 		if (m_pTin->NumTris() > 0)
-			m_pTin->DrawTin(pDC, pView);
+			m_pTin->DrawTin(pView);
 		else
 			// If we have no data, just draw an outline
-			DrawLayerOutline(pDC, pView);
+			DrawLayerOutline(pView);
 	}
 }
 
@@ -327,8 +327,10 @@ void vtElevLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 {
 	if (ui.mode == LB_TrimTIN)
 	{
-		pView->DrawInvertedLine(ui.m_DownLocation, ui.m_CurLocation);	//draw
+		mTrim1 = ui.m_DownLocation;
+		mTrim2 = ui.m_CurLocation;
 		ui.m_bRubber = true;
+		pView->Refresh();
 	}
 }
 
@@ -336,8 +338,8 @@ void vtElevLayer::OnMouseMove(BuilderView *pView, UIContext &ui)
 {
 	if (ui.mode == LB_TrimTIN && ui.m_bRubber)
 	{
-		pView->DrawInvertedLine(ui.m_DownLocation, ui.m_PrevLocation);	// erase
-		pView->DrawInvertedLine(ui.m_DownLocation, ui.m_CurLocation);	// redraw
+		mTrim2 = ui.m_CurLocation;
+		pView->Refresh();
 	}
 }
 
@@ -346,7 +348,6 @@ void vtElevLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 	if (ui.mode == LB_TrimTIN && ui.m_bRubber)
 	{
 		ui.m_bRubber = false;
-		pView->DrawInvertedLine(ui.m_DownLocation, ui.m_PrevLocation);	// erase
 
 		int num = m_pTin->RemoveTrianglesBySegment(ui.m_DownLocation, ui.m_CurLocation);
 		if (num)
@@ -357,164 +358,46 @@ void vtElevLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 	}
 }
 
-void vtElevLayer::DrawLayerBitmap(wxDC *pDC, vtScaledView *pView)
+void vtElevLayer::DrawLayerBitmap(vtScaledView *pView)
 {
 	if (!m_pGrid)
 		return;
 
 	// If we have grid data, but we don't yet have a bitmap to render it, then allocate
 	if (m_pGrid->HasData() && m_pBitmap == NULL)
-		SetupBitmap(pDC);
+		SetupBitmap();
 
 	if (m_pBitmap == NULL || !m_bBitmapRendered)
 	{
-		DrawLayerOutline(pDC, pView);
+		DrawLayerOutline(pView);
 		return;
 	}
 
 	int iColumns, iRows;
 	m_pGrid->GetDimensions(iColumns, iRows);
 
-	DRECT screenrect = pView->WorldToCanvasD(m_pGrid->GetAreaExtents());
-	DRECT destRect = screenrect;
-	wxRect srcRect(0, 0, m_ImageSize.x, m_ImageSize.y);
-
-	double destRectW = (destRect.right - destRect.left); 
-	double destRectH = (destRect.bottom - destRect.top); 
-
-	double ratio_x = (float) srcRect.GetWidth() / destRectW;
-	double ratio_y = (float) srcRect.GetHeight() / destRectH;
-
-#if 0
-	//clip stuff, so we only blit what we need
-	int client_width, client_height;
-	pView->GetClientSize(&client_width, &client_height); //get client window size
-	if ((destRect.x + destRect.GetWidth() < 0) ||
-			(destRect.y + destRect.GetHeight() < 0) ||
-			(destRect.x > client_width) ||
-			(destRect.y > client_height))
-		//image completely off screen, return
-		return;
-	int diff;
-
-	// clip left
-	diff = 0 - destRect.x;
-	if (diff > 0)
-	{
-		destRect.x += diff;
-		srcRect.x += (long)(diff * ratio_x);
-	}
-
-	// clip top
-	diff = 0 - destRect.y;
-	if (diff > 0)
-	{
-		destRect.y += diff;
-		srcRect.y += (long)(diff * ratio_y);
-	}
-
-	// clip right
-	diff = destRect.x + destRect.GetWidth() - client_width;
-	if (diff > 0)
-	{
-		destRect.width -= diff;
-		srcRect.width -= (long)(diff * ratio_x);
-	}
-
-	// clip bottom
-	diff = destRect.y + destRect.GetHeight() - client_height;
-	if (diff > 0)
-	{
-		destRect.height -= diff;
-		srcRect.height -= (long)(diff * ratio_y);
-	}
-#endif
-
-	bool bDrawNormal = true;
-#if WIN32
-	::SetStretchBltMode((HDC) (pDC->GetHDC()), HALFTONE);
-
-	if (!m_bHasMask)
-	{
-		// VTLOG("DrawBM %d, %d wh %d %d\n", (int) destRect.left, (int) destRect.top,
-		//		(int) destRectW, (int) destRectH);
-
-		// Using StretchBlit is much faster and has less scaling/roundoff
-		//  problems than using the wx method DrawBitmap.  However, GDI
-		//  won't stretch and mask at the same time!
-		wxDC2 *pDC2 = (wxDC2 *) pDC;
-		pDC2->StretchBlit(*m_pBitmap->m_pBitmap, destRect.left, destRect.top,
-			destRectW, destRectH, srcRect.x, srcRect.y,
-			srcRect.width, srcRect.height);
-		bDrawNormal = false;
-	}
-#endif
-	if (bDrawNormal)
-	{
-		bool bUseDrawBitmap;
-#if wxCHECK_VERSION(2, 9, 0)
-		bUseDrawBitmap = false;
-#else
-		bUseDrawBitmap = true;		// Older wx doesn't have StretchBlit
-#endif
-		if (ratio_x > 1.0 && ratio_y > 1.0)
-			bUseDrawBitmap = true;
-
-		if (bUseDrawBitmap)
-		{
-			// Scale and draw the bitmap
-			// Must use SetUserScale since wxWidgets doesn't provide StretchBlt?
-			double scale_x = 1.0/ratio_x;
-			double scale_y = 1.0/ratio_y;
-			pDC->SetUserScale(scale_x, scale_y);
-
-			//  On Windows, this does a BitBlt (or MaskBlt if there is a mask)
-			pDC->DrawBitmap(*m_pBitmap->m_pBitmap, (int) (destRect.left/scale_x),
-				(int) (destRect.top/scale_y), m_bHasMask);
-
-			// restore
-			pDC->SetUserScale(1.0, 1.0);
-		}
-#if wxCHECK_VERSION(2, 9, 0)
-		else
-		{
-			// Create a memory DC; seems like a lot of overhead, but it also seems fast enough.
-			wxMemoryDC temp_dc;
-			temp_dc.SelectObject(*(m_pBitmap->m_pBitmap));
-
-			// Using StretchBlit seems to cause strange dark colors when zoomed out, but
-			//  that's better than the horizontal offset problems on zoomed-in that
-			//  resulted from using SetUserScale/DrawBitmap.
-			pDC->StretchBlit(destRect.left, destRect.top, destRectW, destRectH,
-				&temp_dc, srcRect.x, srcRect.y,
-				srcRect.width, srcRect.height, wxCOPY, m_bHasMask);
-		}
-#endif
-	}
+	// m_pGrid->GetAreaExtents()
+	// TODO
+	//pDC->DrawBitmap(*m_pBitmap->m_pBitmap, (int) (destRect.left/scale_x),
+	//	(int) (destRect.top/scale_y), m_bHasMask);
 }
 
-void vtElevLayer::DrawLayerOutline(wxDC *pDC, vtScaledView *pView)
+void vtElevLayer::DrawLayerOutline(vtScaledView *pView)
 {
-	DRECT ext;
-	GetExtent(ext);
-	wxRect screenrect = pView->WorldToCanvas(ext);
+	DRECT rect;
+	GetExtent(rect);
 
 	if (m_pGrid && !m_pGrid->HasData())
 	{
 		// draw darker, dotted lines for a grid not in memory
-		wxPen Pen1(wxColor(0x00, 0x40, 0x00), 1, wxDOT);
-		pDC->SetPen(Pen1);
+		glColor3f(0.0f, 0.25f, 0.0f);
 	}
 	else
 	{
 		// draw a simple crossed box with green lines
-		wxPen Pen1(wxColor(0x00, 0x80, 0x00), 1, wxSOLID);
-		pDC->SetPen(Pen1);
+		glColor3f(0.0f, 0.5f, 0.0f);
 	}
-
-	pDC->SetLogicalFunction(wxCOPY);
-
-	DrawRectangle(pDC, screenrect, true);
+	pView->DrawRectangle(rect);
 }
 
 bool vtElevLayer::GetExtent(DRECT &rect)
@@ -570,7 +453,7 @@ void vtElevLayer::SetupDefaults()
 }
 
 
-void vtElevLayer::SetupBitmap(wxDC *pDC)
+void vtElevLayer::SetupBitmap()
 {
 	int cols, rows;
 	m_pGrid->GetDimensions(cols, rows);
@@ -1596,7 +1479,7 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 
 			// draw our progress in the main view
 			if (pView)
-				pView->ShowGridMarks(area, opts.cols, opts.rows, col, opts.rows-1-row);
+				pView->SetGridMarks(area, opts.cols, opts.rows, col, opts.rows-1-row);
 
 			// Extract the highest LOD we need
 			vtElevationGrid base_lod(tile_area, IPoint2(base_tilesize+1, base_tilesize+1),

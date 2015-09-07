@@ -295,7 +295,6 @@ EVT_MENU(ID_RAW_OFFSET_V,			MainFrame::OnRawOffsetV)
 EVT_MENU(ID_RAW_CLEAN,				MainFrame::OnRawClean)
 EVT_MENU(ID_RAW_SELECT_BAD,			MainFrame::OnRawSelectBad)
 EVT_MENU(ID_RAW_SELECTCONDITION,	MainFrame::OnRawSelectCondition)
-EVT_MENU(ID_RAW_EXPORT_IMAGEMAP,	MainFrame::OnRawExportImageMap)
 EVT_MENU(ID_RAW_EXPORT_KML,			MainFrame::OnRawExportKML)
 EVT_MENU(ID_RAW_GENERATE_ELEVATION,	MainFrame::OnRawGenElevation)
 EVT_MENU(ID_RAW_GENERATE_TIN,		MainFrame::OnRawGenerateTIN)
@@ -1121,7 +1120,7 @@ void MainFrame::OnLayerNew(wxCommandEvent &event)
 	AddLayer(pL);
 	RefreshTreeView();
 	RefreshToolbars();
-	RefreshLayerInView(pL);
+	RefreshView();
 }
 
 void MainFrame::OnLayerOpen(wxCommandEvent &event)
@@ -1587,7 +1586,7 @@ void MainFrame::OnLayerShow(wxCommandEvent &event)
 	if (!pLayer)
 		return;
 	pLayer->SetVisible(!pLayer->GetVisible());
-	RefreshLayerInView(pLayer);
+	RefreshView();
 	RefreshTreeStatus();
 }
 
@@ -1608,7 +1607,7 @@ void MainFrame::OnLayerUp(wxCommandEvent &event)
 	if (num < (int) NumLayers() - 1)
 		SwapLayerOrder(num, num+1);
 
-	RefreshLayerInView(pLayer);
+	RefreshView();
 	RefreshTreeView();
 }
 
@@ -1627,7 +1626,7 @@ void MainFrame::OnLayerDown(wxCommandEvent &event)
 	if (num > 0)
 		SwapLayerOrder(num-1, num);
 
-	RefreshLayerInView(pLayer);
+	RefreshView();
 	RefreshTreeView();
 }
 
@@ -2020,7 +2019,7 @@ void MainFrame::OnElevArithmetic(wxCommandEvent &event)
 		m_pView->SetActiveLayer(result);
 		RefreshTreeView();
 		RefreshToolbars();
-		RefreshLayerInView(result);
+		RefreshView();
 	}
 }
 
@@ -2493,7 +2492,7 @@ void MainFrame::OnImageReplaceRGB(wxCommandEvent& event)
 		return;
 	}
 	GetActiveImageLayer()->ReplaceColor(rgb1, rgb2);
-	RefreshLayerInView(GetActiveImageLayer());
+	RefreshView();
 }
 
 void MainFrame::OnImageCreateOverviews(wxCommandEvent& event)
@@ -3758,114 +3757,6 @@ void CapWords(vtString &str)
 	}
 }
 
-void MainFrame::OnRawExportImageMap(wxCommandEvent& event)
-{
-	vtRawLayer *pRL = GetActiveRawLayer();
-	if (!pRL)
-		return;
-
-	OGRwkbGeometryType type = pRL->GetGeomType();
-	if (type != wkbPolygon)
-		return;
-
-	// First grab image
-	BuilderView *view = GetView();
-	IPoint2 size;
-	view->GetClientSize(&size.x, &size.y);
-
-	wxClientDC dc(view);
-	view->PrepareDC(dc);
-
-	vtDIB dib;
-	dib.Create(size, 24);
-
-	int xx, yy;
-	wxColour color;
-	for (int x = 0; x < size.x; x++)
-	{
-		for (int y = 0; y < size.y; y++)
-		{
-			view->CalcUnscrolledPosition(x, y, &xx, &yy);
-			dc.GetPixel(xx, yy, &color);
-			dib.SetPixel24(x, y, RGBi(color.Red(), color.Green(), color.Blue()));
-		}
-	}
-
-	vtFeatureSet *fset = pRL->GetFeatureSet();
-
-	ImageMapDlg dlg(this, -1, _("Export Image Map"));
-	dlg.SetFields(fset);
-	if (dlg.ShowModal() != wxID_OK)
-		return;
-
-	wxFileDialog loadFile(NULL, _("Save to Image File"), _T(""), _T(""),
-		FSTRING_PNG, wxFD_SAVE);
-	if (loadFile.ShowModal() != wxID_OK)
-		return;
-	vtString fullname = (const char *) loadFile.GetPath().mb_str(wxConvUTF8);
-	vtString filename = (const char *) loadFile.GetFilename().mb_str(wxConvUTF8);
-
-	dib.WritePNG(fullname);
-
-	// Then write imagemap
-	wxFileDialog loadFile2(NULL, _("Save to Image File"), _T(""), _T(""),
-		FSTRING_HTML, wxFD_SAVE);
-	if (loadFile2.ShowModal() != wxID_OK)
-		return;
-	vtString htmlname = (const char *) loadFile2.GetPath().mb_str(wxConvUTF8);
-
-	FILE *fp = vtFileOpen(htmlname, "wb");
-	if (!fp)
-		return;
-	fprintf(fp, "<html>\n");
-	fprintf(fp, "<body>\n");
-	fprintf(fp, "<map name=\"ImageMap\">\n");
-
-	vtFeatureSetPolygon *polyset = (vtFeatureSetPolygon *) fset;
-	uint i, num = polyset->NumEntities();
-	wxPoint sp;		// screen point
-
-	for (i = 0; i < num; i++)
-	{
-		vtString str;
-		polyset->GetValueAsString(i, dlg.m_iField, str);
-
-//		CapWords(str);
-//		str += ".sid";
-
-		fprintf(fp, "<area href=\"%s\" shape=\"polygon\" coords=\"",
-			(const char *) str);
-
-		const DPolygon2 &poly = polyset->GetPolygon(i);
-
-		DLine2 dline;
-		poly.GetAsDLine2(dline);
-
-		uint j, points = dline.GetSize();
-		for (j = 0; j < points; j++)
-		{
-			DPoint2 p = dline[j];
-			if (j == points-1 && p == dline[0])
-				continue;
-
-			if (j > 0)
-				fprintf(fp, ", ");
-
-			view->screen(p, sp);
-			view->CalcScrolledPosition(sp.x, sp.y, &xx, &yy);
-
-			fprintf(fp, "%d, %d", xx, yy);
-		}
-		fprintf(fp, "\">\n");
-	}
-	fprintf(fp, "</map>\n");
-	fprintf(fp, "<img border=\"0\" src=\"%s\" usemap=\"#ImageMap\" width=\"%d\" height=\"%d\">\n",
-		(const char *) filename, size.x, size.y);
-	fprintf(fp, "</body>\n");
-	fprintf(fp, "</html>\n");
-	fclose(fp);
-}
-
 void MainFrame::OnRawExportKML(wxCommandEvent& event)
 {
 	vtRawLayer *pRL = GetActiveRawLayer();
@@ -4102,7 +3993,7 @@ void MainFrame::OnShowAll(wxCommandEvent& event)
 		if (lp->GetType() == m_pTree->m_clicked_layer_type)
 		{
 			lp->SetVisible(true);
-			RefreshLayerInView(lp);
+			RefreshView();
 		}
 	}
 	RefreshTreeStatus();
@@ -4116,7 +4007,7 @@ void MainFrame::OnHideAll(wxCommandEvent& event)
 		if (lp->GetType() == m_pTree->m_clicked_layer_type)
 		{
 			lp->SetVisible(false);
-			RefreshLayerInView(lp);
+			RefreshView();
 		}
 	}
 	RefreshTreeStatus();
@@ -4142,7 +4033,7 @@ void MainFrame::OnLayerToTop(wxCommandEvent& event)
 	if (num != 0)
 	{
 		SwapLayerOrder(0, num);
-		RefreshLayerInView(data->m_pLayer);
+		RefreshView();
 		RefreshTreeView();
 	}
 }
@@ -4150,7 +4041,7 @@ void MainFrame::OnLayerToTop(wxCommandEvent& event)
 void MainFrame::OnLayerToBottom(wxCommandEvent& event)
 {
 	wxTreeItemId itemId = m_pTree->GetSelection();
-	MyTreeItemData *data = (MyTreeItemData *)m_pTree->GetItemData(itemId);
+	MyTreeItemData *data = (MyTreeItemData *)m_pTree->GetItemData(itemId); 
 	if (!data)
 		return;
 
@@ -4159,7 +4050,7 @@ void MainFrame::OnLayerToBottom(wxCommandEvent& event)
 	if (num != total-1)
 	{
 		SwapLayerOrder(num, total-1);
-		RefreshLayerInView(data->m_pLayer);
+		RefreshView();
 		RefreshTreeView();
 	}
 }

@@ -1,12 +1,11 @@
 //
 // Layer.h
 //
-// Copyright (c) 2001-2013 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef LAYER_H
-#define LAYER_H
+#pragma once
 
 #include "vtdata/MathTypes.h"
 #include "vtdata/vtString.h"
@@ -48,7 +47,7 @@ public:
 	// these must be implemented:
 	/// Get the extents
 	virtual bool GetExtent(DRECT &rect) = 0;
-	virtual void DrawLayer(wxDC *pDC, vtScaledView *pView) = 0;
+	virtual void DrawLayer(vtScaledView *pView) = 0;
 	/// Transform the coordinates into another CRS
 	virtual bool TransformCoords(vtProjection &proj) = 0;
 	virtual bool OnSave(bool progress_callback(int) = NULL) = 0;
@@ -132,7 +131,7 @@ public:
 	RGBi m_LineColor;
 	RGBi m_FillColor;
 	bool m_bFill;
-	int m_MarkerShape;	// 0 = circle, 1 = crosshair, this should be an enum
+	//int m_MarkerShape;	// 0 = circle, 1 = crosshair, this should be an enum
 	int m_MarkerSize;	// in pixels
 };
 
@@ -140,6 +139,4 @@ public:
 // Helpers
 
 wxString GetLayerTypeName(const LayerType &lype);
-
-#endif
 

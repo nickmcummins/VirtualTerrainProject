@@ -259,7 +259,7 @@ void TileDlg::OnSize( wxCommandEvent &event )
 	UpdateInfo();
 
 	if (m_pView)
-		m_pView->ShowGridMarks(m_area, m_iColumns, m_iRows, -1, -1);
+		m_pView->SetGridMarks(m_area, m_iColumns, m_iRows, -1, -1);
 }
 
 void TileDlg::OnDotDotDot( wxCommandEvent &event )

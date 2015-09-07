@@ -45,6 +45,7 @@ DECLARE_APP(BuilderApp)
 ////////////////////////////////////////////////////////////////
 
 BEGIN_EVENT_TABLE(BuilderView, vtScaledView)
+EVT_PAINT(BuilderView::OnPaint)
 EVT_LEFT_DOWN(BuilderView::OnLeftDown)
 EVT_LEFT_UP(BuilderView::OnLeftUp)
 EVT_LEFT_DCLICK(BuilderView::OnLeftDoubleClick)
@@ -61,14 +62,15 @@ EVT_IDLE(BuilderView::OnIdle)
 EVT_SIZE(BuilderView::OnSize)
 EVT_ERASE_BACKGROUND(BuilderView::OnEraseBackground)
 
-EVT_SCROLLWIN_THUMBTRACK(BuilderView::OnBeginScroll)
-EVT_SCROLLWIN_THUMBRELEASE(BuilderView::OnEndScroll)
+//EVT_SCROLLWIN_THUMBTRACK(BuilderView::OnBeginScroll)
+//EVT_SCROLLWIN_THUMBRELEASE(BuilderView::OnEndScroll)
 
-EVT_SCROLLWIN_LINEUP(BuilderView::OnOtherScrollEvents)
-EVT_SCROLLWIN_LINEDOWN(BuilderView::OnOtherScrollEvents)
-EVT_SCROLLWIN_PAGEUP(BuilderView::OnOtherScrollEvents)
-EVT_SCROLLWIN_PAGEDOWN(BuilderView::OnOtherScrollEvents)
-//EVT_SCROLLWIN_CHANGED(BuilderView::OnScrollChanged)
+//EVT_SCROLLWIN_LINEUP(BuilderView::OnOtherScrollEvents)
+//EVT_SCROLLWIN_LINEDOWN(BuilderView::OnOtherScrollEvents)
+//EVT_SCROLLWIN_PAGEUP(BuilderView::OnOtherScrollEvents)
+//EVT_SCROLLWIN_PAGEDOWN(BuilderView::OnOtherScrollEvents)
+EVT_SCROLLWIN(BuilderView::OnOtherScrollEvents)
+
 END_EVENT_TABLE()
 
 /////////////////////////////////////////////////////////////////
@@ -121,6 +123,8 @@ BuilderView::BuilderView(wxWindow *parent, wxWindowID id, const wxPoint& pos,
 	// world map SHP file
 	m_iEntities = 0;
 	m_bAttemptedLoad = false;
+
+	m_context = new wxGLContext(this);
 }
 
 BuilderView::~BuilderView()
@@ -133,8 +137,17 @@ BuilderView::~BuilderView()
 ////////////////////////////////////////////////////////////
 // Operations
 
-void BuilderView::OnDraw(wxDC& dc)  // overridden to draw this view
+void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 {
+	if (!IsShown())
+		return;
+
+	SetCurrent(*m_context);
+	wxPaintDC dc(this);
+
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	static bool bFirstDraw = true;
 	if (bFirstDraw)
 	{
@@ -154,11 +167,11 @@ void BuilderView::OnDraw(wxDC& dc)  // overridden to draw this view
 
 	// Draw 'interrupted projection outline' for current projection
 	if (g_bld->GetAtProjection().IsDymaxion())
-		DrawDymaxionOutline(&dc);
+		DrawDymaxionOutline();
 
 	// Draw the world map SHP file of country outline polys in latlon
 	if (m_bShowMap)
-		DrawWorldMap(&dc);
+		DrawWorldMap();
 
 	// Draw the solid layers first
 	for (int i = 0; i < iLayers; i++)
@@ -167,7 +180,7 @@ void BuilderView::OnDraw(wxDC& dc)  // overridden to draw this view
 		if (lp->GetType() != LT_IMAGE && lp->GetType() != LT_ELEVATION)
 			continue;
 		if (lp->GetVisible())
-			lp->DrawLayer(&dc, this);
+			lp->DrawLayer(this);
 	}
 	// Then the poly/vector/point layers
 	for (int i = 0; i < iLayers; i++)
@@ -176,31 +189,30 @@ void BuilderView::OnDraw(wxDC& dc)  // overridden to draw this view
 		if (lp->GetType() == LT_IMAGE || lp->GetType() == LT_ELEVATION)
 			continue;
 		if (lp->GetVisible())
-			lp->DrawLayer(&dc, this);
+			lp->DrawLayer(this);
 	}
 	vtLayer *curr = g_bld->GetActiveLayer();
 	if (curr && (curr->GetType() == LT_ELEVATION || curr->GetType() == LT_IMAGE))
 	{
 		DRECT rect;
 		curr->GetAreaExtent(rect);
-		HighlightArea(&dc, rect);
+		HighlightArea(rect);
 	}
 
 	if (m_bShowUTMBounds)
-		DrawUTMBounds(&dc);
+		DrawUTMBounds();
 
-	DrawAreaTool(&dc, g_bld->GetAtArea());
+	DrawAreaTool(g_bld->GetAtArea());
 
 	if (m_bShowGridMarks)
-		DrawGridMarks(dc);	// erase
+		DrawGridMarks();	// erase
 
-	DrawDistanceTool(&dc);
+	DrawDistanceTool();
 
-	if (m_bScaleBar && !m_bPanning && !m_bScrolling)
-		DrawScaleBar(&dc);
+	SwapBuffers();
 }
 
-void BuilderView::DrawDymaxionOutline(wxDC *pDC)
+void BuilderView::DrawDymaxionOutline()
 {
 	DLine2Array polys;
 
@@ -208,14 +220,13 @@ void BuilderView::DrawDymaxionOutline(wxDC *pDC)
 
 	for (uint i = 0; i < polys.size(); i++)
 	{
-		DrawPolyLine(pDC, polys[i], true);
+		DrawPolyLine(polys[i], true);
 	}
 }
 
 void BuilderView::GetMouseLocation(DPoint2 &p)
 {
-	p.x = ox(m_ui.m_CurPoint.x);
-	p.y = oy(m_ui.m_CurPoint.y);
+	p = m_ui.m_CurLocation;
 }
 
 void BuilderView::SetMode(LBMode m)
@@ -252,17 +263,14 @@ void BuilderView::SetMode(LBMode m)
 		if (m_ui.m_pEditingRoad)
 		{
 			m_ui.m_pEditingRoad->m_bDrawPoints = false;
-			RefreshRoad(m_ui.m_pEditingRoad);
 		}
 		m_ui.m_pEditingRoad = NULL;
 	}
 }
 
-void BuilderView::DrawUTMBounds(wxDC *pDC)
+void BuilderView::DrawUTMBounds()
 {
-	wxPen orange(wxColor(255,128,0), 1, wxSOLID);
-	pDC->SetLogicalFunction(wxCOPY);
-	pDC->SetPen(orange);
+	glColor3f(1, 0.5f, 0);		// Orange
 
 	const vtProjection &proj = g_bld->GetAtProjection();
 
@@ -271,20 +279,14 @@ void BuilderView::DrawUTMBounds(wxDC *pDC)
 
 	DPoint2 ll, utm;
 	wxPoint sp, array[4000];
-	int zone, j;
+	int zone;
 
 	if (proj.IsGeographic())
 	{
 		for (zone = 0; zone < 60; zone++)
 		{
-			ll.x = -180.0f + zone * 6.0;
-
-			ll.y = -70.0;
-			screen(ll, array[0]);
-			ll.y = +70.0;
-			screen(ll, array[1]);
-
-			pDC->DrawLines(2, array);
+			double lon = -180 + zone * 6.0;
+			DrawLine(DPoint2(lon, -70.0), DPoint2(lon, 70.0));
 		}
 	}
 	else
@@ -298,13 +300,13 @@ void BuilderView::DrawUTMBounds(wxDC *pDC)
 
 		ScopedOCTransform trans1(CreateCoordTransform(&proj, &geo));
 
-		// try to speed up a bit by avoiding zones off the screen
-		object(wxPoint(0, height/2), proj_point);
+		// Avoid zones that are too far from our location.
+		world(wxPoint(0, height/2), proj_point);
 		trans1->Transform(1, &proj_point.x, &proj_point.y);
 		zone = GuessZoneFromGeo(proj_point);
 		if (zone-1 > zone_start) zone_start = zone-1;
 
-		object(wxPoint(width, height/2), proj_point);
+		world(wxPoint(width, height/2), proj_point);
 		trans1->Transform(1, &proj_point.x, &proj_point.y);
 		zone = GuessZoneFromGeo(proj_point);
 		if (zone+1 < zone_end) zone_end = zone+1;
@@ -315,18 +317,15 @@ void BuilderView::DrawUTMBounds(wxDC *pDC)
 
 		for (int zone = zone_start; zone < zone_end; zone++)
 		{
+			glBegin(GL_LINE_STRIP);
 			ll.x = -180.0f + zone * 6.0;
-			j = 0;
 			for (ll.y = -70.0; ll.y <= 70.0; ll.y += 0.1)
 			{
 				proj_point = ll;
 				trans2->Transform(1, &proj_point.x, &proj_point.y);
-				screen(proj_point, sp);
-				if (sp.y < -8000 || sp.y > 8000)
-					continue;
-				array[j++] = sp;
+				glVertex2d(proj_point.x, proj_point.y);
 			}
-			pDC->DrawLines(j, array);
+			glEnd();
 		}
 	}
 }
@@ -491,7 +490,7 @@ void BuilderView::SetWMProj(const vtProjection &proj)
 	}
 }
 
-void BuilderView::DrawWorldMap(wxDC *pDC)
+void BuilderView::DrawWorldMap()
 {
 	if (m_iEntities == 0 && !m_bAttemptedLoad)
 	{
@@ -509,193 +508,13 @@ void BuilderView::DrawWorldMap(wxDC *pDC)
 		}
 	}
 
-	// Set pen options
-	wxPen WMPen(wxColor(0,0,0), 1, wxSOLID);  //solid black pen
-	pDC->SetLogicalFunction(wxCOPY);
-	pDC->SetPen(WMPen);
+	glColor3f(0, 0, 0);  //solid black pen
 
-	// Don't draw polys that are outside the window bounds; convert the bounds
-	//  from the current CRS to Geo, so that we can test
-	bool bHaveBounds = false;
-	DRECT bounds;
-	bounds.SetInsideOut();
-	vtProjection &proj = g_bld->GetAtProjection();
-	if (!proj.IsGeographic() && m_pCurrentToMap != NULL)
-	{
-		wxSize size = GetClientSize();
-		wxPoint pix[4];
-		CalcUnscrolledPosition(0, 0,			&pix[0].x, &pix[0].y);
-		CalcUnscrolledPosition(size.x, 0,		&pix[1].x, &pix[1].y);
-		CalcUnscrolledPosition(size.x, size.y,	&pix[2].x, &pix[2].y);
-		CalcUnscrolledPosition(0, size.y,		&pix[3].x, &pix[3].y);
-
-		for (int i = 0; i < 4; i++)
-		{
-			DPoint2 p;
-			// convert canvas -> earth
-			object(pix[i], p);
-			// convert earth -> map geo
-			if (m_pCurrentToMap->Transform(1, &p.x, &p.y) == 1)
-			{
-				bounds.GrowToContainPoint(p);
-				bHaveBounds = true;
-			}
-		}
-	}
-
-#if 1
 	// Draw each poly in WMPolyDraw
 	for (uint i = 0; i < m_iEntities; i++)
 	{
-		if (bHaveBounds)
-		{
-			if (!bounds.OverlapsRect(WMPolyExtents[i]))
-				continue;
-		}
-		DrawPolyLine(pDC, WMPolyDraw[i], true);
+		DrawPolyLine(WMPolyDraw[i], true);
 	}
-#else
-	// Draw each poly in WMPolyDraw
-	for (uint i = 0; i < m_iEntities; i++)
-	{
-		if (bHaveBounds)
-		{
-			// reject entity if it doesn't overlap view extents
-			if (!bounds.OverlapsRect(WMPolyExtents[i]))
-				continue;
-
-			// attempt to reject a few more entities
-			DPoint2 p1(WMPolyExtents[i].left,WMPolyExtents[i].bottom),p2(WMPolyExtents[i].right,WMPolyExtents[i].top);
-
-			float size_x_orig = p2.x-p1.x;
-			float size_y_orig = p2.y-p1.y;
-
-			if (m_pMapToCurrent->Transform(1, &p1.x, &p1.y) == 1)
-				if (m_pMapToCurrent->Transform(1, &p2.x, &p2.y) == 1)
-				{
-					// reject entity if it is mirrored
-					if (p1.x>=p2.x || p1.y>=p2.y) continue;
-
-					float size_x_proj = p2.x-p1.x;
-					float size_y_proj = p2.y-p1.y;
-
-					static const float distortion=0.5f; // allow 50% distortion
-
-					// reject entity if the distortion threshold is exceeded
-					if (size_x_proj>0 && size_y_proj>0)
-						if ( fabs( (size_x_orig/size_x_proj) / (size_y_orig/size_y_proj) - 1) > distortion )
-							continue;
-				}
-		}
-
-		DrawLine(pDC, WMPolyDraw[i], true);
-	}
-#endif
-}
-
-void BuilderView::DrawScaleBar(wxDC * p_DC)
-{
-	VTLOG1("DrawScaleBar\n");
-#ifndef _SCALE
-
-#define _SCALE
-#define _SCALEBOTTOM	20	//merge to bottom
-#define _SCALERIGHT		160 //merge to right side
-#define _POSTEXT		20	//merge between text and scale
-#define _BARHIGHT		3	//hight of side-delimitor of scale
-#define _MARGIN			10	//margin
-
-#endif //_SCALE
-
-	int xx, yy, w,  h, ww,hh;
-	int scaleLen = 180; //default scale lenght
-	wxString str;
-
-	// Set pen options
-	wxPen WMPen(wxColor(0,0,0), 1, wxSOLID);  //solid black pen
-	p_DC->SetLogicalFunction(wxCOPY);
-	p_DC->SetPen(WMPen);
-
-	GetClientSize(&w,&h);
-
-	//right bottom corner
-	CalcUnscrolledPosition(w, h, &ww, &hh);
-
-	vtProjection &proj = g_bld->GetAtProjection();
-	LinearUnits lu = proj.GetUnits();
-	wxString unit_str;
-
-	double val = scaleLen/GetScale();
-	if (lu == LU_DEGREES)
-	{
-		str.Printf(_T("%.6lg"), val);
-		unit_str = wxString("°", wxConvUTF8);
-	}
-	else if (lu == LU_FEET_INT || lu == LU_FEET_US)
-	{
-		if (val > 5280)
-		{
-			val /= 5280;
-			str.Printf(_T("%.2lf "), val);
-			unit_str = _("miles");
-		}
-		else
-		{
-			str.Printf(_T("%.2lf"), val);
-			unit_str = _T("'");
-		}
-	}
-	else if (lu == LU_METERS)
-	{
-		if (val > 1000)
-		{
-			val /= 1000;
-			str.Printf(_T("%.2lf"), val);
-			unit_str = _T("km");
-		}
-		else
-		{
-			str.Printf(_T("%.2lf"), val);
-			unit_str = _T("m");
-		}
-	}
-	else
-		return;		// unknown units
-
-	str += unit_str;
-
-	// height and width of the string on right side
-	wxFont font(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-	p_DC->SetFont(font);
-	wxCoord textsize_x, textsize_y;
-	p_DC->GetTextExtent(str, &textsize_x, &textsize_y);
-
-	int width = scaleLen + textsize_x + 2 * _MARGIN;
-	int height = 30;
-
-	// coord of the round corner rectangle (in unscrolled coordinates)
-	xx = ww - width;
-	yy = hh - height;
-
-	// Scale Bar Area in scrolled coordinates
-	m_ScaleBarArea = wxRect(w - width, h - height, width, height);
-	p_DC->DrawRoundedRectangle(xx, yy, width, height, 5);
-
-	p_DC->DrawText(_T("0"),xx + _MARGIN,yy + 5);
-	p_DC->DrawText(str, xx + scaleLen, yy + 5);
-
-	p_DC->DrawLine(xx + _MARGIN,
-				   yy + 20,
-				   xx + scaleLen + _MARGIN,
-				   yy + 20);
-	p_DC->DrawLine(xx + _MARGIN,
-				   yy + 20 + _BARHIGHT,
-				   xx + _MARGIN,
-				   yy + 20 - _BARHIGHT);
-	p_DC->DrawLine(xx + scaleLen + _MARGIN,
-				   yy + 20 + _BARHIGHT,
-				   xx + scaleLen + _MARGIN,
-				   yy + 20 - _BARHIGHT);
 }
 
 
@@ -726,49 +545,36 @@ void BuilderView::EndPan()
 		RefreshRect(m_ScaleBarArea);
 }
 
-void BuilderView::DoPan(wxPoint point)
+void BuilderView::DoPan()
 {
-	wxPoint diff;
-	diff = point - m_DownClient;
-	m_DownClient = point;
-
-	// update picture to reflect the changes
-	Scroll(m_xScrollPosition - diff.x,
-		m_yScrollPosition - diff.y);
+	m_offset += m_ui.m_CurLocation - m_ui.m_LastLocation;
 }
 
 
 //////////////////////////////////////////////////////////
 // Box handlers
 
-void BuilderView::InvertRect(wxDC *pDC, const wxRect &r, bool bDashed)
+void BuilderView::DrawInverseRect(const DRECT &r, bool bDashed)
 {
-	InvertRect(pDC, wxPoint(r.x, r.y),
-		wxPoint(r.x + r.width, r.y + r.height), bDashed);
+	DrawInverseRect(DPoint2(r.left, r.top),
+		DPoint2(r.right, r.bottom), bDashed);
 }
 
-void BuilderView::InvertRect(wxDC *pDC, const wxPoint &one,
-	const wxPoint &two, bool bDashed)
+void BuilderView::DrawInverseRect(const DPoint2 &one,
+	const DPoint2 &two, bool bDashed)
 {
-	wxPen pen(*wxBLACK_PEN);
-	if (bDashed)
-		pen.SetStyle(wxSHORT_DASH);
-	pDC->SetPen(pen);
-	pDC->SetLogicalFunction(wxINVERT);
+	glLogicOp(GL_INVERT);
+	// TODO	if (bDashed)
 
-	wxPoint points[5];
-	points[0].x = one.x;
-	points[0].y = one.y;
-	points[1].x = one.x;
-	points[1].y = two.y;
-	points[2].x = two.x;
-	points[2].y = two.y;
-	points[3].x = two.x;
-	points[3].y = one.y;
-	points[4].x = one.x;
-	points[4].y = one.y;
+	glBegin(GL_LINE_STRIP);
+	glVertex2d(one.x, one.y);
+	glVertex2d(one.x, two.y);
+	glVertex2d(two.x, two.y);
+	glVertex2d(two.x, one.y);
+	glVertex2d(one.x, one.y);
+	glEnd();
 
-	pDC->DrawLines(5, points);
+	glLogicOp(GL_COPY);
 }
 
 void BuilderView::BeginBox()
@@ -783,25 +589,16 @@ void BuilderView::EndBox(const wxMouseEvent& event)
 	if (!m_bMouseMoved)
 		return;
 
-	wxClientDC dc(this);
-	PrepareDC(dc);
-
-	InvertRect(&dc, m_ui.m_DownPoint, m_ui.m_LastPoint);
-
-	wxRect rect = PointsToRect(m_ui.m_DownPoint, m_ui.m_LastPoint);
-	m_world_rect = CanvasToWorld(rect);
+	m_world_rect = DRECT(m_ui.m_DownLocation, m_ui.m_LastLocation);
 	switch (m_ui.mode)
 	{
 	case LB_Mag:
-		if (event.AltDown())
-			ZoomOutToRect(m_world_rect);
-		else
-			ZoomToRect(m_world_rect, 0.0f);
+		ZoomToRect(m_world_rect, 0.0f);
 		break;
 	case LB_Box:
-		DrawAreaTool(&dc, g_bld->GetAtArea());
+		DrawAreaTool(g_bld->GetAtArea());
 		g_bld->SetArea(m_world_rect);
-		DrawAreaTool(&dc, g_bld->GetAtArea());
+		DrawAreaTool(g_bld->GetAtArea());
 		break;
 	case LB_Node:
 	case LB_Link:
@@ -811,12 +608,7 @@ void BuilderView::EndBox(const wxMouseEvent& event)
 			if (pRL->SelectArea(m_world_rect, (m_ui.mode == LB_Node),
 				m_bCrossSelect))
 			{
-				rect = WorldToWindow(m_world_rect);
-				IncreaseRect(rect, 5);
-				if (m_bCrossSelect)
-					Refresh();
-				else
-					Refresh(TRUE, &rect);
+				Refresh();
 			}
 			else
 				DeselectAll();
@@ -895,30 +687,24 @@ void BuilderView::EndBoxFeatureSelect(const wxMouseEvent& event)
 	Refresh(false);
 }
 
-void BuilderView::DoBox(wxPoint point)
-{
-	wxClientDC dc(this);
-	PrepareDC(dc);
-	InvertRect(&dc, m_ui.m_DownPoint, m_ui.m_LastPoint);
-	InvertRect(&dc, m_ui.m_DownPoint, point);
-}
-
-void BuilderView::DrawAreaTool(wxDC *pDC, const DRECT &area)
+void BuilderView::DrawAreaTool(const DRECT &area)
 {
 	if (area.IsEmpty())
 		return;
 
-	int d = 3;
-	wxRect r = WorldToCanvas(area);
-
 	// dashed-line rectangle
-	InvertRect(pDC, r, true);
+	DrawInverseRect(area, true);
+
+	DPoint2 d = world_delta(3);
 
 	// four small rectangles, for the handles at each corner
-	InvertRect(pDC, wxPoint(r.x-d, r.y-d), wxPoint(r.x+d, r.y+d));
-	InvertRect(pDC, wxPoint(r.x+r.width-d, r.y-d), wxPoint(r.x+r.width+d, r.y+d));
-	InvertRect(pDC, wxPoint(r.x-d, r.y+r.height-d), wxPoint(r.x+d, r.y+r.height+d));
-	InvertRect(pDC, wxPoint(r.x+r.width-d, r.y+r.height-d), wxPoint(r.x+r.width+d, r.y+r.height+d));
+	DPoint2 top(area.left, area.top);
+	DPoint2 width(area.Width(), 0.0), height(0.0, area.Height());
+
+	DrawInverseRect(top - d, top + d);
+	DrawInverseRect(top + width - d, top + width - d);
+	DrawInverseRect(top + height - d, top + height - d);
+	DrawInverseRect(top + width + height - d, top + width + height - d);
 }
 
 
@@ -951,66 +737,50 @@ void BuilderView::OnEndScroll(wxScrollWinEvent & event)
 
 void BuilderView::OnOtherScrollEvents(wxScrollWinEvent & event)
 {
-	VTLOG1("OnOtherScrollEvents\n");
+	VTLOG("OnOtherScrollEvents (%d)\n", event.GetEventType());
 	if (m_bScaleBar)
 		RefreshRect(m_ScaleBarArea);
-	event.Skip();
+	
+	// Swallow the event?
+	//event.Skip();
 }
 
 
 ////////////////////////////////////////////////////////////
 
-void BuilderView::DrawDistanceTool(wxDC *pDC)
+void BuilderView::DrawDistanceTool()
 {
-	pDC->SetPen(wxPen(*wxBLACK_PEN));
-	pDC->SetLogicalFunction(wxINVERT);
+	glLogicOp(GL_INVERT);
 
 	if (m_ui.m_bDistanceToolMode)
 	{
 		// Path mode
 		// draw the polyline
-		DrawPolyLine(pDC, m_distance_path, false);
+		DrawPolyLine(m_distance_path, false);
 
 		// draw small crosshairs
-		uint i, len = m_distance_path.GetSize();
-		for (i = 0; i < len; i++)
+		for (uint i = 0; i < m_distance_path.GetSize(); i++)
 		{
-			wxPoint p1 = g_screenbuf[i];
-			pDC->DrawLine(p1.x-4, p1.y, p1.x+4+1, p1.y);
-			pDC->DrawLine(p1.x, p1.y-4, p1.x, p1.y+4+1);
+			DrawXHair(m_distance_path[i], 4);
 		}
 	}
 	else
 	{
 		// Line mode
-		wxPoint p1, p2;
-		screen(m_distance_p1, p1);
-		screen(m_distance_p2, p2);
+		DrawLine(m_distance_p1, m_distance_p2);
 
-		// draw small crosshairs
-		pDC->DrawLine(p1.x-4, p1.y, p1.x+4+1, p1.y);
-		pDC->DrawLine(p1.x, p1.y-4, p1.x, p1.y+4+1);
-		pDC->DrawLine(p2.x-4, p2.y, p2.x+4+1, p2.y);
-		pDC->DrawLine(p2.x, p2.y-4, p2.x, p2.y+4+1);
-		// and the line itself
-		pDC->DrawLine(p1.x, p1.y, p2.x, p2.y);
+		// Draw small crosshairs
+		DrawXHair(m_distance_p1, 4);
+		DrawXHair(m_distance_p2, 4);
 	}
-}
-
-void BuilderView::DrawDistanceTool()
-{
-	wxClientDC dc(this);
-	PrepareDC(dc);
-	DrawDistanceTool(&dc);
+	glLogicOp(GL_COPY);
 }
 
 void BuilderView::ClearDistanceTool()
 {
-	DrawDistanceTool();	// erase
-
 	SetDistancePoints(DPoint2(0,0), DPoint2(0,0));
 	SetDistancePath(DLine2());
-//	Refresh();
+	Refresh();
 }
 
 void BuilderView::UpdateDistance()
@@ -1046,20 +816,6 @@ void BuilderView::CheckForTerrainSelect(const DPoint2 &loc)
 	}
 }
 
-void BuilderView::DrawInvertedLine(const DPoint2 &ep1, const DPoint2 &ep2)
-{
-	wxClientDC dc(this);
-	PrepareDC(dc);
-
-	dc.SetPen(wxPen(*wxBLACK_PEN));
-	dc.SetLogicalFunction(wxINVERT);
-
-	wxPoint p1, p2;
-	screen(ep1, p1);
-	screen(ep2, p2);
-	dc.DrawLine(p1.x, p1.y, p2.x, p2.y);
-}
-
 //
 // The view needs to be notified of the new active layer to update
 // the selection marks drawn around the active elevation layer.
@@ -1068,69 +824,41 @@ void BuilderView::SetActiveLayer(vtLayerPtr lp)
 {
 	vtLayer *last = g_bld->GetActiveLayer();
 
-	LayerType prev_type = last ? last->GetType() : LT_UNKNOWN;
-	LayerType curr_type = lp ? lp->GetType() : LT_UNKNOWN;
-	bool bNeedErase = (prev_type == LT_ELEVATION || prev_type == LT_IMAGE);
-	bool bNeedRedraw = (curr_type == LT_ELEVATION || curr_type == LT_IMAGE);
-
 	if (lp != last)
 	{
-		if (bNeedErase || bNeedRedraw)
-		{
-			// Erase previous highlight, change layer, then draw highlight
-			wxClientDC DC(this), *pDC = &DC;
-			PrepareDC(DC);
-			DRECT rect;
+		// Change the current layer
+		g_bld->SetActiveLayer(lp, false);
 
-			if (bNeedErase)
-			{
-				last->GetAreaExtent(rect);
-				HighlightArea(pDC, rect);
-			}
-
-			g_bld->SetActiveLayer(lp, true);
-
-			if (bNeedRedraw)
-			{
-				lp->GetAreaExtent(rect);
-				HighlightArea(pDC, rect);
-			}
-		}
-		else
-			// Simply change the current layer
-			g_bld->SetActiveLayer(lp, false);
+		LayerType prev_type = last ? last->GetType() : LT_UNKNOWN;
+		LayerType curr_type = lp ? lp->GetType() : LT_UNKNOWN;
+		if (prev_type == LT_ELEVATION || prev_type == LT_IMAGE ||
+			curr_type == LT_ELEVATION || curr_type == LT_IMAGE)
+			Refresh();
 	}
 }
 
-void BuilderView::HighlightArea(wxDC *pDC, const DRECT &rect)
+void BuilderView::HighlightArea(const DRECT &rect)
 {
-	wxPen bgPen(wxColor(255,255,255), 3, wxSOLID);
-	pDC->SetPen(bgPen);
-	pDC->SetLogicalFunction(wxINVERT);
+	glColor3f(1, 1, 1);	// White
+	glLogicOp(GL_INVERT);
 
-	wxRect sr = WorldToCanvas(rect);
+	const double sx = rect.Width() / 3;
+	const double sy = rect.Height() / 3;
+	const DPoint2 d = world_delta(2), e = world_delta(4);
 
-	int sx = sr.width / 3;
-	int sy = sr.height / 3;
-	int left = sr.x, right = sr.x+sr.width,
-	top = sr.y, bottom = sr.y+sr.height;
-	int d=2,e=4;
+	DrawLine(rect.left - e.x, rect.top - d.y, rect.left - e.x, rect.top + sy);
+	DrawLine(rect.left - d.x, rect.top - e.y, rect.left + sx, rect.top - e.y);
 
-	//
-	pDC->DrawLine(left - e, top - d, left - e,  top + sy);
-	pDC->DrawLine(left - d, top - e, left + sx, top - e);
+	DrawLine(rect.right - sx, rect.top - e.y, rect.right + e.x, rect.top - e.y);
+	DrawLine(rect.right + e.x, rect.top - d.y, rect.right + e.x, rect.top + sy);
+	
+	DrawLine(rect.right + e.x, rect.bottom - sy, rect.right + e.x, rect.bottom + d.y);
+	DrawLine(rect.right - sx, rect.bottom + e.y,  rect.right + e.x, rect.bottom + e.y);
+	
+	DrawLine(rect.left - e.x, rect.bottom - sy, rect.left - e.x, rect.bottom + d.y);
+	DrawLine(rect.left + sx, rect.bottom + e.y,  rect.left - e.x, rect.bottom + e.y);
 
-	//
-	pDC->DrawLine(right - sx, top - e, right + e, top - e);
-	pDC->DrawLine(right + e,  top - d, right + e, top + sy);
-
-	//
-	pDC->DrawLine(right + e,  bottom - sy, right + e, bottom + d);
-	pDC->DrawLine(right - sx, bottom + e,  right + e, bottom + e);
-
-	//
-	pDC->DrawLine(left - e,  bottom - sy, left - e, bottom + d);
-	pDC->DrawLine(left + sx, bottom + e,  left - e, bottom + e);
+	glLogicOp(GL_COPY);
 }
 
 ////////////////////////////////////////////////////////////
@@ -1170,10 +898,6 @@ void BuilderView::SetCorrectCursor()
 
 void BuilderView::BeginDistance()
 {
-	wxClientDC dc(this);
-	PrepareDC(dc);
-
-	DrawDistanceTool(&dc);	// erase
 	if (m_ui.m_bDistanceToolMode)
 	{
 		// Path mode - set initial segment
@@ -1194,7 +918,7 @@ void BuilderView::BeginDistance()
 		m_distance_p1 = m_ui.m_DownLocation;
 		m_distance_p2 = m_ui.m_DownLocation;
 	}
-	DrawDistanceTool(&dc);	// redraw
+	Refresh();
 }
 
 /////////////////////////////////////////////////////////////
@@ -1210,23 +934,22 @@ void BuilderView::BeginArea()	// in canvas coordinates
 
 	// check to see if they've clicked near one of the sides of the area
 	m_iDragSide = 0;
-	int eps = 10;	// epsilon in pixels
-	wxRect r = WorldToCanvas(area);
+	DPoint2 epsilon = world_delta(10);	// epsilon in pixels
 
-	int d0 = abs(m_ui.m_CurPoint.x - r.x);
-	int d1 = abs(m_ui.m_CurPoint.x - (r.x+r.width));
-	int d2 = abs(m_ui.m_CurPoint.y - r.y);
-	int d3 = abs(m_ui.m_CurPoint.y - (r.y+r.height));
+	double d0 = abs(m_ui.m_CurLocation.x - area.left);
+	double d1 = abs(m_ui.m_CurLocation.x - area.right);
+	double d2 = abs(m_ui.m_CurLocation.y - area.top);
+	double d3 = abs(m_ui.m_CurLocation.y - area.bottom);
 
-	if (d0 < eps) m_iDragSide |= 1;
-	if (d1 < eps) m_iDragSide |= 2;
-	if (d2 < eps) m_iDragSide |= 4;
-	if (d3 < eps) m_iDragSide |= 8;
+	if (d0 < epsilon.x) m_iDragSide |= 1;
+	if (d1 < epsilon.x) m_iDragSide |= 2;
+	if (d2 < epsilon.y) m_iDragSide |= 4;
+	if (d3 < epsilon.y) m_iDragSide |= 8;
 
 	if (!m_iDragSide)
 	{
 		// if they click inside the box, drag it
-		if (r.Contains(m_ui.m_CurPoint.x, m_ui.m_CurPoint.y))
+		if (area.ContainsPoint(m_ui.m_CurLocation))
 			m_iDragSide = 15;
 
 		// if they didn't click near the box, start a new one
@@ -1235,38 +958,28 @@ void BuilderView::BeginArea()	// in canvas coordinates
 	}
 }
 
-void BuilderView::DoArea(wxPoint delta)	// in canvas coordinates
+void BuilderView::UpdateAreaTool(const DPoint2 &delta)
 {
-	wxClientDC dc(this);
-	PrepareDC(dc);
-
-	DrawAreaTool(&dc, g_bld->GetAtArea());	// erase
 	if (m_iDragSide & 1)
-		g_bld->GetAtArea().left += odx(delta.x);
+		g_bld->GetAtArea().left += delta.x;
 	if (m_iDragSide & 2)
-		g_bld->GetAtArea().right += odx(delta.x);
+		g_bld->GetAtArea().right += delta.x;
 	if (m_iDragSide & 4)
-		g_bld->GetAtArea().top += ody(delta.y);
+		g_bld->GetAtArea().top += delta.y;
 	if (m_iDragSide & 8)
-		g_bld->GetAtArea().bottom += ody(delta.y);
-	DrawAreaTool(&dc, g_bld->GetAtArea());	// redraw
+		g_bld->GetAtArea().bottom += delta.y;
 }
 
 void BuilderView::InvertAreaTool(const DRECT &rect)
 {
-	wxClientDC dc(this);
-	PrepareDC(dc);
-	DrawAreaTool(&dc, rect);
+	DrawAreaTool(rect);
 }
 
-void BuilderView::ShowGridMarks(const DRECT &area, int cols, int rows,
+void BuilderView::SetGridMarks(const DRECT &area, int cols, int rows,
 								int active_col, int active_row)
 {
 	wxClientDC dc(this);
 	PrepareDC(dc);
-
-	if (m_bShowGridMarks)
-		DrawGridMarks(dc);	// erase
 
 	if (cols < 1 || rows < 1)
 		return;
@@ -1277,22 +990,16 @@ void BuilderView::ShowGridMarks(const DRECT &area, int cols, int rows,
 	m_iActiveCol = active_col;
 	m_iActiveRow = active_row;
 	m_bShowGridMarks = true;
-	DrawGridMarks(dc);		// draw
 }
 
 void BuilderView::HideGridMarks()
 {
-	if (m_bShowGridMarks)
-	{
-		wxClientDC dc(this);
-		PrepareDC(dc);
-		DrawGridMarks(dc);	// erase
-	}
 	m_bShowGridMarks = false;
 }
 
-void BuilderView::DrawGridMarks(wxDC &dc)
+void BuilderView::DrawGridMarks()
 {
+#if 0 // TODO
 	dc.SetPen(wxPen(*wxBLACK_PEN));
 	dc.SetBrush(wxBrush(*wxBLACK_BRUSH));
 	dc.SetLogicalFunction(wxINVERT);
@@ -1319,6 +1026,7 @@ void BuilderView::DrawGridMarks(wxDC &dc)
 	}
 	delete [] wx;
 	delete [] wy;
+#endif
 }
 
 void BuilderView::DeselectAll()
@@ -1326,28 +1034,8 @@ void BuilderView::DeselectAll()
 	vtRoadLayer *pRL = g_bld->GetActiveRoadLayer();
 	if (pRL)
 	{
-		DRECT *world_bounds;
-		wxRect bound;
-		int n;
-
-		// caller is responsible for deleting the array returned from DeselectAll
-		world_bounds = pRL->DeSelectAll(n);
-		if (n > 100)
-		{
-			// too many deleted for quick refresh
-			Refresh(TRUE);
-		}
-		else
-		{
-			n = n -1;
-			while (n >=0) {
-				bound = WorldToWindow(world_bounds[n]);
-				IncreaseRect(bound, BOUNDADJUST);
-				Refresh(TRUE, &bound);
-				n--;
-			}
-		}
-		delete world_bounds;
+		if (pRL->DeSelectAll())
+			Refresh();
 	}
 	vtStructureLayer *pSL = g_bld->GetActiveStructureLayer();
 	if (pSL)
@@ -1366,32 +1054,14 @@ void BuilderView::DeselectAll()
 
 void BuilderView::DeleteSelected(vtRoadLayer *pRL)
 {
-	int nDeleted;
-
-	// delete the items, which returns an array of extents,
-	// one for each deleted item
-	DRECT *world_bounds = pRL->DeleteSelected(nDeleted);
+	// Delete the items.
+	if (pRL->DeleteSelected())
+		pRL->SetModified(true);
 
 	if (pRL->RemoveUnusedNodes() != 0)
 		pRL->ComputeExtents();
 
-	if (nDeleted > 100)
-	{
-		// too many deleted for quick refresh
-		Refresh(TRUE);
-	}
-	else if (nDeleted > 0  && world_bounds != NULL)
-	{
-		wxRect bound;
-		for (int n = nDeleted - 1; n >= 0; n--)
-		{
-			bound = WorldToWindow(world_bounds[n]);
-			IncreaseRect(bound, BOUNDADJUST);
-			Refresh(TRUE, &bound);
-		}
-		pRL->SetModified(true);
-	}
-	delete world_bounds;
+	Refresh();
 }
 
 void BuilderView::MatchZoomToElev(vtElevLayer *pEL)
@@ -1461,14 +1131,12 @@ void BuilderView::OnLeftDown(wxMouseEvent& event)
 	m_bMouseMoved = false;
 
 	// save the point where the user clicked
-	m_DownClient = event.GetPosition();
-	GetCanvasPosition(event, m_ui.m_DownPoint);
-
+	m_ui.m_DownPoint = event.GetPosition();
 	m_ui.m_CurPoint = m_ui.m_DownPoint;
 	m_ui.m_LastPoint = m_ui.m_DownPoint;
 
 	// "points" are in window pixels, "locations" are in the current CRS
-	object(m_ui.m_DownPoint, m_ui.m_DownLocation);
+	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
 
 	// Remember modifier key state
 	m_ui.m_bShift = event.ShiftDown();
@@ -1543,9 +1211,9 @@ void BuilderView::OnLeftUp(wxMouseEvent& event)
 
 void BuilderView::OnLeftDoubleClick(wxMouseEvent& event)
 {
-	GetCanvasPosition(event, m_ui.m_DownPoint);
+	m_ui.m_DownPoint = event.GetPosition();
 	m_ui.m_CurPoint = m_ui.m_LastPoint = m_ui.m_DownPoint;
-	object(m_ui.m_DownPoint, m_ui.m_DownLocation);
+	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
 
 	vtLayer *pL = g_bld->GetActiveLayer();
 	if (pL)
@@ -1557,9 +1225,9 @@ void BuilderView::OnLButtonClick(wxMouseEvent& event)
 	vtLayerPtr pL = g_bld->GetActiveLayer();
 	if (!pL) return;
 
-	GetCanvasPosition(event, m_ui.m_DownPoint);
+	m_ui.m_DownPoint = event.GetPosition();
 	m_ui.m_CurPoint = m_ui.m_LastPoint = m_ui.m_DownPoint;
-	DPoint2 point(ox(m_ui.m_CurPoint.x), oy(m_ui.m_CurPoint.y));
+	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
 
 	if (pL->GetType() == LT_ROAD)
 	{
@@ -1610,22 +1278,20 @@ void BuilderView::OnLButtonClickElement(vtRoadLayer *pRL)
 	DRECT world_bound;
 
 	// error is how close to the road/node can we be off by?
-	float error = odx(5);
+	DPoint2 epsilon = world_delta(5);
 
 	bool returnVal = false;
 	if (m_ui.mode == LB_Node)
-		returnVal = pRL->SelectNode(m_ui.m_DownLocation, error, world_bound);
+		returnVal = pRL->SelectNode(m_ui.m_DownLocation, epsilon.x, world_bound);
 	else if (m_ui.mode == LB_Link)
-		returnVal = pRL->SelectLink(m_ui.m_DownLocation, error, world_bound);
+		returnVal = pRL->SelectLink(m_ui.m_DownLocation, epsilon.x, world_bound);
 	else if (m_ui.mode == LB_LinkExtend)
-		returnVal = pRL->SelectAndExtendLink(m_ui.m_DownLocation, error, world_bound);
+		returnVal = pRL->SelectAndExtendLink(m_ui.m_DownLocation, epsilon.x, world_bound);
 
 	wxString str;
 	if (returnVal)
 	{
-		wxRect screen_bound = WorldToWindow(world_bound);
-		IncreaseRect(screen_bound, BOUNDADJUST);
-		Refresh(TRUE, &screen_bound);
+		Refresh();
 		if (m_ui.mode == LB_Node)
 			str.Printf(_("Selected 1 Node (%d total)"), pRL->GetSelectedNodes());
 		else
@@ -1645,14 +1311,6 @@ void BuilderView::OnLButtonClickLinkEdit(vtRoadLayer *pRL)
 {
 }
 
-void BuilderView::RefreshRoad(LinkEdit *pRoad)
-{
-	DRECT world_bound = pRoad->m_extent;
-	wxRect screen_bound = WorldToWindow(world_bound);
-	IncreaseRect(screen_bound, BOUNDADJUST);
-	Refresh(TRUE, &screen_bound);
-}
-
 void BuilderView::OnLButtonClickFeature(vtLayerPtr pL)
 {
 	if (pL->GetType() == LT_STRUCTURE)
@@ -1662,10 +1320,12 @@ void BuilderView::OnLButtonClickFeature(vtLayerPtr pL)
 		// first do a deselect-all
 		pSL->DeselectAll();
 
+		DPoint2 epsilon = world_delta(5);
+
 		// see if there is a building at m_ui.m_DownPoint
 		int building;
 		double distance;
-		bool found = pSL->FindClosestStructure(m_ui.m_DownLocation, odx(5),
+		bool found = pSL->FindClosestStructure(m_ui.m_DownLocation, epsilon.x,
 				building, distance);
 		if (found)
 		{
@@ -1694,10 +1354,10 @@ void BuilderView::OnMiddleDown(wxMouseEvent& event)
 	m_bMouseMoved = false;
 
 	// save the point where the user clicked
-	m_DownClient = event.GetPosition();
-
-	GetCanvasPosition(event, m_ui.m_DownPoint);
+	m_ui.m_DownPoint = event.GetPosition();
 	m_ui.m_CurPoint = m_ui.m_DownPoint;
+	world(m_ui.m_DownPoint, m_ui.m_DownLocation);
+
 	if (!m_bMouseCaptured)
 	{
 		CaptureMouse();
@@ -1772,15 +1432,11 @@ void BuilderView::OnRightUpStructure(vtStructureLayer *pSL)
 
 void BuilderView::OnMouseMove(wxMouseEvent& event)
 {
-	wxPoint point = event.GetPosition();
-//	VTLOG("MouseMove(%d %d)\n", point.x, point.y);
-	static wxPoint lastpoint;
+	wxPoint pointp = event.GetPosition();
+	VTLOG("MouseMove(%d %d)\n", pointp.x, pointp.y);
 
-	if (point == lastpoint)
-		return;
-
-	GetCanvasPosition(event, m_ui.m_CurPoint);
-	object(m_ui.m_CurPoint, m_ui.m_CurLocation);
+	m_ui.m_CurPoint = event.GetPosition();
+	world(m_ui.m_CurPoint, m_ui.m_CurLocation);
 
 	if (m_ui.m_bLMouseButton || m_ui.m_bMMouseButton || m_ui.m_bRMouseButton)
 	{
@@ -1791,23 +1447,24 @@ void BuilderView::OnMouseMove(wxMouseEvent& event)
 	}
 
 	if (m_bPanning)
-		DoPan(point);
+		DoPan();
 
 	// left button click and drag
 	if (m_ui.m_bLMouseButton)
 	{
 		if (m_bBoxing)
-			DoBox(m_ui.m_CurPoint);
+		{
+			DrawInverseRect(m_ui.m_DownLocation, m_ui.m_CurLocation);
+		}
 		if (m_iDragSide)
-			DoArea(point - lastpoint);
+			UpdateAreaTool(m_ui.m_CurLocation - m_ui.m_LastLocation);
 		if (m_ui.mode == LB_Dist)
 		{
 			wxClientDC dc(this);
 			PrepareDC(dc);
 
-			DrawDistanceTool(&dc);	// erase
 			OnDragDistance();		// update
-			DrawDistanceTool(&dc);	// redraw
+			Refresh();
 		}
 		else if (m_ui.mode == LB_BldEdit && m_ui.m_bRubber)
 		{
@@ -1825,13 +1482,12 @@ void BuilderView::OnMouseMove(wxMouseEvent& event)
 		g_bld->m_pInstanceDlg->SetLocation(m_ui.m_CurLocation);
 
 	m_ui.m_LastPoint = m_ui.m_CurPoint;
-	m_ui.m_PrevLocation = m_ui.m_CurLocation;
-
-	lastpoint = point;
+	m_ui.m_LastLocation = m_ui.m_CurLocation;
 }
 
 void BuilderView::OnMouseWheel(wxMouseEvent& event)
 {
+	VTLOG("OnMouseWheel %d\n", event.m_wheelRotation);
 	if (event.m_wheelRotation > 0)
 		SetScale(GetScale() * sqrt(2.0));
 	else

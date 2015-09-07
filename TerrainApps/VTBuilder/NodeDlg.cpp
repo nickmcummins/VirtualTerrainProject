@@ -21,94 +21,6 @@
 
 #define MULTIPLE	5000
 
-static wxPoint buf[10];
-
-void NodeDlgView::OnDraw(wxDC &dc)
-{
-	if (!m_pNode)
-		return;
-
-	wxPoint center;
-	screen(m_pNode->Pos(), center);
-	m_pNode->Draw(&dc, this);
-
-	wxString string;
-	for (int i = 0; i < m_pNode->NumLinks(); i++)
-	{
-		LinkEdit *pR = m_pNode->GetLink(i);
-		pR->Draw(&dc, this);
-
-		//we need to use the original node here because the roads point to it.
-		const DPoint2 close = m_pNode->GetAdjacentLinkPoint2d(i);
-		DPoint2 vector = close - m_pNode->Pos();
-		vector.Normalize();
-		IPoint2 vec;
-
-		vec.x = (int)(center.x + vector.x*20);
-		vec.y = (int)(center.y - vector.y*20);
-
-		//draw signal lights or stop signs as necessary.
-		dc.SetLogicalFunction(wxCOPY);
-		wxPen pen;
-		wxBrush brush;
-
-		switch (m_pNode->GetIntersectType(i))
-		{
-		case IT_STOPSIGN:
-			pen.SetColour(128,0,0);
-			dc.SetPen(pen);
-			vec.x += 2;
-			vec.y += 6;
-			buf[0].x = vec.x; buf[0].y = vec.y;
-			vec.x -= 4;
-			buf[1].x = vec.x; buf[1].y = vec.y;
-			vec.x -= 3;
-			vec.y -= 3;
-			buf[2].x = vec.x; buf[2].y = vec.y;
-			vec.y -= 4;
-			buf[3].x = vec.x; buf[3].y = vec.y;
-			vec.x += 3;
-			vec.y -= 3;
-			buf[4].x = vec.x; buf[4].y = vec.y;
-			vec.x += 4;
-			buf[5].x = vec.x; buf[5].y = vec.y;
-			vec.x += 3;
-			vec.y += 3;
-			buf[6].x = vec.x; buf[6].y = vec.y;
-			vec.y += 4;
-			buf[7].x = vec.x; buf[7].y = vec.y;
-			vec.x -= 3;
-			vec.y += 3;
-			buf[8].x = vec.x; buf[8].y = vec.y;
-			dc.DrawLines(9, buf);
-			break;
-		case IT_LIGHT:
-			pen.SetColour(128,0,0);
-			brush.SetColour(128,0,0);
-			dc.SetPen(pen);
-			dc.SetBrush(brush);
-			{
-				wxRect box;
-				int radius = 4;
-				box.y = vec.y - radius;
-				box.height = (radius << 1);
-				box.x = vec.x - radius;
-				box.width = (radius << 1);
-				dc.DrawEllipse(box.x, box.y, box.width, box.height);
-			}
-			break;
-		default:	// Keep picky compilers quiet.
-			break;
-		}
-
-		//draw text labels
-		vec.x = (int)(center.x + vector.x*40);
-		vec.y = (int)(center.y - vector.y*40);
-		string.Printf(_T("%i"), i);
-		dc.DrawText(string, vec.x-10, vec.y-10);
-	}
-}
-
 // WDR: class implementations
 
 //----------------------------------------------------------------------------
@@ -145,18 +57,10 @@ NodeDlg::NodeDlg( wxWindow *parent, wxWindowID id, const wxString &title,
 	GetSizer()->SetSizeHints(this);
 }
 
-void NodeDlg::SetScale(float fScale)
-{
-	m_pView->SetScale(fScale);
-}
-
 void NodeDlg::SetNode(NodeEdit *pSingleNode, vtRoadLayer *pLayer)
 {
 	m_pNode = pSingleNode;
 	m_pLayer = pLayer;
-	m_pView->m_pNode = m_pNode;
-	if (NULL != m_pNode)
-		m_pView->ZoomToPoint(m_pNode->Pos());
 }
 
 // WDR: handler implementations for NodeDlg

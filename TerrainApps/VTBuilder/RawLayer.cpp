@@ -38,7 +38,6 @@ vtRawLayer::vtRawLayer() : vtLayer(LT_RAW)
 	// default dark red
 	m_DrawStyle.m_LineColor.Set(128,0,0);
 
-	m_DrawStyle.m_MarkerShape = 0;
 	m_DrawStyle.m_MarkerSize = 2;
 	m_bExtentComputed = false;
 }
@@ -112,7 +111,7 @@ bool vtRawLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtRawLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
+void vtRawLayer::DrawLayer(vtScaledView *pView)
 {
 	if (!m_pSet)
 		return;
@@ -125,92 +124,62 @@ void vtRawLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
 	{
 		DRECT rect;
 		GetExtent(rect);
-		wxRect screenrect = pView->WorldToCanvas(rect);
 
 		// draw a simple box with green lines
-		wxPen Pen1(wxColor(0x80, 0x00, 0x00), 1, wxLONG_DASH);
-		pDC->SetLogicalFunction(wxCOPY);
-		pDC->SetPen(Pen1);
-		DrawRectangle(pDC, screenrect);
+		pView->SetColor(RGBi(0x80, 0x00, 0x00));
+		pView->DrawRectangle(rect);
 	}
 
-	wxColor linecolor(m_DrawStyle.m_LineColor.r, m_DrawStyle.m_LineColor.g, m_DrawStyle.m_LineColor.b);
 	bool bFill = m_DrawStyle.m_bFill;
 
 	// single pixel solid pens
-	wxPen DefPen(linecolor, 1, wxSOLID);
-	wxPen SelPen(wxColor(255,255,0), 1, wxSOLID);
-	wxPen NoPen(wxColor(0,0,0), 1, wxTRANSPARENT);
+	RGBi DefPen = m_DrawStyle.m_LineColor;
+	RGBi SelPen(255, 255, 0);
 	int pen = 0;
 
-	pDC->SetLogicalFunction(wxCOPY);
-	pDC->SetPen(DefPen);
+	pView->SetColor(m_DrawStyle.m_LineColor);
 
+	// TODO: Totally redo this with a vertex array
 	wxPoint p;
 	uint i, j, entities = m_pSet->NumEntities();
 	OGRwkbGeometryType type = m_pSet->GetGeomType();
 	if (type == wkbPoint)
 	{
 		vtFeatureSetPoint2D *pSetP2 = dynamic_cast<vtFeatureSetPoint2D *>(m_pSet);
+		glBegin(GL_POINTS);
 		for (i = 0; i < entities; i += iIncrement)
 		{
 			if (m_pSet->IsSelected(i)) {
-				if (pen == 0) { pDC->SetPen(SelPen); pen = 1; }
+				if (pen == 0) { pView->SetColor(SelPen); pen = 1; }
 			}
 			else {
-				if (pen == 1) { pDC->SetPen(DefPen); pen = 0; }
+				if (pen == 1) { pView->SetColor(DefPen); pen = 0; }
 			}
-			const DPoint2 &p2 = pSetP2->GetPoint(i);
-			pView->screen(p2, p);
+			const DPoint2 &p = pSetP2->GetPoint(i);
+
 			if (bDrawSimple)
 			{
-				pDC->DrawPoint(p);
-			}
-			else if (m_DrawStyle.m_MarkerShape == 0)	// dot
-			{
-				if (m_DrawStyle.m_MarkerSize < 2)
-				{
-					pDC->DrawPoint(p);
-					pDC->DrawPoint(p.x+1, p.y);
-					pDC->DrawPoint(p.x, p.y+1);
-					pDC->DrawPoint(p.x-1, p.y);
-					pDC->DrawPoint(p.x, p.y-1);
-				}
-				else
-				{
-					pDC->DrawLine(p.x, p.y-1, p.x+2, p.y-1);
-					pDC->DrawLine(p.x-1, p.y, p.x+3, p.y);
-					pDC->DrawLine(p.x-1, p.y+1, p.x+3, p.y+1);
-					pDC->DrawLine(p.x, p.y+2, p.x+2, p.y+2);
-				}
-			}
-			else if (m_DrawStyle.m_MarkerShape == 1)	// crosshair
-			{
-				int ms = m_DrawStyle.m_MarkerSize;
-				pDC->DrawLine(p.x-ms, p.y, p.x+ms+1, p.y);
-				pDC->DrawLine(p.x, p.y-ms, p.x, p.y+ms+1);
+				glVertex2d(p.x, p.y);
 			}
 		}
+		glEnd();
 	}
 	if (type == wkbPoint25D)
 	{
 		vtFeatureSetPoint3D *pSetP3 = dynamic_cast<vtFeatureSetPoint3D *>(m_pSet);
+		glBegin(GL_POINTS);
 		for (i = 0; i < entities; i += iIncrement)
 		{
 			if (m_pSet->IsSelected(i)) {
-				if (pen == 0) { pDC->SetPen(SelPen); pen = 1; }
+				if (pen == 0) { pView->SetColor(SelPen); pen = 1; }
 			}
 			else {
-				if (pen == 1) { pDC->SetPen(DefPen); pen = 0; }
+				if (pen == 1) { pView->SetColor(DefPen); pen = 0; }
 			}
 			const DPoint3 &p3 = pSetP3->GetPoint(i);
-			pView->screen(DPoint2(p3.x, p3.y), p);
-			pDC->DrawPoint(p);
-			pDC->DrawPoint(p.x+1, p.y);
-			pDC->DrawPoint(p.x, p.y+1);
-			pDC->DrawPoint(p.x-1, p.y);
-			pDC->DrawPoint(p.x, p.y-1);
+			glVertex2d(p3.x, p3.y);
 		}
+		glEnd();
 	}
 	if (type == wkbLineString)
 	{
@@ -218,15 +187,13 @@ void vtRawLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
 		for (i = 0; i < entities; i += iIncrement)
 		{
 			if (m_pSet->IsSelected(i)) {
-				if (pen == 0) { pDC->SetPen(SelPen); pen = 1; }
+				if (pen == 0) { pView->SetColor(SelPen); pen = 1; }
 			}
 			else {
-				if (pen == 1) { pDC->SetPen(DefPen); pen = 0; }
+				if (pen == 1) { pView->SetColor(DefPen); pen = 0; }
 			}
-			DLine2 &dline = pSetLine->GetPolyLine(i);
-
 			bool bClosed = false;
-			pView->DrawPolyLine(pDC, dline, bClosed);
+			pView->DrawPolyLine(pSetLine->GetPolyLine(i), bClosed);
 		}
 	}
 	if (type == wkbLineString25D)
@@ -235,10 +202,10 @@ void vtRawLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
 		for (i = 0; i < entities; i += iIncrement)
 		{
 			if (m_pSet->IsSelected(i)) {
-				if (pen == 0) { pDC->SetPen(SelPen); pen = 1; }
+				if (pen == 0) { pView->SetColor(SelPen); pen = 1; }
 			}
 			else {
-				if (pen == 1) { pDC->SetPen(DefPen); pen = 0; }
+				if (pen == 1) { pView->SetColor(DefPen); pen = 0; }
 			}
 			DLine3 &dline3 = pSetLine->GetPolyLine(i);
 
@@ -249,39 +216,34 @@ void vtRawLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
 				dline[j].Set(dline3[j].x, dline3[j].y);
 
 			bool bClosed = false;
-			pView->DrawPolyLine(pDC, dline, bClosed);
+			pView->DrawPolyLine(dline, bClosed);
 		}
 	}
 	if (type == wkbPolygon)
 	{
 		vtFeatureSetPolygon *pSetPoly = dynamic_cast<vtFeatureSetPolygon *>(m_pSet);
 
-		if (bFill)
-			pDC->SetPen(NoPen);
-
 		for (i = 0; i < entities; i += iIncrement)
 		{
-			if (bFill)
-				pDC->SetPen(NoPen);
-			else
+			if (!bFill)
 			{
 				if (pSetPoly->IsSelected(i)) {
-					if (pen == 0) { pDC->SetPen(SelPen); pen = 1; }
+					if (pen == 0) { pView->SetColor(SelPen); pen = 1; }
 				}
 				else {
-					if (pen == 1) { pDC->SetPen(DefPen); pen = 0; }
+					if (pen == 1) { pView->SetColor(DefPen); pen = 0; }
 				}
 			}
 			DPolygon2 &dpoly = pSetPoly->GetPolygon(i);
-			pView->DrawPolygon(pDC, dpoly, bFill);
+			pView->DrawPolygon(dpoly, bFill);
 
 			if (bFill)
 			{
 				if (pSetPoly->IsSelected(i))
-					pDC->SetPen(SelPen);
+					pView->SetColor(SelPen);
 				else
-					pDC->SetPen(DefPen);
-				pView->DrawPolygon(pDC, dpoly, false);
+					pView->SetColor(DefPen);
+				pView->DrawPolygon(dpoly, true);
 			}
 		}
 	}
@@ -475,7 +437,7 @@ void vtRawLayer::GetPropertyText(wxString &strIn)
 void vtRawLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 {
 	int iEnt;
-	double epsilon = pView->odx(6);  // calculate what 6 pixels is as world coord
+	DPoint2 epsilon = pView->world_delta(6);  // calculate what 6 pixels is as world coord
 
 	if (NULL == m_pSet)		// safety check
 		return;
@@ -503,7 +465,7 @@ void vtRawLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 	case LB_FeatInfo:
 		if (type == wkbPoint)
 		{
-			iEnt = pSetP2->FindClosestPoint(ui.m_DownLocation, epsilon);
+			iEnt = pSetP2->FindClosestPoint(ui.m_DownLocation, epsilon.x);
 			if (iEnt != -1)
 			{
 				g_bld->UpdateFeatureDialog(this, pSetP2, iEnt);

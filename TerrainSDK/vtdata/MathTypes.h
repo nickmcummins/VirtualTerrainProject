@@ -1,13 +1,12 @@
 //
 // Basic data type definitions shared by all the VTP software.
 //
-// Copyright (c) 2001-2013 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 /** \file MathTypes.h */
 
-#ifndef VTMATHTYPESH
-#define VTMATHTYPESH
+#pragma once
 
 #include <math.h>
 #include <float.h>
@@ -759,6 +758,13 @@ class DRECT
 public:
 	DRECT() { left = top = right = bottom = 0.0; }
 	DRECT(double l, double t, double r, double b) { left = l; top = t; right = r; bottom = b; }
+	DRECT(const DPoint2 &leftTop, const DPoint2 &rightBottom)
+	{
+		left = leftTop.x;
+		top = leftTop.y;
+		right = rightBottom.x;
+		bottom = rightBottom.y;
+	}
 
 	void SetRect(double l, double t, double r, double b) { left = l; top = t; right = r; bottom = b; }
 
@@ -1465,5 +1471,3 @@ void ProjectionXZ(const DPolygon2 &dpoly2, float fY, FPolygon3 &fpoly3);
 
 double AreaOfTriangle(const DPoint2 &A, const DPoint2 &B, const DPoint2 &C);
 double AreaOfTriangle(const DPoint3 &A, const DPoint3 &B, const DPoint3 &C);
-
-#endif	// VTMATHTYPESH

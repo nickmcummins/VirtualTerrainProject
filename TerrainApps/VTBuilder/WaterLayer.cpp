@@ -66,20 +66,17 @@ bool vtWaterLayer::TransformCoords(vtProjection &proj_new)
 	return true;
 }
 
-void vtWaterLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
+void vtWaterLayer::DrawLayer(vtScaledView *pView)
 {
-	wxPen WaterPen(wxColor(0,40,160), 1, wxSOLID);
-	pDC->SetLogicalFunction(wxCOPY);
-	pDC->SetPen(WaterPen);
-	wxBrush WaterBrush(wxColor(0,200,200), wxSOLID);
-	pDC->SetBrush(WaterBrush);
+	pView->SetColor(RGBi(0, 40, 160));
+	//wxBrush WaterBrush(wxColor(0,200,200), wxSOLID);
 
 	int num_lines = (int)m_Lines.size();
 	for (int i = 0; i < num_lines; i++)
 	{
 		const vtWaterFeature &feat = GetFeature(i);
 
-		pView->DrawPolyLine(pDC, feat, false);
+		pView->DrawPolyLine(feat, false);
 	}
 }
 

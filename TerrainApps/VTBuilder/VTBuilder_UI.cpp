@@ -1612,10 +1612,6 @@ NodeDlgBase::NodeDlgBase( wxWindow* parent, wxWindowID id, const wxString& title
 	wxStaticBoxSizer* sbSizer8;
 	sbSizer8 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("View") ), wxVERTICAL );
 	
-	m_scrolled = new NodeDlgView( this, ID_SCROLLED, wxDefaultPosition, wxSize( 200,160 ), wxHSCROLL|wxVSCROLL );
-	m_scrolled->SetScrollRate( 5, 5 );
-	sbSizer8->Add( m_scrolled, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
 	bSizer40->Add( sbSizer8, 1, wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
 	
 	this->SetSizer( bSizer40 );

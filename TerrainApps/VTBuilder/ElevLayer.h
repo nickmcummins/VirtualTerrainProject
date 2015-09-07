@@ -1,12 +1,11 @@
 //
 // ElevLayer.h
 //
-// Copyright (c) 2001-2011 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef ELEVLAYER_H
-#define ELEVLAYER_H
+#pragma once
 
 #include "wx/image.h"
 #include "vtdata/ElevationGrid.h"
@@ -39,7 +38,7 @@ public:
 
 	// overrides
 	bool GetExtent(DRECT &rect);
-	void DrawLayer(wxDC *pDC, vtScaledView *pView);
+	void DrawLayer(vtScaledView *pView);
 	bool TransformCoords(vtProjection &proj);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();
@@ -62,8 +61,8 @@ public:
 	void OnLeftUp(BuilderView *pView, UIContext &ui);
 	void OnMouseMove(BuilderView *pView, UIContext &ui);
 
-	void DrawLayerBitmap(wxDC *pDC, vtScaledView *pView);
-	void DrawLayerOutline(wxDC *pDC, vtScaledView *pView);
+	void DrawLayerBitmap(vtScaledView *pView);
+	void DrawLayerOutline(vtScaledView *pView);
 	bool AppendDataFrom(vtLayer *pL);
 	void ReRender();
 	void ReImage();
@@ -98,7 +97,7 @@ public:
 	void SetupTinTriangleBins(int target_triangles_per_bin);
 
 	// drawing
-	void SetupBitmap(wxDC *pDC);
+	void SetupBitmap();
 	void RenderBitmap();
 	static void SetupDefaultColors(ColorMap &cmap);
 
@@ -121,6 +120,7 @@ protected:
 	bool	m_bHasMask;
 	float	m_fSpacing;
 	bool	m_bPreferGZip;	// user wants their elevation treated as a .gz file
+	DPoint2 mTrim1, mTrim2;
 
 	IPoint2 m_ImageSize;
 
@@ -136,6 +136,3 @@ bool MatchTilingToResolution(const DRECT &original_area, const DPoint2 &resoluti
 bool ElevCacheOpen(vtElevLayer *pLayer, const char *fname, vtElevError *err);
 bool ElevCacheLoadData(vtElevLayer *elev);
 void ElevCacheRemove(vtElevLayer *elev);
-
-#endif	// ELEVLAYER_H
-

@@ -112,41 +112,6 @@
 // Singletons
 DECLARE_APP(BuilderApp)
 
-////////////////////////////////////////////////////////////////
-
-#if 0
-class vtScaleBar : public wxWindow
-{
-public:
-	vtScaleBar(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxPanelNameStr);
-
-	void OnPaint(wxPaintEvent& event);
-
-protected:
-	DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(vtScaleBar, wxWindow)
-EVT_PAINT(OnPaint)
-END_EVENT_TABLE()
-
-vtScaleBar::vtScaleBar(wxWindow *parent, wxWindowID id, const wxPoint& pos,
-	const wxSize& size, long style, const wxString& name) :
-  wxWindow(parent, id, pos, size, style, name)
-{
-	VTLOG1("vtScaleBar constructor\n");
-}
-
-void vtScaleBar::OnPaint(wxPaintEvent& event)
-{
-	wxPaintDC dc(this);
-	wxCoord w, h;
-	GetClientSize(&w,&h);
-	dc.DrawRoundedRectangle(0, 0, w, h, 5);
-}
-#endif
-
 //////////////////////////////////////////////////////////////////
 
 /** You can get at the main frame object from anywhere in the application. */
@@ -570,13 +535,9 @@ void MainFrame::SetActiveLayer(vtLayer *lp, bool refresh)
 	}
 }
 
-void MainFrame::RefreshLayerInView(vtLayer *pLayer)
+void MainFrame::RefreshView()
 {
-	DRECT r;
-	pLayer->GetExtent(r);
-	wxRect sr = m_pView->WorldToWindow(r);
-	IncreaseRect(sr, 5);
-	m_pView->Refresh(TRUE, &sr);
+	m_pView->Refresh();
 }
 
 
@@ -1012,14 +973,15 @@ bool MainFrame::SaveProject(const wxString &strPathName) const
 		fprintf(fp, "%s\n", (const char *) fname.mb_str(wxConvUTF8));
 	}
 
-	// write area
+	// write area tool
 	fprintf(fp, "area %lf %lf %lf %lf\n", m_area.left, m_area.top,
 		m_area.right, m_area.bottom);
 
-	// write view rectangle
-	DRECT rect = m_pView->GetWorldRect();
-	fprintf(fp, "view %lf %lf %lf %lf\n", rect.left, rect.top,
-		rect.right, rect.bottom);
+	// write view location
+	double	scale;
+	DPoint2 offset;
+	m_pView->GetViewParams(scale, offset);
+	fprintf(fp, "view_params %lf %lf %lf\n", scale, offset.x, offset.y);
 
 	// done
 	fclose(fp);

@@ -287,12 +287,10 @@ int vtTin2d::GetMemoryUsed() const
 	return bytes;
 }
 
-void vtTin2d::DrawTin(wxDC *pDC, vtScaledView *pView)
+void vtTin2d::DrawTin(vtScaledView *pView)
 {
 	// Dark purple lines
-	wxPen TinPen(wxColor(128,0,128), 1, wxSOLID);
-	pDC->SetLogicalFunction(wxCOPY);
-	pDC->SetPen(TinPen);
+	glColor3f(0.5f, 0, 0.5f);
 
 	bool bDrawSimple = g_Options.GetValueBool(TAG_DRAW_TIN_SIMPLE);
 	if (bDrawSimple)
@@ -305,14 +303,14 @@ void vtTin2d::DrawTin(wxDC *pDC, vtScaledView *pView)
 		// Just draw the online
 		for (Outline::iterator it = m_edges.begin(); it != m_edges.end(); it++)
 		{
-			pView->screen(m_vert[it->v0], g_screenbuf[0]);
-			pView->screen(m_vert[it->v1], g_screenbuf[1]);
-			pDC->DrawLines(2, g_screenbuf);
+			// TODO: be much more efficient
+			pView->DrawLine(m_vert[it->v0], m_vert[it->v1]);
 		}
 	}
 	else
 	{
 		// Draw every triangle
+		// TODO: be WAY more efficient
 		FPoint2 p2;
 		uint tris = NumTris();
 		for (uint i = 0; i < tris; i++)
@@ -326,12 +324,9 @@ void vtTin2d::DrawTin(wxDC *pDC, vtScaledView *pView)
 			int v1 = m_tri[i*3+1];
 			int v2 = m_tri[i*3+2];
 
-			pView->screen(m_vert[v0], g_screenbuf[0]);
-			pView->screen(m_vert[v1], g_screenbuf[1]);
-			pView->screen(m_vert[v2], g_screenbuf[2]);
-
-			g_screenbuf[3] = g_screenbuf[0];
-			pDC->DrawLines(4, g_screenbuf);
+			pView->DrawLine(m_vert[v0], m_vert[v1]);
+			pView->DrawLine(m_vert[v1], m_vert[v2]);
+			pView->DrawLine(m_vert[v2], m_vert[v0]);
 		}
 	}
 #if 0

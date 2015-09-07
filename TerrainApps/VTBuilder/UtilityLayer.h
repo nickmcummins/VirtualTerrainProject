@@ -1,12 +1,11 @@
 //
 // UtilityLayer.h
 //
-// Copyright (c) 2001-2008 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef UTILITYLAYER_H
-#define UTILITYLAYER_H
+#pragma once
 
 #include "Layer.h"
 #include "vtdata/UtilityMap.h"
@@ -19,7 +18,7 @@ public:
 	vtUtilityLayer();
 
 	bool GetExtent(DRECT &rect);
-	void DrawLayer(wxDC *pDC, vtScaledView *pView);
+	void DrawLayer(vtScaledView *pView);
 	bool TransformCoords(vtProjection &proj);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();
@@ -33,10 +32,7 @@ public:
 	void InvertSelection();
 
 protected:
-	void DrawPole(wxDC *pDC, vtScaledView *pView, vtPole *pole);
+	void DrawPole(vtScaledView *pView, vtPole *pole);
 
 	int m_size;
 };
-
-#endif
-

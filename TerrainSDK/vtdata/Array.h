@@ -1,13 +1,12 @@
 //
 // Array.h
 //
-// Copyright (c) 2001-2008 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 /** \file Array.h */
 
-#ifndef ARRAYH
-#define ARRAYH
+#pragma once
 
 #ifdef _MSC_VER
   #pragma warning(disable: 4786)
@@ -510,5 +509,3 @@ template <class E> void vtArray<E>::Clear()
  */
 template <class E> inline bool vtArray<E>::IsEmpty() const
 	{ return m_Size == 0; }
-
-#endif

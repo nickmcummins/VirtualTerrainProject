@@ -21,8 +21,8 @@
 
 #define NODE_RADIUS 5
 
-wxPen LinkPen[12];
-wxPen NodePen[VIT_TOTAL];
+RGBi LinkPen[12];
+RGBi NodePen[VIT_TOTAL];
 static bool g_bInitializedPens = false;
 
 #define RP_HIGHWAY 0
@@ -62,27 +62,22 @@ void NodeEdit::Copy(NodeEdit* node)
 //
 // draw a node as a circle
 //
-bool NodeEdit::Draw(wxDC *pDC, vtScaledView *pView)
+bool NodeEdit::Draw(vtScaledView *pView)
 {
-	pDC->SetLogicalFunction(wxCOPY);
+	// TODO! do this once for all points! With a vertex array!
 	assert(m_iVisual >= VIT_UNKNOWN && m_iVisual <= VIT_STOPSIGN);
-	pDC->SetPen(NodePen[m_iVisual]);
-	pDC->SetBrush(wxBrush(wxColour(0,0,0), wxTRANSPARENT));
-	wxRect box;
+	pView->SetColor(NodePen[m_iVisual]);
 
-	int x = pView->sx(m_p.x);
-	int y = pView->sy(m_p.y);
-	box.x = x - NODE_RADIUS;
-	box.y = y - NODE_RADIUS;
-	box.width = NODE_RADIUS << 1;
-	box.height = NODE_RADIUS << 1;
-	pDC->DrawEllipse(box);
+	glPointSize(NODE_RADIUS);
+	glBegin(GL_POINTS);
+	glVertex2d(m_p.x, m_p.y);
+	glEnd();
+
 	if (m_bSelect)
 	{
-		pDC->SetLogicalFunction(wxINVERT);
-		pDC->SetPen(NodePen[5]);
-		pDC->DrawEllipse(box);
+		// TODO
 	}
+	glPointSize(1);
 	return true;
 }
 
@@ -94,9 +89,6 @@ bool NodeEdit::EditProperties(vtScaledView *pView, vtRoadLayer *pLayer)
 	NodeDlg dlg(NULL, -1, _("Node Properties"));
 
 	dlg.SetNode(this, pLayer);
-
-	float fScale = pView->GetScale();
-	dlg.SetScale(fScale);
 
 	return (dlg.ShowModal() == wxID_OK);
 }
@@ -307,107 +299,52 @@ bool LinkEdit::PartiallyInBounds(const DRECT &bound)
 	return false;
 }
 
-bool LinkEdit::Draw(wxDC *pDC, vtScaledView *pView, bool bShowDirection,
+bool LinkEdit::Draw(vtScaledView *pView, bool bShowDirection,
 	bool bShowWidth)
 {
 	// base link color on type of link
-	pDC->SetLogicalFunction(wxCOPY);
 	if (m_iHwy != -1)
-		pDC->SetPen(LinkPen[RP_HIGHWAY]);
+		pView->SetColor(LinkPen[RP_HIGHWAY]);
 	else
-		pDC->SetPen(LinkPen[m_Surface]);
+		pView->SetColor(LinkPen[m_Surface]);
 
 	const int size = GetSize();
-	if (bShowWidth)
-		pView->DrawDoubleLine(pDC, *this, m_LeftOffset, m_RightOffset);
-	else
-		pView->DrawPolyLine(pDC, *this, false);
+	// TODO if (bShowWidth)
+	pView->DrawPolyLine(*this, false);
 
 	if (bShowWidth && m_iLanes > 1)
 	{
-		pDC->SetPen(LinkPen[RP_CENTERLINE]);
-		pView->DrawPolyLine(pDC, *this, false);
+		pView->SetColor(LinkPen[RP_CENTERLINE]);
+		pView->DrawPolyLine(*this, false);
 	}
 
 	if (m_bSelect)
 	{
-		pDC->SetLogicalFunction(wxINVERT);
-		pDC->SetPen(LinkPen[RP_SELECTION]);
-		pView->DrawPolyLine(pDC, *this, false);
+		glLogicOp(GL_INVERT);
+		pView->SetColor(LinkPen[RP_SELECTION]);
+		pView->DrawPolyLine(*this, false);
+		glLogicOp(GL_COPY);
 	}
 	if (bShowDirection)
 	{
-		int mid = (GetSize() == 2) ? 0 : GetSize() / 2;
-
-		FPoint2 p0, p1, diff, center;
-		FPoint2 fw, side;
-		int r = 0;
-
-		diff.x = diff.y = 0;
-		while (fabs(diff.x) < 2 && fabs(diff.y) < 2)
-		{
-			p0.x = g_screenbuf[mid-r].x;
-			p0.y = g_screenbuf[mid-r].y;
-			p1.x = g_screenbuf[mid+r+1].x;
-			p1.y = g_screenbuf[mid+r+1].y;
-			diff = p1 - p0;
-			r++;
-		}
-		center = p0 + (diff * 0.5f);
-
-		fw.x = diff.x;
-		fw.y = diff.y;
-		fw.Normalize();
-		side.x = -fw.y;
-		side.y = fw.x;
-		pDC->SetPen(LinkPen[RP_DIRECTION]);
-		if (m_iFlags & RF_FORWARD)
-		{
-			pDC->DrawLine((int) (center.x - side.x * 5.0f),
-				(int) (center.y - side.y * 5.0f),
-				(int) (center.x + fw.x * 6.0f),
-				(int) (center.y + fw.y * 6.0f));
-			pDC->DrawLine((int) (center.x + fw.x * 6.0f),
-				(int) (center.y + fw.y * 6.0f),
-				(int) (center.x + side.x * 5.0f),
-				(int) (center.y + side.y * 5.0f));
-		}
-		if (m_iFlags & RF_REVERSE)
-		{
-			pDC->DrawLine((int) (center.x - side.x * 5.0f),
-				(int) (center.y - side.y * 5.0f),
-				(int) (center.x - fw.x * 6.0f),
-				(int) (center.y - fw.y * 6.0f));
-			pDC->DrawLine((int) (center.x - fw.x * 6.0f),
-				(int) (center.y - fw.y * 6.0f),
-				(int) (center.x + side.x * 5.0f),
-				(int) (center.y + side.y * 5.0f));
-		}
+		// TODO
 	}
 	if (m_bDrawPoints)
 	{
-		// Put a crosshair at every point on the line.
-		if (bShowWidth)
-			pView->ProjectPolyline(pDC, *this, false);	// Use the centerline
-
-		const int xhair_size = 4;
-		pDC->SetPen(LinkPen[RP_CROSSES]);
-		for (int c = 0; c < size && c < SCREENBUF_SIZE; c++)
-		{
-			pDC->DrawLine(g_screenbuf[c].x - xhair_size, g_screenbuf[c].y,
-				g_screenbuf[c].x + xhair_size, g_screenbuf[c].y);
-			pDC->DrawLine(g_screenbuf[c].x, g_screenbuf[c].y - xhair_size,
-				g_screenbuf[c].x, g_screenbuf[c].y + xhair_size);
-		}
+		// Put a dot at every point on the line.
+		pView->SetColor(LinkPen[RP_CROSSES]);
+		glPointSize(4);
+		glBegin(GL_POINTS);
+		for (int i = 0; i < size; i++)
+			glVertex2d(GetAt(i).x, GetAt(i).y);
 
 		// We may highlight a single point
 		if (m_iHighlightPoint != -1)
 		{
-			const int radius = 5;
-			pDC->SetPen(LinkPen[RP_CROSSES]);
-			pDC->SetBrush(wxBrush(wxColour(0,0,0), wxTRANSPARENT));
-			pDC->DrawCircle(g_screenbuf[m_iHighlightPoint], radius);
+			// TODO
 		}
+		glEnd();
+		glPointSize(1);
 	}
 	return true;
 }
@@ -447,50 +384,50 @@ RoadMapEdit::RoadMapEdit() : vtRoadMap()
 	{
 		g_bInitializedPens = true;
 
-		LinkPen[RP_HIGHWAY].SetColour(128,0,0);	// 0: dark red highways
-		LinkPen[RP_HIGHWAY].SetWidth(2);
+		LinkPen[RP_HIGHWAY].Set(128,0,0);	// 0: dark red highways
+		//LinkPen[RP_HIGHWAY].SetWidth(2);
 
-		LinkPen[SURFT_GRAVEL].SetColour(128,128,128);	// 1
+		LinkPen[SURFT_GRAVEL].Set(128,128,128);	// 1
 
-		LinkPen[SURFT_TRAIL].SetColour(130,100,70);		// 2
-		LinkPen[SURFT_TRAIL].SetStyle(wxDOT);
+		LinkPen[SURFT_TRAIL].Set(130,100,70);		// 2
+		//LinkPen[SURFT_TRAIL].SetStyle(wxDOT);
 
-		LinkPen[SURFT_2TRACK].SetColour(130,100,70);	// 3
+		LinkPen[SURFT_2TRACK].Set(130,100,70);	// 3
 
-		LinkPen[SURFT_DIRT].SetColour(130,100,70);		// 4
+		LinkPen[SURFT_DIRT].Set(130,100,70);		// 4
 
-		LinkPen[SURFT_PAVED].SetColour(0,0,0);			// 5
+		LinkPen[SURFT_PAVED].Set(0,0,0);			// 5
 
-		LinkPen[SURFT_RAILROAD].SetColour(0,0,0);		// 6
-		LinkPen[SURFT_RAILROAD].SetStyle(wxSHORT_DASH);	// 7
+		LinkPen[SURFT_RAILROAD].Set(0,0,0);		// 6
+		//LinkPen[SURFT_RAILROAD].SetStyle(wxSHORT_DASH);	// 7
 
-		LinkPen[RP_SELECTION].SetColour(255,255,255);	// for selection
-		LinkPen[RP_SELECTION].SetWidth(3);
+		LinkPen[RP_SELECTION].Set(255,255,255);	// for selection
+		//LinkPen[RP_SELECTION].SetWidth(3);
 
-		LinkPen[RP_DIRECTION].SetColour(0,180,0);	// for direction
-		LinkPen[RP_DIRECTION].SetWidth(2);
+		LinkPen[RP_DIRECTION].Set(0,180,0);	// for direction
+		//LinkPen[RP_DIRECTION].SetWidth(2);
 
-		LinkPen[RP_CROSSES].SetColour(128,0,128);	// for edit crosses
+		LinkPen[RP_CROSSES].Set(128,0,128);	// for edit crosses
 
-		LinkPen[RP_CENTERLINE].SetColour(255,255,255);	// for centers of multi-lanes
-		LinkPen[RP_CENTERLINE].SetStyle(wxSHORT_DASH);
+		LinkPen[RP_CENTERLINE].Set(255,255,255);	// for centers of multi-lanes
+		//LinkPen[RP_CENTERLINE].SetStyle(wxSHORT_DASH);
 
-		NodePen[VIT_UNKNOWN].SetColour(255,0,255);
+		NodePen[VIT_UNKNOWN].Set(255,0,255);
 
-		NodePen[VIT_NONE].SetColour(0,128,255);
+		NodePen[VIT_NONE].Set(0,128,255);
 
-		NodePen[VIT_STOPSIGN].SetColour(128,0,0);
-		NodePen[VIT_STOPSIGN].SetStyle(wxDOT);
+		NodePen[VIT_STOPSIGN].Set(128,0,0);
+		//NodePen[VIT_STOPSIGN].SetStyle(wxDOT);
 
-		NodePen[VIT_ALLSTOPS].SetColour(128,0,0);
+		NodePen[VIT_ALLSTOPS].Set(128,0,0);
 
-		NodePen[VIT_LIGHTS].SetColour(0,128,0);
-		NodePen[VIT_LIGHTS].SetStyle(wxDOT);
+		NodePen[VIT_LIGHTS].Set(0,128,0);
+		//NodePen[VIT_LIGHTS].SetStyle(wxDOT);
 
-		NodePen[VIT_ALLLIGHTS].SetColour(0,128,0);
+		NodePen[VIT_ALLLIGHTS].Set(0,128,0);
 
-		NodePen[VIT_SELECTED].SetColour(255,255,255);  //for selection
-		NodePen[VIT_SELECTED].SetWidth(3);
+		NodePen[VIT_SELECTED].Set(255,255,255);  //for selection
+		//NodePen[VIT_SELECTED].SetWidth(3);
 	}
 }
 
@@ -501,12 +438,12 @@ RoadMapEdit::~RoadMapEdit()
 //
 // draw the road network in window, given center and size or drawing area
 //
-void RoadMapEdit::Draw(wxDC *pDC, vtScaledView *pView, bool bNodes)
+void RoadMapEdit::Draw(vtScaledView *pView, bool bNodes)
 {
 	if (bNodes)
 	{
 		for (NodeEdit *curNode = GetFirstNode(); curNode; curNode = curNode->GetNext())
-			curNode->Draw(pDC, pView);
+			curNode->Draw(pView);
 	}
 
 	DPoint2 center;
@@ -529,26 +466,22 @@ void RoadMapEdit::Draw(wxDC *pDC, vtScaledView *pView, bool bNodes)
 			curLink->ComputeDisplayedLinkWidth(ToMeters);
 			curLink->m_bSidesComputed = true;
 		}
-		curLink->Draw(pDC, pView, bShowDir, bShowWidth);
+		curLink->Draw(pView, bShowDir, bShowWidth);
 	}
 }
 
 //
 // delete all selected links
 //
-DRECT *RoadMapEdit::DeleteSelected(int &nDeleted)
+bool RoadMapEdit::DeleteSelected()
 {
-	nDeleted = NumSelectedLinks();
-	if (nDeleted == 0)
-		return NULL;
-
-	DRECT* array = new DRECT[nDeleted];
+	if (NumSelectedLinks() == 0)
+		return false;
 
 	LinkEdit *prevLink = NULL;
 	LinkEdit *tmpLink;
 	LinkEdit *curLink = GetFirstLink();
 	TNode *tmpNode;
-	int n = 0;
 
 	while (curLink)
 	{
@@ -556,10 +489,7 @@ DRECT *RoadMapEdit::DeleteSelected(int &nDeleted)
 		curLink = curLink->GetNext();
 		if (tmpLink->IsSelected())
 		{
-			//delete the link
-			array[n] = tmpLink->m_extent;
-			n++;
-
+			// Delete the link
 			if (prevLink)
 				prevLink->SetNext(curLink);
 			else
@@ -577,8 +507,7 @@ DRECT *RoadMapEdit::DeleteSelected(int &nDeleted)
 			prevLink = tmpLink;
 	}
 	m_bValidExtents = false;
-
-	return array;
+	return true;
 }
 
 bool RoadMapEdit::SelectLink(const DPoint2 &point, float error, DRECT &bound)
@@ -791,35 +720,27 @@ int RoadMapEdit::NumSelectedLinks()
 //
 // caller is responsible for deleting the array returned!
 //
-DRECT *RoadMapEdit::DeSelectAll(int &numRegions)
+bool RoadMapEdit::DeSelectAll()
 {
 	// count the number of regions (number of selected elements)
 	int n = 0;
-	n += NumSelectedNodes();
-	n += NumSelectedLinks();
-	numRegions = n;
-
-	// make an array large enough to hold them all
-	DRECT* array = new DRECT[n];
 
 	// fill the array with the element's extents, and deselect them
-	n = 0;
 	for (NodeEdit* curNode = GetFirstNode(); curNode; curNode = curNode->GetNext())
 	{
 		if (curNode->IsSelected()) {
-			array[n++] = DRECT(curNode->Pos().x, curNode->Pos().y,
-							   curNode->Pos().x, curNode->Pos().y);
 			curNode->Select(false);
+			n++;
 		}
 	}
 	for (LinkEdit* curLink = GetFirstLink(); curLink; curLink = curLink->GetNext())
 	{
 		if (curLink->IsSelected()) {
-			array[n++] = curLink->m_extent;
 			curLink->Select(false);
+			n++;
 		}
 	}
-	return array;
+	return (n != 0);
 }
 
 

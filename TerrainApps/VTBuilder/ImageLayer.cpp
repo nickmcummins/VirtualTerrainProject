@@ -42,9 +42,9 @@ bool vtImageLayer::GetExtent(DRECT &rect)
 	return m_pImage->GetExtent(rect);
 }
 
-void vtImageLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
+void vtImageLayer::DrawLayer(vtScaledView *pView)
 {
-	m_pImage->DrawToView(pDC, pView);
+	m_pImage->DrawToView(pView);
 }
 
 bool vtImageLayer::TransformCoords(vtProjection &proj_new)

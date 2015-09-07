@@ -139,7 +139,7 @@ void MatchDlg::UpdateGuess()
 
 	// Show to the user, visually
 	if (m_pView)
-		m_pView->ShowGridMarks(m_area, m_tile.x, m_tile.y, -1, -1);
+		m_pView->SetGridMarks(m_area, m_tile.x, m_tile.y, -1, -1);
 }
 
 // WDR: handler implementations for MatchDlg

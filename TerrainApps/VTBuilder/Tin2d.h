@@ -67,7 +67,7 @@ public:
 	vtTin2d(vtFeatureSetPoint3D *set);
 	vtTin2d(vtFeatureSetPolygon *set, int iFieldNum, float fHeight = 0.0f);
 
-	void DrawTin(wxDC *pDC, vtScaledView *pView);
+	void DrawTin(vtScaledView *pView);
 	void ComputeEdgeLengths();
 	void CullLongEdgeTris();
 	void FreeEdgeLengths();

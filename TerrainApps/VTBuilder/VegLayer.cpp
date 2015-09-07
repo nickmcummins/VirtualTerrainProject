@@ -29,7 +29,6 @@ vtVegLayer::vtVegLayer() : vtRawLayer()
 	// default dark green
 	m_DrawStyle.m_LineColor.Set(0,128,0);
 
-	m_DrawStyle.m_MarkerShape = 1;	// crosshair
 	m_DrawStyle.m_MarkerSize = 3;	// pixels
 }
 

@@ -1,22 +1,22 @@
 //
 // ScaledView.h
 //
-// Copyright (c) 2001-2013 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef SCALEDVIEWH
-#define SCALEDVIEWH
+#pragma once
 
 #include "vtdata/MathTypes.h"
 #include "ogr_geometry.h"
+#include "wx/glcanvas.h"
 
-class vtScaledView : public wxScrolledWindow
+class vtScaledView : public wxGLCanvas
 {
 public:
 	vtScaledView(wxWindow *parent, wxWindowID id = -1,
 		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize, long style = wxHSCROLL | wxVSCROLL,
+		const wxSize& size = wxDefaultSize, long style = 0,
 		const wxString& name = _T(""));
 
 	void SetScale(double scale);
@@ -24,76 +24,55 @@ public:
 
 	void ZoomToPoint(const DPoint2 &p);
 	void ZoomToRect(const DRECT &geo_rect, float margin);
-	void ZoomOutToRect(const DRECT &geo_rect);
 
-	wxRect WorldToCanvas(const DRECT &r);
-	DRECT WorldToCanvasD(const DRECT &r);
-	wxRect WorldToWindow(const DRECT &r);
-	DRECT CanvasToWorld(const wxRect &r);
-
-	void GetCanvasPosition(const wxMouseEvent &event, wxPoint &pos);
-	DRECT GetWorldRect();
-	wxRect PointsToRect(const wxPoint &p1, const wxPoint &p2);
-
-	// transform object space -> screen space
-	int	sx(double x) const { return (int)(x*m_dScale - m_limits.x); }
-	int	sy(double y) const { return (int)(-y*m_dScale - m_limits.y); }
-	double	sxD(double x) const { return x*m_dScale - m_limits.x; }
-	double	syD(double y) const { return -y*m_dScale - m_limits.y; }
-	void screen(const DPoint2 &p, wxPoint &sp) const
+	// transform world space -> screen space
+	void screen(const DPoint2 &p, DPoint2 &sp) const
 	{
-		sp.x = (int)(p.x*m_dScale - m_limits.x);
-		sp.y = (int)(-p.y*m_dScale - m_limits.y);
+		sp = (p - m_offset)*m_dScale;
 	}
-	void screen(const OGRPoint *p, wxPoint &sp) const
+	void screen(const OGRPoint *p, DPoint2 &sp) const
 	{
-		sp.x = (int)(p->getX()*m_dScale - m_limits.x);
-		sp.y = (int)(-(p->getY())*m_dScale - m_limits.y);
+		sp = (DPoint2(p->getX(), p->getY()) - m_offset) * m_dScale;
 	}
-	// transform object space -> screen space (relative delta)
-	int	sdx(double x) const { return (int)(x*m_dScale); }
-	int	sdy(double y) const { return (int)(-y*m_dScale); }
-
-	wxPoint screen_delta(const DPoint2 &p) const
+	DPoint2 screen_delta(const DPoint2 &p) const
 	{
-		wxPoint sp;
-		sp.x = (int)(p.x*m_dScale);
-		sp.y = (int)(-p.y*m_dScale);
-		return sp;
+		return p * m_dScale;
 	}
 
-	// transform screen space -> object space
-	double ox(int x) const { return (x + m_limits.x) / m_dScale; }
-	double oy(int y) const { return -(y + m_limits.y) / m_dScale; }
-	void object(const wxPoint &sp, DPoint2 &p) const
+	// transform screen space -> world space
+	void world(const wxPoint &sp, DPoint2 &p) const
 	{
-		p.x = (sp.x + m_limits.x) / m_dScale;
-		p.y = -(sp.y + m_limits.y) / m_dScale;
+		p = DPoint2(sp.x, sp.y) / m_dScale + m_offset;
+	}
+	DPoint2 world_delta(const DPoint2 &p)
+	{
+		return p / m_dScale;
+	}
+	DPoint2 world_delta(int pixels)
+	{
+		return DPoint2(pixels / m_dScale, pixels / m_dScale);
 	}
 
-	// transform screen space -> object space (relative delta)
-	double odx(int x) const { return x/m_dScale; }
-	double ody(int y) const { return -y/m_dScale; }
+	void SetColor(const RGBi &color);
+	void DrawLine(const DPoint2 &p0, const DPoint2 &p1);
+	void DrawLine(double p1x, double p1y, double p2x, double p2y);
+	void DrawXHair(const DPoint2 &p, int pixelSize);
+	void DrawRectangle(const DRECT &rect);
+	void DrawPolyLine(const DLine2 &line, bool bClose);
+	void DrawPolygon(const DPolygon2 &poly, bool bFill);
 
-	int ProjectPolyline(wxDC *pDC, const DLine2 &dline, bool bClose);
-	void DrawLine(wxDC *pDC, const DPoint2 &p0, const DPoint2 &p1);
-	void DrawPolyLine(wxDC *pDC, const DLine2 &line, bool bClose);
-	void DrawDoubleLine(wxDC *pDC, const DLine2 &line,
-		const DLine2 &left_offset, const DLine2 &right_offset);
-	void DrawPolygon(wxDC *pDC, const DPolygon2 &poly, bool bFill);
+	void DrawOGRLinearRing(const OGRLinearRing *line, bool bCircles);
+	void DrawOGRPolygon(const OGRPolygon &poly, bool bFill, bool bCircles);
+	void DrawDPolygon2(const DPolygon2 &poly, bool bFill, bool bCircles);
 
-	void DrawOGRLinearRing(wxDC *pDC, const OGRLinearRing *line, bool bCircles);
-	void DrawOGRPolygon(wxDC *pDC, const OGRPolygon &poly, bool bFill, bool bCircles);
-	void DrawDPolygon2(wxDC *pDC, const DPolygon2 &poly, bool bFill, bool bCircles);
+	void GetViewParams(double &scale, DPoint2 &offset)
+	{
+		scale = m_dScale;
+		offset = m_offset;
+	}
 
 protected:
-	void UpdateRanges();
-
-	double	m_dScale;	// pixels per UTM meter/pixel per degree
-	wxRect	m_limits;	// allowed range of m_offset
+	double	m_dScale;	// pixels per geographic unit
+	DPoint2 m_offset;
 };
 
-#define SCREENBUF_SIZE 32000
-extern wxPoint g_screenbuf[SCREENBUF_SIZE];
-
-#endif

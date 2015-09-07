@@ -420,7 +420,7 @@ bool vtImage::GetExtent(DRECT &rect) const
 	return true;
 }
 
-void vtImage::DrawToView(wxDC *pDC, vtScaledView *pView)
+void vtImage::DrawToView(vtScaledView *pView)
 {
 	bool bDrawImage = true;
 
@@ -445,106 +445,18 @@ void vtImage::DrawToView(wxDC *pDC, vtScaledView *pView)
 	if (pBitmap == NULL)
 		bDrawImage = false;
 
-	const wxRect screenrect = pView->WorldToCanvas(m_Extents);
-
 	if (!bDrawImage)
 	{
 		// Draw placeholder yellow frame
-		wxPen yellow(wxColor(255,255,0), 1, wxSOLID);
-		pDC->SetLogicalFunction(wxCOPY);
-		pDC->SetPen(yellow);
-
-		DrawRectangle(pDC, screenrect, true);
+		glColor3f(1.0f, 1.0f, 0.0f);
+		pView->DrawRectangle(m_Extents);
 		return;
 	}
 
-	//clip stuff, so we only blit what we need
-	int client_width, client_height;
-	wxPoint client1, client2;
-
-	pView->GetClientSize(&client_width, &client_height); //get client window size
-	pView->CalcUnscrolledPosition(0, 0, &client1.x, &client1.y);
-	pView->CalcUnscrolledPosition(client_width, client_height, &client2.x, &client2.y);
-
-	wxRect destRect = screenrect;
-	if ((destRect.x + destRect.width < client1.x) ||
-		(destRect.y + destRect.height < client1.y) ||
-		(destRect.x > client2.x) ||
-		(destRect.y > client2.y))
-		return;		//image completely off screen
-
-	IPoint2 bitmap_size = pBitmap->GetSize();
-	wxRect srcRect(0, 0, bitmap_size.x, bitmap_size.y);
-	double ratio_x = (double) srcRect.width / destRect.width;
-	double ratio_y = (double) srcRect.height / destRect.height;
-
-	int diff, diff_source;
-
-	// clip left
-	diff = client1.x - destRect.x;
-	diff_source = (int)(diff * ratio_x); // round to number of whole pixels
-	diff = (int) (diff_source / ratio_x);
-	if (diff > 0)
-	{
-		destRect.x += diff;
-		destRect.width -= diff;
-		srcRect.x += diff_source;
-		srcRect.width -= diff_source;
-	}
-
-	// clip top
-	diff = client1.y - destRect.y;
-	diff_source = (int)(diff * ratio_y); // round to number of whole pixels
-	diff = (int) (diff_source / ratio_y);
-	if (diff > 0)
-	{
-		destRect.y += diff;
-		destRect.height -= diff;
-		srcRect.y += diff_source;
-		srcRect.height -= diff_source;
-	}
-
-	// clip right
-	diff = destRect.x + destRect.width - client2.x;
-	diff_source = (int)(diff * ratio_x); // round to number of whole pixels
-	diff = (int) (diff_source / ratio_x);
-	if (diff > 0)
-	{
-		destRect.width -= diff;
-		srcRect.width -= diff_source;
-	}
-
-	// clip bottom
-	diff = destRect.y + destRect.height - client2.y;
-	diff_source = (int)(diff * ratio_y); // round to number of whole pixels
-	diff = (int) (diff_source / ratio_y);
-	if (diff > 0)
-	{
-		destRect.height -= diff;
-		srcRect.height -= diff_source;
-	}
-
-#if WIN32
-	// Using StretchBlit is much faster and has less scaling/roundoff
-	//  problems than using the wx method DrawBitmap
-	::SetStretchBltMode((HDC) (pDC->GetHDC()), HALFTONE );
-
-	wxDC2 *pDC2 = (wxDC2 *) pDC;
-	pDC2->StretchBlit(*pBitmap->m_pBitmap, destRect.x, destRect.y,
-		destRect.width, destRect.height, srcRect.x, srcRect.y,
-		srcRect.width, srcRect.height);
-#else
-	// scale and draw the bitmap
-	// must use SetUserScale since StretchBlt is not available
-	double scale_x = 1.0/ratio_x;
-	double scale_y = 1.0/ratio_y;
-	pDC->SetUserScale(scale_x, scale_y);
-	pDC->DrawBitmap(*pBitmap->m_pBitmap, (int) (destRect.x/scale_x),
-		(int) (destRect.y/scale_y), false);
-
-	// restore
-	pDC->SetUserScale(1.0, 1.0);
-#endif
+	// TODO
+	//pDC2->StretchBlit(*pBitmap->m_pBitmap, destRect.x, destRect.y,
+	//	destRect.width, destRect.height, srcRect.x, srcRect.y,
+	//	srcRect.width, srcRect.height);
 }
 
 bool vtImage::ConvertProjection(vtImage *pOld, vtProjection &NewProj,
@@ -1957,7 +1869,7 @@ bool vtImage::WriteTile(const TilingOptions &opts, BuilderView *pView, vtString 
 
 	// also draw our progress in the main view
 	if (pView)
-		pView->ShowGridMarks(m_Extents, opts.cols, opts.rows, col, opts.rows-1-row);
+		pView->SetGridMarks(m_Extents, opts.cols, opts.rows, col, opts.rows-1-row);
 
 	// First, fill a buffer with the uncompressed texels
 	uchar *rgb_bytes = (uchar *) malloc(tilesize * tilesize * 3);

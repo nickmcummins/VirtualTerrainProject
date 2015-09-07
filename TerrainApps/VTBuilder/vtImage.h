@@ -94,7 +94,7 @@ public:
 
 	bool GetExtent(DRECT &rect) const;
 	void SetExtent(const DRECT &rect);
-	void DrawToView(wxDC *pDC, vtScaledView *pView);
+	void DrawToView(vtScaledView *pView);
 	bool ConvertProjection(vtImage *input, vtProjection &proj_new,
 						   int iSampleN, bool progress_callback(int) = NULL);
 

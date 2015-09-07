@@ -1,12 +1,11 @@
 //
 // BuilderView.h
 //
-// Copyright (c) 2001-2008 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef BUILDERVIEWH
-#define BUILDERVIEWH
+#pragma once
 
 #include "ScaledView.h"
 #include "vtdata/Projections.h"
@@ -85,7 +84,7 @@ struct UIContext
 	// Mouse in world coordinates
 	DPoint2 m_DownLocation;
 	DPoint2 m_CurLocation;
-	DPoint2 m_PrevLocation;
+	DPoint2 m_LastLocation;
 
 	// Mouse in canvas coords
 	wxPoint	m_DownPoint;
@@ -104,7 +103,7 @@ public:
 		const wxSize& size = wxDefaultSize, const wxString& name = _T(""));
 	virtual ~BuilderView();
 
-	virtual void OnDraw(wxDC& dc); // overridden to draw this view
+	virtual void OnPaint(wxPaintEvent& event); // overridden to draw this view
 
 	// Cursor
 	void SetCorrectCursor();
@@ -115,8 +114,8 @@ public:
 	void GetMouseLocation(DPoint2 &p);
 
 	// UTM zone boundary display
-	void DrawUTMBounds(wxDC *pDC);
-	void DrawDymaxionOutline(wxDC *pDC);
+	void DrawUTMBounds();
+	void DrawDymaxionOutline();
 
 	// World Map
 	void SetWMProj(const vtProjection &p);
@@ -137,7 +136,7 @@ public:
 	void SetShowScaleBar(bool bShow);
 	bool GetShowScaleBar() { return m_bScaleBar; }
 	void InvertAreaTool(const DRECT &rect);
-	void ShowGridMarks(const DRECT &area, int cols, int rows, int active_col, int active_row);
+	void SetGridMarks(const DRECT &area, int cols, int rows, int active_col, int active_row);
 	void HideGridMarks();
 	void SetDistanceToolMode(bool bPath);
 	bool GetDistanceToolMode();
@@ -147,7 +146,6 @@ public:
 	{ m_distance_path = path; }
 	void ClearDistanceTool();
 	void UpdateDistance();
-	void DrawInvertedLine(const DPoint2 &ep1, const DPoint2 &ep2);
 
 	void RunTest();
 
@@ -163,20 +161,19 @@ protected:
 
 	// Elevation
 	void CheckForTerrainSelect(const DPoint2 &loc);
-	void HighlightArea(wxDC *pDC, const DRECT &rect);
+	void HighlightArea(const DRECT &rect);
 
 	// Pan handlers
 	void BeginPan();
 	void EndPan();
-	void DoPan(wxPoint point);
+	void DoPan();
 
 	// Box handlers
 	void BeginBox();
 	void EndBox(const wxMouseEvent& event);
 	void EndBoxFeatureSelect(const wxMouseEvent& event);
-	void DoBox(wxPoint point);
 	void BeginArea();
-	void DoArea(wxPoint delta);
+	void UpdateAreaTool(const DPoint2 &delta);
 
 	// Mouse handlers
 	void OnLeftDown(wxMouseEvent& event);
@@ -201,10 +198,9 @@ protected:
 	void OnSize(wxSizeEvent& event);
 	void OnEraseBackground(wxEraseEvent& event);
 
-	void InvertRect(wxDC *pDC, const wxRect &r, bool bDashed = false);
-	void InvertRect(wxDC *pDC, const wxPoint &one, const wxPoint &two, bool bDashed = false);
-	void DrawAreaTool(wxDC *pDC, const DRECT &area);
-	void DrawDistanceTool(wxDC *pDC);
+	void DrawInverseRect(const DRECT &r, bool bDashed = false);
+	void DrawInverseRect(const DPoint2 &one, const DPoint2 &two, bool bDashed = false);
+	void DrawAreaTool(const DRECT &area);
 	void DrawDistanceTool();
 	void BeginDistance();
 
@@ -216,18 +212,12 @@ protected:
 	DPoint2 m_distance_p1, m_distance_p2;
 	DLine2 m_distance_path;
 
-	// Mouse in window coords
-	wxPoint m_DownClient;
-
 	// Used while mouse button is down
 	bool	m_bMouseMoved;
 	bool	m_bPanning;		// currently panning
 	bool	m_bScrolling;	// currently scrolling
 	bool	m_bBoxing;		// currently drawing a rubber box
 	int		m_iDragSide;	// which side of the area box being dragged
-
-	// Used while editing roads
-	void RefreshRoad(LinkEdit *pRoad);
 
 	wxCursor	*m_pCursorPan;
 	bool		m_bMouseCaptured;
@@ -244,25 +234,23 @@ protected:
 	OCTransform		*m_pMapToCurrent, *m_pCurrentToMap;
 
 	bool ImportWorldMap();
-	void DrawWorldMap(wxDC *pDC);
+	void DrawWorldMap();
 
 	// Grid marks
 	bool m_bShowGridMarks;
 	DRECT m_GridArea;
 	int m_iGridCols, m_iGridRows, m_iActiveCol, m_iActiveRow;
-	void DrawGridMarks(wxDC &dc);
+	void DrawGridMarks();
 
 	//--------------------------------
-	void DrawScaleBar(wxDC * dc);
 	void OnBeginScroll(wxScrollWinEvent & event);
 	void OnEndScroll(wxScrollWinEvent& event);
 	void OnOtherScrollEvents(wxScrollWinEvent & event);
 	wxRect m_ScaleBarArea;
 
 	UIContext m_ui;
+	wxGLContext *m_context;
 
 	DECLARE_EVENT_TABLE()
 };
-
-#endif
 

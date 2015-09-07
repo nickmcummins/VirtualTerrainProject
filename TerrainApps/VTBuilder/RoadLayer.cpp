@@ -48,9 +48,9 @@ bool vtRoadLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtRoadLayer::DrawLayer(wxDC *pDC, vtScaledView *pView)
+void vtRoadLayer::DrawLayer(vtScaledView *pView)
 {
-	Draw(pDC, pView, m_bDrawNodes);
+	Draw(pView, m_bDrawNodes);
 }
 
 bool vtRoadLayer::OnSave(bool progress_callback(int))
@@ -276,8 +276,7 @@ void vtRoadLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 		int closest_i = -1;
 		double dist;
 		ui.m_pEditingRoad->NearestPoint(ui.m_DownLocation, closest_i, dist);
-		const int pixels = pView->sdx(dist);
-		if (pixels < 8)
+		if (dist < pView->world_delta(8).x)
 		{
 			// begin dragging point
 			ui.m_iEditingPoint = closest_i;
@@ -288,30 +287,30 @@ void vtRoadLayer::OnLeftDown(BuilderView *pView, UIContext &ui)
 	}
 	if (ui.mode == LB_Dir)
 	{
-		LinkEdit *pLink = FindLink(ui.m_DownLocation, pView->odx(5));
+		LinkEdit *pLink = FindLink(ui.m_DownLocation, pView->world_delta(5).x);
 		if (pLink)
 		{
 			ToggleLinkDirection(pLink);
-			pView->RefreshRoad(pLink);
+			pView->Refresh();
 		}
 	}
 	if (ui.mode == LB_LinkEdit)
 	{
 		// see if there is a link or node at m_DownPoint
-		const float epsilon = pView->odx(5);
+		const float epsilon = pView->world_delta(5).x;
 
 		LinkEdit *pLink = FindLink(ui.m_DownLocation, epsilon);
 		if (pLink != ui.m_pEditingRoad)
 		{
 			if (ui.m_pEditingRoad)	// Un-highlight previously hightlighted
 			{
-				pView->RefreshRoad(ui.m_pEditingRoad);
+				pView->Refresh();
 				ui.m_pEditingRoad->m_bDrawPoints = false;
 			}
 			ui.m_pEditingRoad = pLink;
 			if (ui.m_pEditingRoad)	// Highlight the currently hightlighted
 			{
-				pView->RefreshRoad(ui.m_pEditingRoad);
+				pView->Refresh();
 				ui.m_pEditingRoad->m_bDrawPoints = true;
 			}
 		}
@@ -330,12 +329,12 @@ void vtRoadLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 	if (ui.m_pEditingRoad != NULL && ui.m_iEditingPoint >= 0)
 	{
 		LinkEdit *le = ui.m_pEditingRoad;
-		pView->RefreshRoad(le);	// erase where it was
 		DPoint2 p = le->GetAt(ui.m_iEditingPoint);
 		p += (ui.m_CurLocation - ui.m_DownLocation);
 		le->SetAt(ui.m_iEditingPoint, p);
 		le->Dirtied();
-		pView->RefreshRoad(le);	// draw where it is now
+
+		pView->Refresh();
 
 		// see if we changed the first or last point, affects some node
 		int num_points = le->GetSize();
@@ -385,7 +384,7 @@ void vtRoadLayer::OnLeftDoubleClick(BuilderView *pView, UIContext &ui)
 	DRECT world_bound, bound2;
 
 	// epsilon is how close to the link/node can we be off by?
-	float epsilon = pView->odx(5);
+	double epsilon = pView->world_delta(5).x;
 	bool bRefresh = false;
 
 	if (ui.mode == LB_Node)
@@ -402,9 +401,7 @@ void vtRoadLayer::OnLeftDoubleClick(BuilderView *pView, UIContext &ui)
 	}
 	if (bRefresh)
 	{
-		wxRect screen_bound = pView->WorldToWindow(world_bound);
-		IncreaseRect(screen_bound, 5);
-		pView->Refresh(TRUE, &screen_bound);
+		pView->Refresh();
 	}
 }
 
@@ -419,13 +416,14 @@ void vtRoadLayer::OnMouseMove(BuilderView *pView, UIContext &ui)
 			int closest_i = -1;
 			double dist;
 			ui.m_pEditingRoad->NearestPoint(ui.m_CurLocation, closest_i, dist);
-			const int pixels = pView->sdx(dist);
-			if (pixels < 8)
+
+			if (dist < pView->world_delta(8).x)
 				ui.m_pEditingRoad->m_iHighlightPoint = closest_i;
 			else
 				ui.m_pEditingRoad->m_iHighlightPoint = -1;
+
 			if (previous != ui.m_pEditingRoad->m_iHighlightPoint)
-				pView->RefreshRoad(ui.m_pEditingRoad);
+				pView->Refresh();
 		}
 	}
 }
@@ -497,9 +495,6 @@ bool vtRoadLayer::EditNodesProperties(BuilderView *pView)
 	else
 		dlg.SetNode(NULL, this);
 
-	float fScale = pView->GetScale();
-	dlg.SetScale(fScale);
-
 	return (dlg.ShowModal() == wxID_OK);
 }
 
@@ -527,6 +522,8 @@ bool vtRoadLayer::EditLinksProperties(BuilderView *pView)
 	return (dlg.ShowModal() == wxID_OK);
 }
 
+/** Selected everything in the box, return true if anything was selected. 
+ */
 bool vtRoadLayer::SelectArea(const DRECT &box, bool nodemode, bool crossSelect)
 {
 	bool ret = false;

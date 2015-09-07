@@ -1,12 +1,11 @@
 //
 // RoadMapEdit.h
 //
-// Copyright (c) 2001-2012 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef ROADMAPEDIT
-#define ROADMAPEDIT
+#pragma once
 
 #include "vtdata/RoadMap.h"
 #include "vtdata/Selectable.h"
@@ -41,7 +40,7 @@ public:
 	//copies this node's properties to parameter node.
 	void Copy(NodeEdit *node);
 	//draws the node
-	bool Draw(wxDC *pDC, vtScaledView *pView);
+	bool Draw(vtScaledView *pView);
 	//brings up a node dialog to edit road properties
 	bool EditProperties(vtScaledView *pView, vtRoadLayer *pLayer);
 
@@ -87,7 +86,7 @@ public:
 	bool PartiallyInBounds(const DRECT &bound);
 
 	//draw the road
-	bool Draw(wxDC *pDC, vtScaledView *pView, bool bShowDirection = false,
+	bool Draw(vtScaledView *pView, bool bShowDirection = false,
 		bool bShowWidth = false);
 	// prepare to draw the road (estimate the left and right edges)
 	void ComputeDisplayedLinkWidth(const DPoint2 &ToMeters);
@@ -178,13 +177,13 @@ public:
 	//----------------------------------------------
 
 	// draw the road network in window, given size of drawing area
-	void Draw(wxDC *pDC, vtScaledView *pView, bool bNodes);
+	void Draw(vtScaledView *pView, bool bNodes);
 
 	// look at the road properties to guess what the intersections might be
 	void GuessIntersectionTypes();
 
 	// delete selected roads.
-	DRECT* DeleteSelected(int &nBounds);
+	bool DeleteSelected();
 
 	// find which road is within a given distance of a given point
 	LinkEdit *FindLink(const DPoint2 &point, float error);
@@ -214,7 +213,7 @@ public:
 	//return the number of selected roads
 	int NumSelectedLinks();
 	//deselect all (nodes and roads.
-	DRECT *DeSelectAll(int &numRegions);
+	bool DeSelectAll();
 
 protected:
 	void ApplyDLGAttributes(int road_type, int &lanes, SurfaceType &stype, int &priority);
@@ -232,5 +231,3 @@ protected:
 };
 
 typedef NodeEdit *NodeEditPtr;
-
-#endif

@@ -1,15 +1,12 @@
 //
 // Projections.h
 //
-// Copyright (c) 2001-2013 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
-//
-// Derived from public-domain USGS software.
 //
 /** \file Projections.h */
 
-#ifndef PROJECTIONSH
-#define PROJECTIONSH
+#pragma once
 
 //
 // Earth's diameter: 12756 km
@@ -223,4 +220,3 @@ extern GDALWrapper g_GDALWrapper;
 #  endif
 #endif
 
-#endif	// PROJECTIONSH

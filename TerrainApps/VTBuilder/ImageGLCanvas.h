@@ -1,12 +1,11 @@
 //
 // VTBuilder ImageGLCanvas.h
 //
-// Copyright (c) 2001-2012 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef HELPERH
-#define HELPERH
+#pragma once
 
 #include "vtdata/Projections.h"
 #include "vtdata/MathTypes.h"
@@ -35,8 +34,9 @@ void DoTextureCompress(uchar *rgb_bytes, vtMiniDatabuf &output_buf,
 class ImageGLCanvas : public wxGLCanvas
 {
 public:
-	ImageGLCanvas(wxWindow *parent, const wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition,
-	  const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT(""),
+	ImageGLCanvas(wxWindow *parent, const wxWindowID id = -1,
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		long style = 0, const wxString& name = wxT(""),
 	  int* gl_attrib = NULL);
 	~ImageGLCanvas();
 
@@ -55,5 +55,3 @@ protected:
 #if SUPPORT_SQUISH
 void DoTextureSquish(uchar *rgb_bytes, vtMiniDatabuf &output_buf, bool bFast);
 #endif
-
-#endif	// HELPERH
