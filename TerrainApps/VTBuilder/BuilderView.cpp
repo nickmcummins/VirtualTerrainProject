@@ -864,25 +864,25 @@ void BuilderView::SetActiveLayer(vtLayerPtr lp)
 void BuilderView::HighlightArea(const DRECT &rect)
 {
 	glColor3f(1, 1, 1);	// White
-	glLogicOp(GL_INVERT);
+	PushLogicOp(GL_XOR);
+	glLineWidth(3);
 
 	const double sx = rect.Width() / 3;
 	const double sy = rect.Height() / 3;
 	const DPoint2 d = PixelsToWorld(2), e = PixelsToWorld(4);
 
-	DrawLine(rect.left - e.x, rect.top - d.y, rect.left - e.x, rect.top + sy);
-	DrawLine(rect.left - d.x, rect.top - e.y, rect.left + sx, rect.top - e.y);
+	DrawLine(rect.left - e.x, rect.top + d.y, rect.left - e.x, rect.top - sy);
+	DrawLine(rect.left - d.x, rect.top + e.y, rect.left + sx, rect.top + e.y);
 
-	DrawLine(rect.right - sx, rect.top - e.y, rect.right + e.x, rect.top - e.y);
-	DrawLine(rect.right + e.x, rect.top - d.y, rect.right + e.x, rect.top + sy);
+	DrawLine(rect.right - sx, rect.top + e.y, rect.right + e.x, rect.top + e.y);
+	DrawLine(rect.right + e.x, rect.top + d.y, rect.right + e.x, rect.top - sy);
 	
-	DrawLine(rect.right + e.x, rect.bottom - sy, rect.right + e.x, rect.bottom + d.y);
-	DrawLine(rect.right - sx, rect.bottom + e.y,  rect.right + e.x, rect.bottom + e.y);
+	DrawLine(rect.right + e.x, rect.bottom + sy, rect.right + e.x, rect.bottom - d.y);
+	DrawLine(rect.right - sx, rect.bottom - e.y,  rect.right + e.x, rect.bottom - e.y);
 	
-	DrawLine(rect.left - e.x, rect.bottom - sy, rect.left - e.x, rect.bottom + d.y);
-	DrawLine(rect.left + sx, rect.bottom + e.y,  rect.left - e.x, rect.bottom + e.y);
-
-	glLogicOp(GL_COPY);
+	DrawLine(rect.left - e.x, rect.bottom + sy, rect.left - e.x, rect.bottom - d.y);
+	DrawLine(rect.left + sx, rect.bottom - e.y,  rect.left - e.x, rect.bottom - e.y);
+	glLineWidth(1);
 }
 
 ////////////////////////////////////////////////////////////

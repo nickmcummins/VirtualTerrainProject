@@ -26,7 +26,7 @@ public:
 	AttribMap();
 	~AttribMap();
 
-	bool Load(const char *fname_att, const char *fname_bmp);
+	bool Load(const char *filename_attrib, const char *filename_png);
 	int GetAttribute(float utm_x, float utm_y);
 
 	int m_iNumAttribs;

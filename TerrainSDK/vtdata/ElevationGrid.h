@@ -14,7 +14,6 @@
 #include "HeightField.h"
 #include "vtString.h"
 
-class vtDIB;
 class GDALDataset;
 
 /**
@@ -104,7 +103,6 @@ public:
 	// Save
 	bool SaveTo3TX(const char *szFileName, bool progress_callback(int) = NULL) const;
 	bool SaveToGeoTIFF(const char *szFileName) const;
-	bool SaveToBMP(const char *szFileName) const;
 	bool SaveToTerragen(const char *szFileName) const;
 	bool SaveToBT(const char *szFileName, bool progress_callback(int) = NULL, bool bGZip = false);
 	bool SaveToSTM(const char *szFileName, bool progress_callback(int) = NULL);

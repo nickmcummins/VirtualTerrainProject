@@ -2,7 +2,8 @@
 add_library(unzip ioapi.c iowin32.c unzip.c ioapi.h iowin32.h unzip.h)
 
 # Make the debug configuration have a postfix on the output target
-set_target_properties(unzip PROPERTIES DEBUG_POSTFIX "d")
+# This seems to cause trouble with the .pdb not getting the postfix
+#set_target_properties(unzip PROPERTIES DEBUG_POSTFIX "d")
 
 if(ZLIB_FOUND)
 	include_directories(${ZLIB_INCLUDE_DIR})

@@ -1612,37 +1612,6 @@ bool vtElevationGrid::SaveToGeoTIFF(const char *szFileName) const
 	return true;
 }
 
-
-/**
- * Write the elevation grid to a 8-bit BMP file.  Much information is lost,
- * including precision, sign, and geographic location.
- */
-bool vtElevationGrid::SaveToBMP(const char *szFileName) const
-{
-	// We must scale from our actual range down to 8 bits
-	float fMin = m_fMinHeight;
-	if (fMin < 0)
-		fMin = 0;
-	float fMax = m_fMaxHeight;
-	float fRange = fMax - fMin;
-	float fScale = (fRange == 0.0f ? 0.0f : 255.0f / fRange);
-
-	vtDIB dib;
-	if (!dib.Create(m_iSize, 8, true))
-		return false;
-
-	for (int x = 0; x < m_iSize.x; x++)
-	{
-		for (int y = 0; y < m_iSize.y; y++)
-		{
-			const float value = GetFValue(x, y);
-			dib.SetPixel8(x, y, (uchar) ((value - fMin) * fScale));
-		}
-	}
-	return dib.WriteBMP(szFileName);
-}
-
-
 /**
  * Loads an elevation grid using the GDAL library.  The GDAL library
  * supports a very large number of formats, including SDTS-DEM.  See
@@ -3139,7 +3108,7 @@ bool vtElevationGrid::SaveToPNG16(const char *fname)
 		row_pointers[k] = image + k*width*2;
 
 	short val;
-	byte *adr = (byte *) &val;
+	uint8_t *adr = (uint8_t *) &val;
 	uint row, col;
 	for (row = 0; row < height; row++)
 	{

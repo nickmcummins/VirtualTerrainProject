@@ -549,18 +549,17 @@ bool MainFrame::ReadINI(const char *fname)
 	if (!fpIni)
 		return false;
 
-	int ShowMap, ShowElev, ShadeQuick, DoMask, DoUTM, ShowPaths, DrawWidth,
-		CastShadows, ShadeDot=0, Angle=30, Direction=45;
+	int ShowMap, ShowElev, ShadeQuick, DoUTM, ShowPaths, DrawWidth,
+		CastShadows, ShadeDot=0, Angle=30, Direction=45, dummy;
 	float Ambient = 0.1f;
 	float Gamma = 0.8f;
 	int quiet = fscanf(fpIni, "%d %d %d %d %d %d %d %d %d %d %d %f %f", &ShowMap,
-		&ShowElev, &ShadeQuick, &DoMask, &DoUTM, &ShowPaths, &DrawWidth,
+		&ShowElev, &ShadeQuick, &dummy, &DoUTM, &ShowPaths, &DrawWidth,
 		&CastShadows, &ShadeDot, &Angle, &Direction, &Ambient, &Gamma);
 
 	vtElevLayer::m_draw.m_bShowElevation = (ShowElev != 0);
 	vtElevLayer::m_draw.m_bShadingQuick = (ShadeQuick != 0);
 	vtElevLayer::m_draw.m_bShadingDot = (ShadeDot != 0);
-	vtElevLayer::m_draw.m_bDoMask = (DoMask != 0);
 	vtElevLayer::m_draw.m_bCastShadows = (CastShadows != 0);
 	vtElevLayer::m_draw.m_iCastAngle = Angle;
 	vtElevLayer::m_draw.m_iCastDirection = Direction;

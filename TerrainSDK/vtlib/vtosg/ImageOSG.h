@@ -56,7 +56,7 @@ public:
 protected:
 //	bool _Read(const char *fname, bool bAllowCache = true, bool progress_callback(int) = NULL);
 	void _BasicInit();
-	void _CreateFromDIB(vtDIB *pDIB, bool b16bit = false);
+	void _CreateFromDIB(const vtDIB *pDIB, bool b16bit = false);
 	bool _ReadPNG(const char *filename);
 };
 typedef osg::ref_ptr<vtImage> vtImagePtr;

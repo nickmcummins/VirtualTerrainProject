@@ -10,14 +10,13 @@
 #include "wx/image.h"
 #include "vtdata/ElevationGrid.h"
 #include "vtdata/HeightField.h"
+#include "vtdata/vtDIB.h"
 #include "Layer.h"
 #include "ElevDrawOptions.h"
 #include "TilingOptions.h"
 
 #define SHADING_BIAS	200
 
-class vtBitmap;
-class vtDIB;
 class vtElevationGrid;
 class vtFeatureSet;
 class vtTin2d;
@@ -61,8 +60,6 @@ public:
 	void OnLeftUp(BuilderView *pView, UIContext &ui);
 	void OnMouseMove(BuilderView *pView, UIContext &ui);
 
-	void DrawLayerBitmap(vtScaledView *pView);
-	void DrawLayerOutline(vtScaledView *pView);
 	bool AppendDataFrom(vtLayer *pL);
 	void ReRender();
 	void ReImage();
@@ -96,9 +93,11 @@ public:
 	void MergeSharedVerts(bool bSilent = false);
 	void SetupTinTriangleBins(int target_triangles_per_bin);
 
-	// drawing
+	// Drawing
 	void SetupBitmap();
 	void RenderBitmap();
+	void DrawLayerBitmap(vtScaledView *pView);
+	void DrawLayerOutline(vtScaledView *pView);
 	static void SetupDefaultColors(ColorMap &cmap);
 
 	static ElevDrawOptions m_draw;
@@ -117,15 +116,14 @@ protected:
 
 	bool	m_bNeedsDraw;
 	bool	m_bBitmapRendered;
-	bool	m_bHasMask;
 	float	m_fSpacing;
 	bool	m_bPreferGZip;	// user wants their elevation treated as a .gz file
 	DPoint2 mTrim1, mTrim2;
 
 	IPoint2 m_ImageSize;
 
-	vtBitmap	*m_pBitmap;
-	wxMask		*m_pMask;
+	vtDIB	m_Bitmap;
+	unsigned int m_iTextureId;
 };
 
 // Helpers

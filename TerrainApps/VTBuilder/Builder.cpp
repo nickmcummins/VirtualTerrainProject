@@ -692,7 +692,6 @@ void Builder::SetOptionDefaults()
 	g_Options.SetValueBool(TAG_SHADING_QUICK, true, true);
 	g_Options.SetValueBool(TAG_SHADING_DOT, false, true);
 	g_Options.SetValueBool(TAG_CAST_SHADOWS, false, true);
-	g_Options.SetValueBool(TAG_DO_MASK, true, true);
 	g_Options.SetValueInt(TAG_CAST_ANGLE, 20, true);
 	g_Options.SetValueInt(TAG_CAST_DIRECTION, 45, true);
 	g_Options.SetValueFloat(TAG_AMBIENT, 0.25f, true);

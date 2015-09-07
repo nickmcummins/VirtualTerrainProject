@@ -551,7 +551,7 @@ bool vtTiledGeom::ReadTileList(const char *dataset_fname_elev,
 			}
 			if (elev_exists)
 			{
-				hfields[i+cols*j] = new byte[str.GetLength()+1];
+				hfields[i+cols*j] = new uint8_t[str.GetLength()+1];
 				strcpy((char *) hfields[i+cols*j], str);
 			}
 			else
@@ -582,7 +582,7 @@ bool vtTiledGeom::ReadTileList(const char *dataset_fname_elev,
 			}
 			if (image_exists)
 			{
-				textures[i+cols*j] = new byte[str.GetLength()+1];
+				textures[i+cols*j] = new uint8_t[str.GetLength()+1];
 				strcpy((char *) textures[i+cols*j], str);
 			}
 			else

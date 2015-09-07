@@ -452,45 +452,6 @@ vtPlantSpecies3d *vtSpeciesList3d::GetSpecies(uint i) const
 
 ////////////
 
-#if 0
-// forest_derived_from_image
-
-	for (i = 0; i < pDIB->m_iWidth; i += step)
-	{
-		a = (i * FOREST_CLUSTER / pDIB->m_iWidth);
-		if (a == FOREST_CLUSTER)
-			break;
-		for (j = 0; j < pDIB->m_iHeight; j += step)
-		{
-			b = (j * FOREST_CLUSTER / pDIB->m_iHeight);
-			pixel = pDIB->GetPixel(i, pDIB->m_iHeight - 1 - j);
-
-			// yes, it's BACKWARDS.  Not sure why, but it is BGR, blue green red
-			blue = GetRValue(pixel);
-			green = GetGValue(pixel);
-			red = GetBValue(pixel);
-
-			if (red <= 86 &&
-				green >= 76 && green <= 178 &&
-				blue <= 62)
-				probability = 0.8f;		// probably forest
-			else
-			if (red >= 87 && red <= 140 &&
-				green >= 76 && green <= 220 &&
-				blue <= 86)
-				probability = 0.1f;		// might have scattered trees (eg. pasture)
-			else
-				probability = 0.0f;		// no trees
-
-			if (random(1.0f) < probability)
-			{
-				tree_count++;
-			}
-		}
-	}
-#endif
-
-
 int vtSpeciesList3d::CheckAvailability()
 {
 	VTLOG("vtSpeciesList3d checking availability of %d species.\n",

@@ -106,169 +106,49 @@ void vtBitmapBase::BlitTo(vtBitmapBase &target, int x, int y)
 // Class vtDIB
 //
 
-#ifndef _WINGDI_
-
-#ifdef _MSC_VER
-#include <pshpack2.h>
-#endif
-
-#ifdef __GNUC__
-#  define PACKED __attribute__((packed))
-#else
-#  define PACKED
-#endif
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-typedef struct tagBITMAPFILEHEADER {
-	word	bfType;
-	dword   bfSize;
-	word	bfReserved1;
-	word	bfReserved2;
-	dword   bfOffBits;
-} PACKED BITMAPFILEHEADER;
-
-#ifdef _MSC_VER
-#include <poppack.h>
-#endif
-
-typedef struct tagBITMAPINFOHEADER{
-	dword	biSize;
-	long	biWidth;
-	long	biHeight;
-	word	biPlanes;
-	word	biBitCount;
-	dword	biCompression;
-	dword	biSizeImage;
-	long	biXPelsPerMeter;
-	long	biYPelsPerMeter;
-	dword	biClrUsed;
-	dword	biClrImportant;
-} PACKED BITMAPINFOHEADER;
-
-typedef struct tagRGBQUAD {
-	byte	rgbBlue;
-	byte	rgbGreen;
-	byte	rgbRed;
-	byte	rgbReserved;
-} PACKED RGBQUAD;
-
-#endif	// DOXYGEN_SHOULD_SKIP_THIS
-
-/* constants for the biCompression field */
-#define BI_RGB			0L
-#define BI_RLE8			1L
-#define BI_RLE4			2L
-#define BI_BITFIELDS	3L
-
-#endif // #ifndef _WINGDI_
-
 /**
  * Create a new empty DIB wrapper.
  */
 vtDIB::vtDIB()
 {
 	m_bLoadedSuccessfully = false;
-	m_bLeaveIt = false;
-	m_pDIB = NULL;
+	m_Data = NULL;
 }
-
-
-vtDIB::vtDIB(void *pDIB)
-{
-	m_pDIB = pDIB;
-
-	m_Hdr = (BITMAPINFOHEADER *) m_pDIB;
-	m_Data = ((byte *)m_Hdr) + sizeof(BITMAPINFOHEADER) + m_iPaletteSize;
-
-	m_iWidth = m_Hdr->biWidth;
-	m_iHeight = m_Hdr->biHeight;
-	m_iBitCount = m_Hdr->biBitCount;
-	m_iByteCount = m_iBitCount/8;
-
-	_ComputeByteWidth();
-}
-
 
 vtDIB::~vtDIB()
 {
-	// Only free the encapsulated DIB if we're allowed to
-	if (!m_bLeaveIt)
-	{
-		if (m_pDIB != NULL)
-			free(m_pDIB);
-		m_pDIB = NULL;
-	}
+	if (m_Data != NULL)
+		free(m_Data);
+	m_Data = NULL;
 }
 
 
 /**
  * Create a new DIB in memory.
  */
-bool vtDIB::Create(const IPoint2 &size, int bitdepth, bool create_palette)
+bool vtDIB::Create(const IPoint2 &size, int bitdepth)
 {
 	m_iWidth = size.x;
 	m_iHeight = size.y;
-	m_iBitCount = bitdepth;
-	m_iByteCount = m_iBitCount/8;
+	m_iByteCount = bitdepth /8;
 
-	_ComputeByteWidth();
+	// compute the width in bytes of each scanline (with DIB padding)
+	m_iByteWidth = ((m_iWidth * bitdepth + 31) / 32 * 4);
 
-	int ImageSize = m_iByteWidth * m_iHeight;
-
-	int PaletteColors = create_palette ? 256 : 0;
-	m_iPaletteSize = sizeof(RGBQUAD) * PaletteColors;
-
-	int total_size = sizeof(BITMAPINFOHEADER) + m_iPaletteSize + ImageSize;
-	m_pDIB = malloc(total_size);
-	if (!m_pDIB)
+	const int ImageSize = m_iByteWidth * m_iHeight;
+	m_Data = malloc(ImageSize);
+	if (!m_Data)
 	{
-		VTLOG("Could not allocate %d bytes\n", total_size);
+		VTLOG("Could not allocate %d bytes\n", ImageSize);
 		return false;
 	}
-
-	m_Hdr = (BITMAPINFOHEADER *) m_pDIB;
-	m_Data = ((byte *)m_Hdr) + sizeof(BITMAPINFOHEADER) + m_iPaletteSize;
-
-	m_Hdr->biSize = sizeof(BITMAPINFOHEADER);
-	m_Hdr->biWidth = size.x;
-	m_Hdr->biHeight = size.y;
-	m_Hdr->biPlanes = 1;
-	m_Hdr->biBitCount = (word) bitdepth;
-	m_Hdr->biCompression = BI_RGB;
-	m_Hdr->biSizeImage = ImageSize;
-	m_Hdr->biClrUsed = PaletteColors;
-	m_Hdr->biClrImportant = 0;
-
-	if (create_palette)
-	{
-		RGBQUAD *rgb=(RGBQUAD*)((char*)m_Hdr + sizeof(BITMAPINFOHEADER));
-		for (int i=0; i<256; i++)
-			rgb[i].rgbBlue = rgb[i].rgbGreen = rgb[i].rgbRed =
-				(uchar)i;
-	}
-	m_bLeaveIt = false;
 	return true;
 }
 
-bool vtDIB::Create24From8bit(const vtDIB &from)
+bool vtDIB::IsAllocated() const
 {
-	if (!Create(from.GetSize(), 24))
-		return false;
-
-	RGBi rgb;
-	uint i, j;
-	for (i = 0; i < m_iWidth; i++)
-	{
-		for (j = 0; j < m_iHeight; j++)
-		{
-			from.GetPixel24From8bit(i, j, rgb);
-			SetPixel24(i, j, rgb);
-		}
-	}
-	return true;
+	return (m_Data != nullptr);
 }
-
 
 /**
  * Read a image file into the DIB.  This method will check to see if the
@@ -283,188 +163,12 @@ bool vtDIB::Read(const char *fname, bool progress_callback(int))
 	if (fread(buf, 2, 1, fp) != 1)
 		return false;
 	fclose(fp);
-	if (buf[0] == 0x42 && buf[1] == 0x4d)
-		return ReadBMP(fname, progress_callback);
-	else if (buf[0] == 0xFF && buf[1] == 0xD8)
+	if (buf[0] == 0xFF && buf[1] == 0xD8)
 		return ReadJPEG(fname, progress_callback);
 	else if (buf[0] == 0x89 && buf[1] == 0x50)
 		return ReadPNG(fname, progress_callback);
 	return false;
 }
-
-
-/**
- * Read a MSWindows-style .bmp file into the DIB.
- */
-bool vtDIB::ReadBMP(const char *fname, bool progress_callback(int))
-{
-	BITMAPFILEHEADER	bitmapHdr;
-	int MemorySize;
-
-	FILE *fp = vtFileOpen(fname, "rb");
-	if (!fp)
-		return false;
-
-	// allocate enough room for the header
-	m_pDIB = malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));
-	if (!m_pDIB)
-		return false;
-
-	m_Hdr = (BITMAPINFOHEADER *) m_pDIB;
-
-	if (fread(&bitmapHdr, 14, 1, fp) == 0)
-		goto ErrExit;
-	bitmapHdr.bfType	= SwapBytes( (short)bitmapHdr.bfType  , BO_LE, BO_CPU );
-	bitmapHdr.bfSize	= SwapBytes( (long)bitmapHdr.bfSize   , BO_LE, BO_CPU );
-	bitmapHdr.bfOffBits = SwapBytes( (long)bitmapHdr.bfOffBits, BO_LE, BO_CPU );
-
-	if (bitmapHdr.bfType != 0x4d42)
-		goto ErrExit;
-
-	if (fread(m_Hdr, sizeof(BITMAPINFOHEADER), 1, fp) == 0)
-		goto ErrExit;
-	m_Hdr->biSize			= SwapBytes( (long )m_Hdr->biSize		,BO_LE, BO_CPU );
-	m_Hdr->biWidth			= SwapBytes( (long )m_Hdr->biWidth		,BO_LE, BO_CPU );
-	m_Hdr->biHeight			= SwapBytes( (long )m_Hdr->biHeight		,BO_LE, BO_CPU );
-	m_Hdr->biPlanes			= SwapBytes( (short)m_Hdr->biPlanes		,BO_LE, BO_CPU );
-	m_Hdr->biBitCount		= SwapBytes( (short)m_Hdr->biBitCount	,BO_LE, BO_CPU );
-	m_Hdr->biCompression	= SwapBytes( (long )m_Hdr->biCompression,BO_LE, BO_CPU );
-	m_Hdr->biSizeImage		= SwapBytes( (long )m_Hdr->biSizeImage	,BO_LE, BO_CPU );
-	m_Hdr->biXPelsPerMeter	= SwapBytes( (long )m_Hdr->biXPelsPerMeter,BO_LE, BO_CPU );
-	m_Hdr->biYPelsPerMeter	= SwapBytes( (long )m_Hdr->biYPelsPerMeter,BO_LE, BO_CPU );
-	m_Hdr->biClrUsed		= SwapBytes( (long )m_Hdr->biClrUsed	  ,BO_LE, BO_CPU );
-	m_Hdr->biClrImportant	= SwapBytes( (long )m_Hdr->biClrImportant ,BO_LE, BO_CPU );
-
-	if (m_Hdr->biCompression != BI_RGB)
-	{
-		if (m_Hdr->biBitCount == 32 &&
-			m_Hdr->biCompression != BI_BITFIELDS)
-		   goto ErrExit;
-	}
-
-	if (m_Hdr->biBitCount != 8
-				&& m_Hdr->biBitCount != 16
-				&& m_Hdr->biBitCount != 4
-				&& m_Hdr->biBitCount != 32
-			&& m_Hdr->biBitCount != 24)
-	{
-		goto ErrExit;
-	}
-
-	if (m_Hdr->biClrUsed == 0)
-	{
-		if ( m_Hdr->biBitCount != 24)
-			m_Hdr->biClrUsed = 1 << m_Hdr->biBitCount;
-	}
-
-	if (m_Hdr->biSizeImage == 0)
-	{
-		m_Hdr->biSizeImage =
-			((((m_Hdr->biWidth * (long )m_Hdr->biBitCount) + 31) & ~31) >> 3)
-			 * m_Hdr->biHeight;
-	}
-
-	m_iPaletteSize = m_Hdr->biClrUsed * sizeof(RGBQUAD);
-	MemorySize = m_Hdr->biSize + m_iPaletteSize + m_Hdr->biSizeImage;
-	m_pDIB = realloc(m_pDIB, MemorySize);
-	if (!m_pDIB)
-		return false;
-
-	m_Hdr = (BITMAPINFOHEADER *) m_pDIB;
-	m_Data = ((byte *)m_Hdr) + sizeof(BITMAPINFOHEADER) + m_iPaletteSize;
-
-	// read palette
-	fread(((char *)m_Hdr) + m_Hdr->biSize, m_iPaletteSize, 1, fp);
-
-	fseek(fp, bitmapHdr.bfOffBits, SEEK_SET);
-
-	if (progress_callback != NULL)
-	{
-		char *target = ((char *)m_Hdr) + m_Hdr->biSize + m_iPaletteSize;
-		// Read it a row at a time;
-		int row_length = m_Hdr->biSizeImage / m_Hdr->biHeight;
-		for (int r = 0; r < m_Hdr->biHeight; r++)
-		{
-			fread(target + (row_length*r), row_length, 1, fp);
-			progress_callback(r * 100 / m_Hdr->biHeight);
-		}
-	}
-	else
-	{
-		// Read it in one big chunk
-		fread(((char *)m_Hdr) + m_Hdr->biSize + m_iPaletteSize, m_Hdr->biSizeImage, 1, fp);
-	}
-
-	// loaded OK
-	m_iWidth = m_Hdr->biWidth;
-	m_iHeight = m_Hdr->biHeight;
-	m_iBitCount = m_Hdr->biBitCount;
-	m_iByteCount = m_iBitCount/8;
-	m_iPaletteSize = sizeof(RGBQUAD) * m_Hdr->biClrUsed;
-
-	_ComputeByteWidth();
-	fclose(fp);
-	return true;
-
-ErrExit:
-	fclose(fp);
-	return false;
-}
-
-/**
- * Write a MSWindows-style .bmp file from the DIB.
- */
-bool vtDIB::WriteBMP(const char *fname)
-{
-	FILE *fp = vtFileOpen(fname, "wb");
-	if (!fp) return false;
-
-	// write file header
-	BITMAPFILEHEADER	bitmapHdr;
-	bitmapHdr.bfType = 0x4d42;
-	bitmapHdr.bfReserved1 = 0;
-	bitmapHdr.bfReserved2 = 0;
-	bitmapHdr.bfOffBits = 14 + 40 + m_iPaletteSize;		/* Header and colormap */
-	bitmapHdr.bfSize = bitmapHdr.bfOffBits + m_iByteWidth * m_iHeight;
-
-	bitmapHdr.bfType	= SwapBytes( (short)bitmapHdr.bfType  , BO_CPU, BO_LE );
-	bitmapHdr.bfSize	= SwapBytes( (long)bitmapHdr.bfSize   , BO_CPU, BO_LE );
-	bitmapHdr.bfOffBits = SwapBytes( (long)bitmapHdr.bfOffBits, BO_CPU, BO_LE );
-
-	fwrite(&bitmapHdr, 14, 1, fp);
-
-	// write bitmap header
-	BITMAPINFOHEADER t_Hdr = *m_Hdr;
-
-	t_Hdr.biSize		  = SwapBytes( (long )t_Hdr.biSize		 ,BO_CPU, BO_LE );
-	t_Hdr.biWidth		 = SwapBytes( (long )t_Hdr.biWidth		,BO_CPU, BO_LE );
-	t_Hdr.biHeight		= SwapBytes( (long )t_Hdr.biHeight	   ,BO_CPU, BO_LE );
-	t_Hdr.biPlanes		= SwapBytes( (short)t_Hdr.biPlanes	   ,BO_CPU, BO_LE );
-	t_Hdr.biBitCount	  = SwapBytes( (short)t_Hdr.biBitCount	 ,BO_CPU, BO_LE );
-	t_Hdr.biCompression   = SwapBytes( (long )t_Hdr.biCompression  ,BO_CPU, BO_LE );
-	t_Hdr.biSizeImage	 = SwapBytes( (long )t_Hdr.biSizeImage	,BO_CPU, BO_LE );
-	t_Hdr.biXPelsPerMeter = SwapBytes( (long )t_Hdr.biXPelsPerMeter,BO_CPU, BO_LE );
-	t_Hdr.biYPelsPerMeter = SwapBytes( (long )t_Hdr.biYPelsPerMeter,BO_CPU, BO_LE );
-	t_Hdr.biClrUsed	   = SwapBytes( (long )t_Hdr.biClrUsed	  ,BO_CPU, BO_LE );
-	t_Hdr.biClrImportant  = SwapBytes( (long )t_Hdr.biClrImportant ,BO_CPU, BO_LE );
-
-	fwrite(&t_Hdr, 40, 1, fp);
-
-	// write palette
-	if (m_iPaletteSize)
-	{
-		RGBQUAD *rgb=(RGBQUAD*)((char*)m_Hdr + sizeof(BITMAPINFOHEADER));
-		fwrite(rgb, m_iPaletteSize, 1, fp);
-	}
-
-	// write data
-	fwrite(m_Data, m_Hdr->biSizeImage, 1, fp);
-
-	// done
-	fclose(fp);
-	return true;
-}
-
 
 /**
  * Read a JPEG file. A DIB of the necessary size and depth is allocated.
@@ -495,7 +199,7 @@ bool vtDIB::ReadJPEG(const char *fname, bool progress_callback(int))
 		bitdepth = 8;
 	else
 		bitdepth = 24;
-	if (!Create(IPoint2(cinfo.image_width, cinfo.image_height), bitdepth, bitdepth == 8))
+	if (!Create(IPoint2(cinfo.image_width, cinfo.image_height), bitdepth))
 		return false;
 
 	/* Start decompressor */
@@ -517,7 +221,7 @@ bool vtDIB::ReadJPEG(const char *fname, bool progress_callback(int))
 			progress_callback(cinfo.output_scanline * 100 / cinfo.output_height);
 
 		JSAMPROW inptr = buffer[0];
-		byte *adr = ((byte *)m_Data) + (m_iHeight-1-cinfo.output_scanline)*m_iByteWidth;
+		uint8_t *adr = ((uint8_t *)m_Data) + (m_iHeight-1-cinfo.output_scanline)*m_iByteWidth;
 
 		num_scanlines = jpeg_read_scanlines(&cinfo, buffer,
 						buffer_height);
@@ -610,7 +314,7 @@ bool vtDIB::WriteJPEG(const char *fname, int quality, bool progress_callback(int
 		// Transfer data.  Note source values are in BGR order.
 		JSAMPROW outptr = row_buffer;
 		JSAMPROW adr = ((JSAMPROW)m_Data) + (m_iHeight-1-cinfo.next_scanline)*m_iByteWidth;
-		if (m_iBitCount == 8)
+		if (m_iByteCount == 1)
 		{
 			for (col = 0; col < m_iWidth; col++)
 				*outptr++ = *adr++;
@@ -746,7 +450,7 @@ bool vtDIB::ReadPNG(const char *fname, bool progress_callback(int))
 			return false;
 	}
 
-	Create(IPoint2(width, height), iBitCount, iBitCount == 8);
+	Create(IPoint2(width, height), iBitCount);
 
 	int png_stride = png_get_rowbytes(png, info);
 	uint row, col;
@@ -755,7 +459,7 @@ bool vtDIB::ReadPNG(const char *fname, bool progress_callback(int))
 		if (progress_callback != NULL)
 			progress_callback(row * 100 / height);
 
-		byte *adr = ((byte *)m_Data) + row*m_iByteWidth;
+		uint8_t *adr = ((uint8_t *)m_Data) + row*m_iByteWidth;
 		png_bytep inptr = m_pPngData + row*png_stride;
 		if (iBitCount == 8)
 		{
@@ -860,17 +564,12 @@ bool vtDIB::WritePNG(const char *fname)
 	*/
 	int color_type=0;	// set to 0 to avoid compiler warning
 	int png_bit_depth;
-	if (m_iBitCount <= 8)
-	{
-		color_type = PNG_COLOR_TYPE_PALETTE;
-		png_bit_depth = m_iBitCount;
-	}
-	if (m_iBitCount == 24)
+	if (m_iByteCount == 3)
 	{
 		color_type = PNG_COLOR_TYPE_RGB;
 		png_bit_depth = 8;
 	}
-	if (m_iBitCount == 32)
+	if (m_iByteCount == 4)
 	{
 		color_type = PNG_COLOR_TYPE_RGB_ALPHA;
 		png_bit_depth = 8;
@@ -879,21 +578,6 @@ bool vtDIB::WritePNG(const char *fname)
 	png_set_IHDR(png_ptr, info_ptr, m_iWidth, m_iHeight, png_bit_depth, color_type,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
-	if (m_iBitCount <= 8)
-	{
-		/* set the palette if there is one.  REQUIRED for indexed-color images */
-		palette = (png_colorp)png_malloc(png_ptr, PNG_MAX_PALETTE_LENGTH
-				 * sizeof (png_color));
-		RGBQUAD *rgb=(RGBQUAD*)((char*)m_Hdr + sizeof(BITMAPINFOHEADER));
-		int p;
-		for (p = 0; p < 256; p++)
-		{
-			palette[p].red = rgb[p].rgbRed;
-			palette[p].green = rgb[p].rgbGreen;
-			palette[p].red = rgb[p].rgbBlue;
-		}
-		png_set_PLTE(png_ptr, info_ptr, palette, PNG_MAX_PALETTE_LENGTH);
-	}
 	/* You must not free palette here, because png_set_PLTE only makes a link to
 	  the palette that you malloced.  Wait until you are about to destroy
 	  the png structure. */
@@ -923,14 +607,14 @@ bool vtDIB::WritePNG(const char *fname)
 	uint row, col;
 	for (row = 0; row < height; row++)
 	{
-		byte *adr = ((byte *)m_Data) + row*m_iByteWidth;
+		uint8_t *adr = ((uint8_t *)m_Data) + row*m_iByteWidth;
 		png_bytep pngptr = row_pointers[height-1-row];
-		if (m_iBitCount == 8)
+		if (m_iByteCount == 1)
 		{
 			for (col = 0; col < width; col++)
 				*pngptr++ = *adr++;
 		}
-		else if (m_iBitCount == 24)
+		else if (m_iByteCount == 3)
 		{
 			for (col = 0; col < width; col++)
 			{
@@ -940,7 +624,7 @@ bool vtDIB::WritePNG(const char *fname)
 				adr += 3;
 			}
 		}
-		else if (m_iBitCount == 32)
+		else if (m_iByteCount == 4)
 		{
 			for (col = 0; col < width; col++)
 			{
@@ -1022,7 +706,7 @@ bool vtDIB::WriteTIF(const char *fname, const DRECT *area,
 
 	char **papszParmList = NULL;
 	GDALDataset *pDataset;
-	if (m_iBitCount == 8)
+	if (m_iByteCount == 1)
 		pDataset = pDriver->Create(fname_local, m_iWidth, m_iHeight,
 			1, GDT_Byte, papszParmList );
 	else
@@ -1050,7 +734,7 @@ bool vtDIB::WriteTIF(const char *fname, const DRECT *area,
 
 	GDALRasterBand *pBand;
 
-	if (m_iBitCount == 8)
+	if (m_iByteCount == 1)
 	{
 		pBand = pDataset->GetRasterBand(1);
 		for (uint x = 0; x < m_iWidth; x++)
@@ -1092,21 +776,6 @@ bool vtDIB::WriteTIF(const char *fname, const DRECT *area,
 	return true;
 }
 
-void vtDIB::_ComputeByteWidth()
-{
-	// compute the width in bytes of each scanline (with DIB padding)
-	m_iByteWidth = (((m_iWidth)*(m_iBitCount) + 31) / 32 * 4);
-}
-
-/**
- * Pass true to indicate that the DIB should not free its internal memory
- * when the object is deleted.
- */
-void vtDIB::LeaveInternalDIB(bool bLeaveIt)
-{
-	m_bLeaveIt = bLeaveIt;
-}
-
 /**
  * Get a 24-bit RGB value from a 24-bit bitmap.
  *
@@ -1114,14 +783,14 @@ void vtDIB::LeaveInternalDIB(bool bLeaveIt)
  */
 uint vtDIB::GetPixel24(int x, int y) const
 {
-	register byte* adr;
+	register uint8_t* adr;
 
 	// note: Most processors don't support unaligned int/float reads, and on
 	//	   those that do, it's slower than aligned reads.
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	return (*(byte *)(adr+0)) << 16 |
-		   (*(byte *)(adr+1)) <<  8 |
-		   (*(byte *)(adr+2));
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
+	return (*(uint8_t *)(adr+2)) << 16 |
+		   (*(uint8_t *)(adr+1)) <<  8 |
+		   (*(uint8_t *)(adr+0));
 }
 
 /**
@@ -1129,87 +798,69 @@ uint vtDIB::GetPixel24(int x, int y) const
  */
 void vtDIB::GetPixel24(int x, int y, RGBi &rgb) const
 {
-	if (m_iBitCount == 8)
-	{
-		GetPixel24From8bit(x, y, rgb);
-		return;
-	}
-
-	register byte* adr;
+	register uint8_t* adr;
 
 	// note: Most processors don't support unaligned int/float reads, and on
 	//	   those that do, it's slower than aligned reads.
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	rgb.b = *((byte *)(adr+0));
-	rgb.g = *((byte *)(adr+1));
-	rgb.r = *((byte *)(adr+2));
-}
-
-void vtDIB::GetPixel24From8bit(int x, int y, RGBi &rgb) const
-{
-	register byte* adr;
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + x;
-	uchar val = *adr;
-
-	RGBQUAD *palette=(RGBQUAD*)((char*)m_Hdr + sizeof(BITMAPINFOHEADER));
-	rgb.b = palette[val].rgbBlue;
-	rgb.g = palette[val].rgbGreen;
-	rgb.r = palette[val].rgbRed;
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
+	rgb.r = *((uint8_t *)(adr+0));
+	rgb.g = *((uint8_t *)(adr+1));
+	rgb.b = *((uint8_t *)(adr+2));
 }
 
 void vtDIB::GetPixel32(int x, int y, RGBAi &rgba) const
 {
-	register byte* adr;
+	register uint8_t* adr;
 
 	// note: Most processors don't support unaligned int/float reads, and on
 	//	   those that do, it's slower than aligned reads.
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	rgba.b = *((byte *)(adr+0));
-	rgba.g = *((byte *)(adr+1));
-	rgba.r = *((byte *)(adr+2));
-	rgba.a = *((byte *)(adr+3));
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
+	rgba.r = *((uint8_t *)(adr+0));
+	rgba.g = *((uint8_t *)(adr+1));
+	rgba.b = *((uint8_t *)(adr+2));
+	rgba.a = *((uint8_t *)(adr+3));
 }
 
 
 /**
  * Set a 24-bit RGB value in a 24-bit bitmap.
  */
-void vtDIB::SetPixel24(int x, int y, dword color)
+void vtDIB::SetPixel24(int x, int y, uint color)
 {
-	register byte* adr;
+	register uint8_t* adr;
 
 	// note: Most processors don't support unaligned int/float writes, and on
 	//	   those that do, it's slower than unaligned writes.
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	*((byte *)(adr+0)) = (uchar) (color >> 16);
-	*((byte *)(adr+1)) = (uchar) (color >>  8);
-	*((byte *)(adr+2)) = (uchar) color;
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
+	*((uint8_t *)(adr + 0)) = (uchar)color;
+	*((uint8_t *)(adr + 1)) = (uchar)(color >> 8);
+	*((uint8_t *)(adr + 2)) = (uchar)(color >> 16);
 }
 
 void vtDIB::SetPixel24(int x, int y, const RGBi &rgb)
 {
-	register byte* adr;
+	register uint8_t* adr;
 
 	// note: Most processors don't support unaligned int/float writes, and on
 	//	   those that do, it's slower than unaligned writes.
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	*((byte *)(adr+0)) = (uchar) rgb.b;
-	*((byte *)(adr+1)) = (uchar) rgb.g;
-	*((byte *)(adr+2)) = (uchar) rgb.r;
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
+	*((uint8_t *)(adr+0)) = (uchar) rgb.b;
+	*((uint8_t *)(adr+1)) = (uchar) rgb.g;
+	*((uint8_t *)(adr+2)) = (uchar) rgb.r;
 }
 
 void vtDIB::SetPixel32(int x, int y, const RGBAi &rgba)
 {
-	register byte* adr;
+	register uint8_t* adr;
 
 	// note: Most processors don't support unaligned int/float writes, and on
 	//	   those that do, it's slower than unaligned writes.
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	*((byte *)(adr+0)) = (uchar) rgba.b;
-	*((byte *)(adr+1)) = (uchar) rgba.g;
-	*((byte *)(adr+2)) = (uchar) rgba.r;
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
+	*((uint8_t *)(adr+0)) = (uchar) rgba.b;
+	*((uint8_t *)(adr+1)) = (uchar) rgba.g;
+	*((uint8_t *)(adr+2)) = (uchar) rgba.r;
 	if (m_iByteCount == 4)
-		*((byte *)(adr+3)) = (uchar) rgba.a;
+		*((uint8_t *)(adr+3)) = (uchar) rgba.a;
 }
 
 /**
@@ -1217,9 +868,9 @@ void vtDIB::SetPixel32(int x, int y, const RGBAi &rgba)
  */
 uchar vtDIB::GetPixel8(int x, int y) const
 {
-	register byte* adr;
+	register uint8_t* adr;
 
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + x;
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + x;
 	return *adr;
 }
 
@@ -1229,42 +880,10 @@ uchar vtDIB::GetPixel8(int x, int y) const
  */
 void vtDIB::SetPixel8(int x, int y, uchar value)
 {
-	register byte* adr;
+	register uint8_t* adr;
 
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + x;
+	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + x;
 	*adr = value;
-}
-
-/**
- * Get a single bit from a 1-bit bitmap.
- */
-bool vtDIB::GetPixel1(int x, int y) const
-{
-	// untested - just my guess
-	register int byte_offset = x/8;
-	register int bit_offset = x%8;
-	register byte* adr;
-
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + byte_offset;
-	return ((*adr) >> bit_offset) & 0x01;
-}
-
-
-/**
- * Set a single bit in a 1-bit bitmap.
- */
-void vtDIB::SetPixel1(int x, int y, bool value)
-{
-	// untested - just my guess
-	register int byte_offset = x/8;
-	register int bit_offset = x%8;
-	register byte* adr;
-
-	adr = ((byte *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + byte_offset;
-	if (value)
-		(*adr) |= (1 << bit_offset);
-	else
-		(*adr) &= ~(1 << bit_offset);
 }
 
 /**
@@ -1286,7 +905,7 @@ void vtDIB::SetColor(const RGBi &rgb)
 void vtDIB::Invert()
 {
 	uint i, j;
-	if (m_iBitCount == 8)
+	if (m_iByteCount == 1)
 	{
 		for (i = 0; i < m_iWidth; i++)
 			for (j = 0; j < m_iHeight; j++)
@@ -1294,7 +913,7 @@ void vtDIB::Invert()
 				SetPixel8(i, j, 8-GetPixel8(i, j));
 			}
 	}
-	if (m_iBitCount == 24)
+	else if (m_iByteCount == 3)
 	{
 		RGBi rgb;
 		for (i = 0; i < m_iWidth; i++)

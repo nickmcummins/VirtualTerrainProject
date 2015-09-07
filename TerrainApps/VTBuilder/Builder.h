@@ -220,7 +220,6 @@ public:
 	void ExportASC();
 	void ExportGeoTIFF();
 	void ExportTerragen();
-	void ExportBMP();
 	void ExportSTM();
 	void ExportTIN();
 	void ExportPlanet();

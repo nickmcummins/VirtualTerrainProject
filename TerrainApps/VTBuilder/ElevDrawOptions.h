@@ -14,7 +14,6 @@
 #define TAG_SHADING_QUICK	"ShadingQuick"
 #define TAG_SHADING_DOT		"ShadingDot"
 #define TAG_CAST_SHADOWS	"CastShadows"
-#define TAG_DO_MASK			"DoMask"
 #define TAG_CAST_ANGLE		"CastAngle"
 #define TAG_CAST_DIRECTION	"CastDirection"
 #define TAG_AMBIENT			"Ambient"
@@ -33,7 +32,6 @@ public:
 	bool m_bShadingQuick;
 	bool m_bShadingDot;
 	bool m_bCastShadows;
-	bool m_bDoMask;
 	int m_iCastAngle;
 	int m_iCastDirection;
 	float m_fAmbient;

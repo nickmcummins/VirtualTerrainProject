@@ -86,11 +86,6 @@ vtElevLayer::vtElevLayer(vtElevationGrid *grid) : vtLayer(LT_ELEVATION)
 
 vtElevLayer::~vtElevLayer()
 {
-	if (m_bBitmapRendered)
-	{
-		delete m_pBitmap;
-		m_pBitmap = NULL;
-	}
 	delete m_pGrid;
 	delete m_pTin;
 
@@ -242,7 +237,7 @@ bool vtElevLayer::NeedsDraw()
 		return false;
 	if (m_bNeedsDraw)
 		return true;
-	if (m_pBitmap != NULL && m_draw.m_bShowElevation && !m_bBitmapRendered)
+	if (m_Bitmap.IsAllocated() && m_draw.m_bShowElevation && !m_bBitmapRendered)
 		return true;
 	return false;
 }
@@ -358,48 +353,6 @@ void vtElevLayer::OnLeftUp(BuilderView *pView, UIContext &ui)
 	}
 }
 
-void vtElevLayer::DrawLayerBitmap(vtScaledView *pView)
-{
-	if (!m_pGrid)
-		return;
-
-	// If we have grid data, but we don't yet have a bitmap to render it, then allocate
-	if (m_pGrid->HasData() && m_pBitmap == NULL)
-		SetupBitmap();
-
-	if (m_pBitmap == NULL || !m_bBitmapRendered)
-	{
-		DrawLayerOutline(pView);
-		return;
-	}
-
-	int iColumns, iRows;
-	m_pGrid->GetDimensions(iColumns, iRows);
-
-	// m_pGrid->GetAreaExtents()
-	// TODO
-	//pDC->DrawBitmap(*m_pBitmap->m_pBitmap, (int) (destRect.left/scale_x),
-	//	(int) (destRect.top/scale_y), m_bHasMask);
-}
-
-void vtElevLayer::DrawLayerOutline(vtScaledView *pView)
-{
-	DRECT rect;
-	GetExtent(rect);
-
-	if (m_pGrid && !m_pGrid->HasData())
-	{
-		// draw darker, dotted lines for a grid not in memory
-		glColor3f(0.0f, 0.25f, 0.0f);
-	}
-	else
-	{
-		// draw a simple crossed box with green lines
-		glColor3f(0.0f, 0.5f, 0.0f);
-	}
-	pView->DrawRectangle(rect);
-}
-
 bool vtElevLayer::GetExtent(DRECT &rect)
 {
 	if (m_pGrid)
@@ -445,8 +398,6 @@ void vtElevLayer::SetupDefaults()
 	SetLayerFilename(_("Untitled"));
 	m_bPreferGZip = false;
 
-	m_pBitmap = NULL;
-	m_pMask = NULL;
 	m_ImageSize.x = 0;
 	m_ImageSize.y = 0;
 	m_fSpacing = 0.0f;
@@ -472,14 +423,147 @@ void vtElevLayer::SetupBitmap()
 		m_ImageSize.y = rows / div;
 	}
 
-	m_pBitmap = new vtBitmap;
-	if (!m_pBitmap->Allocate(m_ImageSize))
+	if (!m_Bitmap.Create(m_ImageSize, 32))
 	{
 		DisplayAndLog(_("Couldn't create bitmap, probably too large."));
-		delete m_pBitmap;
-		m_pBitmap = NULL;
 	}
+	// And also the texture
+	// allocate a texture name
+	glGenTextures(1, &m_iTextureId);
+	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_ImageSize.x, m_ImageSize.y, 0, GL_RGBA,
+		GL_UNSIGNED_BYTE, m_Bitmap.GetData());
+
 	m_bNeedsDraw = true;
+}
+
+void vtElevLayer::RenderBitmap()
+{
+	if (!m_pGrid)
+		return;
+
+	// flag as being rendered
+	m_bNeedsDraw = false;
+
+	// safety check
+	if (m_ImageSize.x == 0 || m_ImageSize.y == 0)
+		return;
+
+	DetermineMeterSpacing();
+
+	clock_t tm1 = clock();
+
+#if 0
+	// TODO: re-enable this friendly cancel behavior
+	if (UpdateProgressDialog(j * 100 / m_ImageSize.y))
+	{
+		wxString msg = _("Turn off displayed elevation for elevation layers?");
+		if (wxMessageBox(msg, _T(""), wxYES_NO) == wxYES)
+		{
+			m_draw.m_bShowElevation = false;
+			CloseProgressDialog();
+			return;
+		}
+		else
+			ResumeProgressDialog();
+	}
+#endif
+	ColorMap cmap;
+	vtString cmap_fname = m_draw.m_strColorMapFile;
+	vtString cmap_path = FindFileOnPaths(vtGetDataPath(), "GeoTypical/" + cmap_fname);
+	bool bLoaded = false;
+	if (cmap_path != "")
+	{
+		if (cmap.Load(cmap_path))
+			bLoaded = true;
+	}
+	if (!bLoaded)
+		SetupDefaultColors(cmap);
+
+	bool has_invalid = m_pGrid->ColorDibFromElevation(&m_Bitmap, &cmap,
+		8000, RGBi(255, 0, 0), progress_callback_minor);
+
+	if (m_draw.m_bShadingQuick)
+		m_pGrid->ShadeQuick(&m_Bitmap, SHADING_BIAS, true, progress_callback_minor);
+	else if (m_draw.m_bShadingDot)
+	{
+		// Quick and simple sunlight vector
+		FPoint3 light_dir = LightDirection(m_draw.m_iCastAngle, m_draw.m_iCastDirection);
+
+		if (m_draw.m_bCastShadows)
+			m_pGrid->ShadowCastDib(&m_Bitmap, light_dir, 1.0f,
+				m_draw.m_fAmbient, progress_callback_minor);
+		else
+			m_pGrid->ShadeDibFromElevation(&m_Bitmap, light_dir, 1.0f,
+				m_draw.m_fAmbient, m_draw.m_fGamma, true, progress_callback_minor);
+	}
+
+	clock_t tm2 = clock();
+	float time = ((float)tm2 - tm1) / CLOCKS_PER_SEC;
+	VTLOG("RenderBitmap: %.3f seconds.\n", time);
+
+	// Copy to texture
+	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_ImageSize.x, m_ImageSize.y, GL_RGBA,
+		GL_UNSIGNED_BYTE, m_Bitmap.GetData());
+
+	m_bBitmapRendered = true;
+}
+
+void vtElevLayer::DrawLayerBitmap(vtScaledView *pView)
+{
+	if (!m_pGrid)
+		return;
+
+	// If we have grid data, but we don't yet have a bitmap to render it, then allocate
+	if (m_pGrid->HasData() && !m_Bitmap.IsAllocated())
+		SetupBitmap();
+
+	if (!m_Bitmap.IsAllocated() || !m_bBitmapRendered)
+	{
+		DrawLayerOutline(pView);
+		return;
+	}
+
+	// Enable textures
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
+	glDisable(GL_LIGHTING);
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+	DRECT area = m_pGrid->GetAreaExtents();
+
+	glBegin(GL_QUADS);
+	glTexCoord2d(0.0, 0.0);		glVertex2d(area.left, area.bottom);
+	glTexCoord2d(1.0, 0.0); 	glVertex2d(area.right, area.bottom);
+	glTexCoord2d(1.0, 1.0); 	glVertex2d(area.right, area.top);
+	glTexCoord2d(0.0, 1.0); 	glVertex2d(area.left, area.top);
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+}
+
+void vtElevLayer::DrawLayerOutline(vtScaledView *pView)
+{
+	DRECT rect;
+	GetExtent(rect);
+
+	if (m_pGrid && !m_pGrid->HasData())
+	{
+		// draw darker, dotted lines for a grid not in memory
+		glColor3f(0.0f, 0.25f, 0.0f);
+	}
+	else
+	{
+		// draw a simple crossed box with green lines
+		glColor3f(0.0f, 0.5f, 0.0f);
+	}
+	pView->DrawRectangle(rect);
 }
 
 void vtElevLayer::SetupDefaultColors(ColorMap &cmap)
@@ -522,85 +606,6 @@ void vtElevLayer::SetupDefaultColors(ColorMap &cmap)
 	cmap.Add( 450*15, RGBi(0, 128, 0));
 }
 
-void vtElevLayer::RenderBitmap()
-{
-	if (!m_pGrid)
-		return;
-
-	// flag as being rendered
-	m_bNeedsDraw = false;
-
-	// safety check
-	if (m_ImageSize.x == 0 || m_ImageSize.y == 0)
-		return;
-
-	DetermineMeterSpacing();
-
-	clock_t tm1 = clock();
-
-#if 0
-	// TODO: re-enable this friendly cancel behavior
-	if (UpdateProgressDialog(j*100/m_ImageSize.y))
-	{
-		wxString msg = _("Turn off displayed elevation for elevation layers?");
-		if (wxMessageBox(msg, _T(""), wxYES_NO) == wxYES)
-		{
-			m_draw.m_bShowElevation = false;
-			CloseProgressDialog();
-			return;
-		}
-		else
-			ResumeProgressDialog();
-	}
-#endif
-	ColorMap cmap;
-	vtString cmap_fname = m_draw.m_strColorMapFile;
-	vtString cmap_path = FindFileOnPaths(vtGetDataPath(), "GeoTypical/" + cmap_fname);
-	bool bLoaded = false;
-	if (cmap_path != "")
-	{
-		if (cmap.Load(cmap_path))
-			bLoaded = true;
-	}
-	if (!bLoaded)
-		SetupDefaultColors(cmap);
-
-	bool has_invalid = m_pGrid->ColorDibFromElevation(m_pBitmap, &cmap,
-		8000, RGBi(255,0,0), progress_callback_minor);
-
-	if (m_draw.m_bShadingQuick)
-		m_pGrid->ShadeQuick(m_pBitmap, SHADING_BIAS, true, progress_callback_minor);
-	else if (m_draw.m_bShadingDot)
-	{
-		// Quick and simple sunlight vector
-		FPoint3 light_dir = LightDirection(m_draw.m_iCastAngle, m_draw.m_iCastDirection);
-
-		if (m_draw.m_bCastShadows)
-			m_pGrid->ShadowCastDib(m_pBitmap, light_dir, 1.0f,
-				m_draw.m_fAmbient, progress_callback_minor);
-		else
-			m_pGrid->ShadeDibFromElevation(m_pBitmap, light_dir, 1.0f,
-				m_draw.m_fAmbient, m_draw.m_fGamma, true, progress_callback_minor);
-	}
-
-	m_pBitmap->ContentsChanged();
-
-	if (has_invalid && m_draw.m_bDoMask)
-	{
-		m_pMask = new wxMask(*m_pBitmap->m_pBitmap, wxColour(255, 0, 0));
-		m_pBitmap->m_pBitmap->SetMask(m_pMask);
-		m_bHasMask = true;
-	}
-	else
-		m_bHasMask = false;
-
-	clock_t tm2 = clock();
-	float time = ((float)tm2 - tm1)/CLOCKS_PER_SEC;
-	VTLOG("RenderBitmap: %.3f seconds.\n", time);
-
-	m_bBitmapRendered = true;
-}
-
 void vtElevLayer::ReRender()
 {
 	if (IsGrid())
@@ -612,8 +617,6 @@ void vtElevLayer::ReRender()
 
 void vtElevLayer::ReImage()
 {
-	delete m_pBitmap;
-	m_pBitmap = NULL;
 	m_bBitmapRendered = false;
 }
 

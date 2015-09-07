@@ -31,16 +31,16 @@ AttribMap::AttribMap()
 {
 }
 
-bool AttribMap::Load(const char *fname_att, const char *fname_bmp)
+bool AttribMap::Load(const char *filename_attrib, const char *filename_png)
 {
-	bool result = ReadBMP(fname_bmp);
+	bool result = ReadPNG(filename_png);
 	if (!result)
 		return false;
 
 	m_AttribTable = NULL;
 
 	// also read attribute description file
-	FILE *fp = vtFileOpen(fname_att, "r");
+	FILE *fp = vtFileOpen(filename_attrib, "r");
 	if (!fp)
 		return false;
 

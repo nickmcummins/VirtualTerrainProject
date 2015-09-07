@@ -2167,7 +2167,6 @@ void MainFrame::OnElevExport(wxCommandEvent &event)
 	{
 		choices.Add(_T("3TX"));
 		choices.Add(_T("ArcInfo ASCII Grid"));
-		choices.Add(_T("BMP"));
 		choices.Add(_T("ChunkLOD (.chu)"));
 		choices.Add(_T("GeoTIFF"));
 		choices.Add(_T("MSI Planet"));
@@ -2202,18 +2201,17 @@ void MainFrame::OnElevExport(wxCommandEvent &event)
 		{
 		case 0: Export3TX(); break;
 		case 1: ExportASC(); break;
-		case 2: ExportBMP(); break;
-		case 3: ExportChunkLOD(); break;
-		case 4: ExportGeoTIFF(); break;
-		case 5: ExportPlanet(); break;
-		case 6: ExportPNG16(); break;
-		case 7: ExportRAWINF(); break;
-		case 8: ExportRAW_Unity(); break;
-		case 9: ExportSTM(); break;
-		case 10: ExportTIN(); break;
-		case 11: ExportTerragen(); break;
-		case 12: ExportVRML(); break;
-		case 13: ExportXYZ(); break;
+		case 2: ExportChunkLOD(); break;
+		case 3: ExportGeoTIFF(); break;
+		case 4: ExportPlanet(); break;
+		case 5: ExportPNG16(); break;
+		case 6: ExportRAWINF(); break;
+		case 7: ExportRAW_Unity(); break;
+		case 8: ExportSTM(); break;
+		case 9: ExportTIN(); break;
+		case 10: ExportTerragen(); break;
+		case 11: ExportVRML(); break;
+		case 12: ExportXYZ(); break;
 		}
 	}
 	else	// is a TIN

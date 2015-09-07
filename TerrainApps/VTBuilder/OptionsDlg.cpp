@@ -41,7 +41,6 @@ OptionsDlg::OptionsDlg( wxWindow *parent, wxWindowID id, const wxString &title,
 
 	AddValidator(this, ID_RADIO_OUTLINE_ONLY, &m_bShowOutlines);
 	AddValidator(this, ID_RADIO_COLOR, &m_opt.m_bShowElevation);
-	AddValidator(this, ID_CHECK_HIDE_UNKNOWN, &m_opt.m_bDoMask);
 	AddValidator(this, ID_CHECK_DRAW_TIN_SIMPLE, &m_bDrawTinSimple);
 
 	AddValidator(this, ID_CHECK_SHOW_ROAD_WIDTH, &m_bShowRoadWidth);

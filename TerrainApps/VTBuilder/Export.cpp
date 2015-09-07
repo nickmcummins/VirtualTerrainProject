@@ -98,18 +98,6 @@ void Builder::ExportGeoTIFF()
 		DisplayAndLog("Error writing file.");
 }
 
-void Builder::ExportBMP()
-{
-	const vtString fname = GetActiveLayer()->GetExportFilename(FSTRING_BMP);
-	if (fname == "")
-		return;
-	bool success = GetActiveElevLayer()->GetGrid()->SaveToBMP(fname);
-	if (success)
-		DisplayAndLog("Successfully wrote file '%s'", (const char *) fname);
-	else
-		DisplayAndLog("Error writing file.");
-}
-
 void Builder::ExportSTM()
 {
 	const vtString fname = GetActiveLayer()->GetExportFilename(FSTRING_STM);
