@@ -1,1 +1,3 @@
 ^vc14$
+.tag$
+^TerrainSDK/Doc$
