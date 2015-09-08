@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include "LocalCS.h"
 #include "MathTypes.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "Structure.h"
 #include "ogrsf_frmts.h"
 

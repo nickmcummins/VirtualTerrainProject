@@ -7,7 +7,7 @@
 #define VTOSG_IMAGEH
 
 #include "vtdata/vtDIB.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 #include <osg/Image>
 #include <osgDB/ReadFile>

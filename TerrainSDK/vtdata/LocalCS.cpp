@@ -13,7 +13,7 @@
 #include <math.h>
 
 #include "MathTypes.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "LocalCS.h"
 
 ////////////////////////////////////////////////////////////////////////////

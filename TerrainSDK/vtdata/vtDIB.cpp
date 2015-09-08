@@ -29,7 +29,7 @@ extern "C" {
 
 // GDAL for TIFF support
 #include "gdal_priv.h"
-#include "Projections.h"
+#include "vtCRS.h"
 
 ///////////////////////////////////////////////////////////////////////
 // Base class vtBitmapBase

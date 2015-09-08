@@ -7,7 +7,7 @@
 //
 
 #include "LocalDatabuf.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 #if USE_LIBMINI_DATABUF
 

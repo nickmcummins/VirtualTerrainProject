@@ -18,7 +18,7 @@
 
 #include "vtdata/FilePath.h"	// for dir_iter
 #include "vtdata/GDALWrapper.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtdata/vtLog.h"
 #include "vtdata/vtDIB.h"
 #include "Helper.h"

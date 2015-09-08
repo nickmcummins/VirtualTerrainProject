@@ -8,7 +8,7 @@
 #pragma once
 
 #include "MathTypes.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "Building.h"
 #include "HeightField.h"
 #include <stdio.h>

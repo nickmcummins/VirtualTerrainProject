@@ -18,7 +18,7 @@ extern "C" {
 
 #include "MiniDatabuf.h"
 #include "vtdata/vtLog.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtdata/MathTypes.h"
 #include "vtdata/FilePath.h"
 

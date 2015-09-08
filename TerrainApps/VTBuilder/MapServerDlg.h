@@ -12,7 +12,7 @@
 
 #include "vtdata/MathTypes.h"
 #include "vtdata/WFSClient.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 // WDR: class declarations
 

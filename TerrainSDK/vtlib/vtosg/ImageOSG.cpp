@@ -11,7 +11,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include "gdal_priv.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtdata/GDALWrapper.h"
 
 #ifndef LOG_IMAGE_LOAD

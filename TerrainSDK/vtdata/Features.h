@@ -10,7 +10,7 @@
 
 #include "MathTypes.h"
 #include "vtString.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "Content.h"
 
 #include "shapelib/shapefil.h"

@@ -10,7 +10,7 @@
 
 #include "vtui_UI.h"
 #include "vtui/AutoDialog.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 // WDR: class declarations
 

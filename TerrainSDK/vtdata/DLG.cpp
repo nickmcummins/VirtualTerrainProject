@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #include "DLG.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "FilePath.h"
 
 // helper functions

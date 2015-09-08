@@ -9,7 +9,7 @@
 #define LOCATION_H
 
 #include "vtdata/vtString.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtdata/LocalCS.h"
 
 #if SUPPORT_WSTRING

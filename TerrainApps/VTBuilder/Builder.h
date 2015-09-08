@@ -8,7 +8,7 @@
 #ifndef BUILDERH
 #define BUILDERH
 
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtdata/Plants.h"		// for vtSpeciesList
 #include "vtdata/Fence.h"		// for LinStructOptions
 #include "vtdata/vtLog.h"

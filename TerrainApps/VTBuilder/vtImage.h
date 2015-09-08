@@ -12,7 +12,7 @@
 #include "gdal.h"
 
 #include "TilingOptions.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 class vtBitmap;
 class GDALDataset;

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <vector>
 #include "MathTypes.h"
-#include "Projections.h"
+#include "vtCRS.h"
 
 #define DLG_ERR_FILE	1
 #define DLG_ERR_READ	2

@@ -9,7 +9,7 @@
 #define ELEVATIONGRIDH
 
 #include "MathTypes.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "LocalCS.h"
 #include "HeightField.h"
 #include "vtString.h"

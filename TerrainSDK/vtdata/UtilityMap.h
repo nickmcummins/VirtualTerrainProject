@@ -12,7 +12,7 @@
 #define UTILITYH
 
 #include "MathTypes.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "Content.h"
 
 /**

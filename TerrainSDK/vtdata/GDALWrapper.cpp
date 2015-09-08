@@ -8,7 +8,7 @@
 #include "MathTypes.h"	// for ScopedLocale
 #include "vtString.h"
 #include "vtLog.h"
-#include "Projections.h"	// For testing vtCRS
+#include "vtCRS.h"	// For testing vtCRS
 
 // GDAL
 #include "gdal_priv.h"

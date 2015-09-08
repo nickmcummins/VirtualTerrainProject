@@ -5,7 +5,7 @@ add_library(vtdata
 		DxfParser.cpp ElevationGrid.cpp ElevationGridBT.cpp ElevationGridDEM.cpp ElevationGridIO.cpp FeatureGeom.cpp
 		Features.cpp Fence.cpp FilePath.cpp GDALWrapper.cpp Geodesic.cpp GEOnet.cpp HeightField.cpp Icosa.cpp LevellerTag.cpp
 		LocalCS.cpp LULC.cpp MaterialDescriptor.cpp MathTypes.cpp Matrix.cpp Plants.cpp
-		PolyChecker.cpp Projections.cpp QuikGrid.cpp RoadMap.cpp SPA.cpp StructArray.cpp
+		PolyChecker.cpp vtCRS.cpp QuikGrid.cpp RoadMap.cpp SPA.cpp StructArray.cpp
 		StructImport.cpp Structure.cpp Triangulate.cpp TripDub.cpp Unarchive.cpp UtilityMap.cpp
 		Vocab.cpp vtDIB.cpp vtLog.cpp vtString.cpp vtTime.cpp vtTin.cpp vtUnzip.cpp WFSClient.cpp
 
@@ -13,7 +13,7 @@ add_library(vtdata
 		config_vtdata.h Content.h CubicSpline.h DataPath.h DLG.h DxfParser.h ElevationGrid.h ElevError.h
 		Features.h Fence.h FileFilters.h FilePath.h GDALWrapper.h GEOnet.h HeightField.h Icosa.h LayerBase.h
 		LevellerTag.h LocalCS.h LULC.h Mainpage.h MaterialDescriptor.h MathTypes.h
-		Plants.h PolyChecker.h Projections.h QuikGrid.h RoadMap.h Selectable.h SPA.h StatePlane.h
+		Plants.h PolyChecker.h vtCRS.h QuikGrid.h RoadMap.h Selectable.h SPA.h StatePlane.h
 		StructArray.h Structure.h Triangulate.h TripDub.h Unarchive.h UtilityMap.h Version.h
 		Vocab.h vtDIB.h vtLog.h vtString.h vtTime.h vtTin.h vtUnzip.h WFSClient.h
 

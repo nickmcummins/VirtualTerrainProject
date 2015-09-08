@@ -12,7 +12,7 @@
 
 #include "vtdata/Building.h"
 #include "vtdata/Fence.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtlib/core/AnimPath.h"
 #include "vtlib/core/Elastic.h"
 #include "vtlib/core/NavEngines.h"

@@ -13,7 +13,7 @@
 #endif
 
 #include "VTBuilder_UI.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 // WDR: class declarations
 

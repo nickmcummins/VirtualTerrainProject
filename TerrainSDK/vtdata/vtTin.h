@@ -9,7 +9,7 @@
 #define VTTINH
 
 #include "MathTypes.h"
-#include "Projections.h"
+#include "vtCRS.h"
 #include "HeightField.h"
 #include "vtString.h"
 

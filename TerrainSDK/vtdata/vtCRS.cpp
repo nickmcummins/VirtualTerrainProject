@@ -1,13 +1,11 @@
 //
-// Projections.cpp
+// vtCRS.cpp
 //
-// Copyright (c) 2001-2013 Virtual Terrain Project
+// Copyright (c) 2001-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
-// Parts of the code are derived from public-domain USGS software.
-//
 
-#include "Projections.h"
+#include "vtCRS.h"
 #include "StatePlane.h"
 #include "MathTypes.h"
 #include "vtString.h"	// for stricmp
@@ -345,52 +343,52 @@ OGRErr vtCRS::SetGeogCSFromDatum(int iDatum)
 		DATUM eDatum = (DATUM) iDatum;
 		switch (eDatum)
 		{
-			case ADINDAN:
-				err = SetWellKnownGeogCS( "EPSG:4201" ); break;
-			case ARC1950:
-				err = SetWellKnownGeogCS( "EPSG:4209" ); break;
-			case ARC1960:
-				err = SetWellKnownGeogCS( "EPSG:4210" ); break;
-			case AUSTRALIAN_GEODETIC_1966:
-				err = SetWellKnownGeogCS( "EPSG:4202" ); break;
-			case AUSTRALIAN_GEODETIC_1984:
-				err = SetWellKnownGeogCS( "EPSG:4203" ); break;
-			case CAPE:
-				err = SetWellKnownGeogCS( "EPSG:4222" ); break;
-			case EUROPEAN_DATUM_1950:
-				err = SetWellKnownGeogCS( "EPSG:4230" ); break;
-			case GEODETIC_DATUM_1949:
-				err = SetWellKnownGeogCS( "EPSG:4272" ); break;
-			case HU_TZU_SHAN:
-				err = SetWellKnownGeogCS( "EPSG:4236" ); break;
-		//	case INDIAN:
-		//		err = SetWellKnownGeogCS( "EPSG:" ); break;	// there are 3 Indian Datum
-			case NAD27:
-				err = SetWellKnownGeogCS( "NAD27" ); break;
-			case NAD83:
-				err = SetWellKnownGeogCS( "NAD83" ); break;
+		case ADINDAN:
+			err = SetWellKnownGeogCS( "EPSG:4201" ); break;
+		case ARC1950:
+			err = SetWellKnownGeogCS( "EPSG:4209" ); break;
+		case ARC1960:
+			err = SetWellKnownGeogCS( "EPSG:4210" ); break;
+		case AUSTRALIAN_GEODETIC_1966:
+			err = SetWellKnownGeogCS( "EPSG:4202" ); break;
+		case AUSTRALIAN_GEODETIC_1984:
+			err = SetWellKnownGeogCS( "EPSG:4203" ); break;
+		case CAPE:
+			err = SetWellKnownGeogCS( "EPSG:4222" ); break;
+		case EUROPEAN_DATUM_1950:
+			err = SetWellKnownGeogCS( "EPSG:4230" ); break;
+		case GEODETIC_DATUM_1949:
+			err = SetWellKnownGeogCS( "EPSG:4272" ); break;
+		case HU_TZU_SHAN:
+			err = SetWellKnownGeogCS( "EPSG:4236" ); break;
+	//	case INDIAN:
+	//		err = SetWellKnownGeogCS( "EPSG:" ); break;	// there are 3 Indian Datum
+		case NAD27:
+			err = SetWellKnownGeogCS( "NAD27" ); break;
+		case NAD83:
+			err = SetWellKnownGeogCS( "NAD83" ); break;
 
-			case OLD_HAWAIIAN_MEAN:
-				err = SetWellKnownGeogCS( "EPSG:4135" ); break;
-			case OMAN:
-				err = SetWellKnownGeogCS( "EPSG:4232" ); break;	// Fahud
-			case ORDNANCE_SURVEY_1936:
-				err = SetWellKnownGeogCS( "EPSG:4277" ); break;
-			case PUERTO_RICO:
-				err = SetWellKnownGeogCS( "EPSG:4139" ); break;
-			case PULKOVO_1942:
-				err = SetWellKnownGeogCS( "EPSG:4284" ); break;
-			case PROVISIONAL_S_AMERICAN_1956:
-				err = SetWellKnownGeogCS( "EPSG:4248" ); break;
-			case TOKYO:
-				err = SetWellKnownGeogCS( "EPSG:4301" ); break;
+		case OLD_HAWAIIAN_MEAN:
+			err = SetWellKnownGeogCS( "EPSG:4135" ); break;
+		case OMAN:
+			err = SetWellKnownGeogCS( "EPSG:4232" ); break;	// Fahud
+		case ORDNANCE_SURVEY_1936:
+			err = SetWellKnownGeogCS( "EPSG:4277" ); break;
+		case PUERTO_RICO:
+			err = SetWellKnownGeogCS( "EPSG:4139" ); break;
+		case PULKOVO_1942:
+			err = SetWellKnownGeogCS( "EPSG:4284" ); break;
+		case PROVISIONAL_S_AMERICAN_1956:
+			err = SetWellKnownGeogCS( "EPSG:4248" ); break;
+		case TOKYO:
+			err = SetWellKnownGeogCS( "EPSG:4301" ); break;
 
-			case WGS_72:
-				err = SetWellKnownGeogCS( "WGS72" ); break;
-			case WGS_84:
-				err = SetWellKnownGeogCS( "WGS84" ); break;
-			default:
-				err = SetWellKnownGeogCS( "WGS84" );
+		case WGS_72:
+			err = SetWellKnownGeogCS( "WGS72" ); break;
+		case WGS_84:
+			err = SetWellKnownGeogCS( "WGS84" ); break;
+		default:
+			err = SetWellKnownGeogCS( "WGS84" );
 		}
 	}
 	else
@@ -818,64 +816,64 @@ const char *DatumToString(int d)
 
 const char *datumToStringShort(DATUM d)
 {
-	switch ( d )
+	switch (d)
 	{
-		case ADINDAN:
-			return "ADINDAN";
-		case ARC1950:
-			return "ARC1950";
-		case ARC1960:
-			return "ARC1960";
-		case AUSTRALIAN_GEODETIC_1966:
-			return "AGD66";
-		case AUSTRALIAN_GEODETIC_1984:
-			return "AGD84";
-		case CAMP_AREA_ASTRO:
-			return "CAMP AREA ASTRO";
-		case CAPE:
-			return "CAPE";
-		case EUROPEAN_DATUM_1950:
-			return "ED50";
-		case EUROPEAN_DATUM_1979:
-			return "ED79";
-		case GEODETIC_DATUM_1949:
-			return "GD49";
-		case HONG_KONG_1963:
-			return "HONG KONG 1963";
-		case HU_TZU_SHAN:
-			return "HU TZU SHAN";
-		case INDIAN:
-			return "INDIAN";
-		case NAD27:
-			return "NAD27";
-		case NAD83:
-			return "NAD83";
-		case OLD_HAWAIIAN_MEAN:
-			return "OLD HAWAII";
-		case OMAN:
-			return "OMAN";
-		case ORDNANCE_SURVEY_1936:
-			return "OSGB 1936";
-		case PUERTO_RICO:
-			return "PUERTO RICO";
-		case PULKOVO_1942:
-			return "PULKOVO 1942";
-		case PROVISIONAL_S_AMERICAN_1956:
-			return "PSAD 1956";
-		case TOKYO:
-			return "TOKYO";
-		case WGS_72:
-			return "WGS72";
-		case WGS_84:
-			return "WGS84";
-		case UNKNOWN_DATUM:
-			return "Unknown";
-		case NO_DATUM:
-			return "None";
-		case DEFAULT_DATUM:
-			return "Default";
-		default:
-			return "Bad";
+	case ADINDAN:
+		return "ADINDAN";
+	case ARC1950:
+		return "ARC1950";
+	case ARC1960:
+		return "ARC1960";
+	case AUSTRALIAN_GEODETIC_1966:
+		return "AGD66";
+	case AUSTRALIAN_GEODETIC_1984:
+		return "AGD84";
+	case CAMP_AREA_ASTRO:
+		return "CAMP AREA ASTRO";
+	case CAPE:
+		return "CAPE";
+	case EUROPEAN_DATUM_1950:
+		return "ED50";
+	case EUROPEAN_DATUM_1979:
+		return "ED79";
+	case GEODETIC_DATUM_1949:
+		return "GD49";
+	case HONG_KONG_1963:
+		return "HONG KONG 1963";
+	case HU_TZU_SHAN:
+		return "HU TZU SHAN";
+	case INDIAN:
+		return "INDIAN";
+	case NAD27:
+		return "NAD27";
+	case NAD83:
+		return "NAD83";
+	case OLD_HAWAIIAN_MEAN:
+		return "OLD HAWAII";
+	case OMAN:
+		return "OMAN";
+	case ORDNANCE_SURVEY_1936:
+		return "OSGB 1936";
+	case PUERTO_RICO:
+		return "PUERTO RICO";
+	case PULKOVO_1942:
+		return "PULKOVO 1942";
+	case PROVISIONAL_S_AMERICAN_1956:
+		return "PSAD 1956";
+	case TOKYO:
+		return "TOKYO";
+	case WGS_72:
+		return "WGS72";
+	case WGS_84:
+		return "WGS84";
+	case UNKNOWN_DATUM:
+		return "Unknown";
+	case NO_DATUM:
+		return "None";
+	case DEFAULT_DATUM:
+		return "Default";
+	default:
+		return "Bad";
 	}
 }
 /**
@@ -1230,8 +1228,7 @@ static void MassageDatumFromWKT(vtString &strDatum )
 	if (strDatum.Left(2) == "D_")
 		strDatum = strDatum.Right(strDatum.GetLength()-2);
 
-	int i;
-	for( i = 0; papszDatumEquiv[i] != NULL; i += 2 )
+	for(int i = 0; papszDatumEquiv[i] != NULL; i += 2)
 	{
 		if( !strcmp((const char *)strDatum,papszDatumEquiv[i+1]) )
 		{

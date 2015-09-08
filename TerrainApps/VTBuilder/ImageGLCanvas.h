@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtdata/MathTypes.h"
 
 /////////////////

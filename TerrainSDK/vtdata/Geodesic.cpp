@@ -8,7 +8,7 @@
 // at most large distances."
 //
 
-#include "Projections.h"
+#include "vtCRS.h"
 
 double adjlon (double lon)
 {

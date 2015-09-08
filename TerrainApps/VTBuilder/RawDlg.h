@@ -9,7 +9,7 @@
 #define __RawDlg_H__
 
 #include "vtdata/MathTypes.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 #include "VTBuilder_UI.h"
 

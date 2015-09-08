@@ -15,7 +15,7 @@
 #include "vtui_UI.h"
 #include "AutoDialog.h"
 #include "vtdata/HeightField.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 
 class ProfileCallback
 {

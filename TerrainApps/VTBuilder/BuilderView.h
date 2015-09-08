@@ -9,7 +9,7 @@
 
 #include "ScaledView.h"
 #include "UIContext.h"
-#include "vtdata/Projections.h"
+#include "vtdata/vtCRS.h"
 #include "vtdata/Icosa.h"
 
 class vtLayer;
