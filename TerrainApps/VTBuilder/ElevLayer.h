@@ -37,7 +37,7 @@ public:
 
 	// overrides
 	bool GetExtent(DRECT &rect);
-	void DrawLayer(vtScaledView *pView);
+	void DrawLayer(vtScaledView *pView, UIContext &ui);
 	bool TransformCoords(vtProjection &proj);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();

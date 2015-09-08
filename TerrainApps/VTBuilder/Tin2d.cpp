@@ -13,6 +13,7 @@
 
 #include "Tin2d.h"
 #include "Options.h"
+#include "ScaledView.h"
 
 #include "vtdata/ElevationGrid.h"
 #include "vtdata/Features.h"

@@ -84,7 +84,7 @@ bool vtStructureLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtStructureLayer::DrawLayer(vtScaledView *pView)
+void vtStructureLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 {
 	uint structs = size();
 	pView->SetColor(RGBi(255, 128, 0));

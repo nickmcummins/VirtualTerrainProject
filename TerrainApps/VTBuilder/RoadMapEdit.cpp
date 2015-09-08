@@ -70,7 +70,7 @@ bool NodeEdit::Draw(vtScaledView *pView)
 
 	glPointSize(NODE_RADIUS);
 	glBegin(GL_POINTS);
-	glVertex2d(m_p.x, m_p.y);
+	pView->SendVertex(m_p);
 	glEnd();
 
 	if (m_bSelect)
@@ -336,7 +336,7 @@ bool LinkEdit::Draw(vtScaledView *pView, bool bShowDirection,
 		glPointSize(4);
 		glBegin(GL_POINTS);
 		for (int i = 0; i < size; i++)
-			glVertex2d(GetAt(i).x, GetAt(i).y);
+			pView->SendVertex(GetAt(i));
 
 		// We may highlight a single point
 		if (m_iHighlightPoint != -1)

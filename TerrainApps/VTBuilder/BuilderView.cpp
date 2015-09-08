@@ -61,16 +61,6 @@ EVT_CHAR(BuilderView::OnChar)
 EVT_IDLE(BuilderView::OnIdle)
 EVT_SIZE(BuilderView::OnSize)
 EVT_ERASE_BACKGROUND(BuilderView::OnEraseBackground)
-
-//EVT_SCROLLWIN_THUMBTRACK(BuilderView::OnBeginScroll)
-//EVT_SCROLLWIN_THUMBRELEASE(BuilderView::OnEndScroll)
-
-//EVT_SCROLLWIN_LINEUP(BuilderView::OnOtherScrollEvents)
-//EVT_SCROLLWIN_LINEDOWN(BuilderView::OnOtherScrollEvents)
-//EVT_SCROLLWIN_PAGEUP(BuilderView::OnOtherScrollEvents)
-//EVT_SCROLLWIN_PAGEDOWN(BuilderView::OnOtherScrollEvents)
-EVT_SCROLLWIN(BuilderView::OnOtherScrollEvents)
-
 END_EVENT_TABLE()
 
 /////////////////////////////////////////////////////////////////
@@ -91,7 +81,6 @@ BuilderView::BuilderView(wxWindow *parent, wxWindowID id, const wxPoint& pos,
 
 	m_bMouseMoved = false;
 	m_bPanning = false;
-	m_bScrolling = false;
 	m_bBoxing = false;
 	m_iDragSide = 0;
 	m_bMouseCaptured = false;
@@ -125,6 +114,8 @@ BuilderView::BuilderView(wxWindow *parent, wxWindowID id, const wxPoint& pos,
 	m_bAttemptedLoad = false;
 
 	m_context = new wxGLContext(this);
+
+	SetLocalOrigin(DPoint2(40, 40));
 }
 
 BuilderView::~BuilderView()
@@ -204,7 +195,7 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 		if (lp->GetType() != LT_IMAGE && lp->GetType() != LT_ELEVATION)
 			continue;
 		if (lp->GetVisible())
-			lp->DrawLayer(this);
+			lp->DrawLayer(this, m_ui);
 	}
 	// Then the poly/vector/point layers
 	for (int i = 0; i < iLayers; i++)
@@ -213,7 +204,7 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 		if (lp->GetType() == LT_IMAGE || lp->GetType() == LT_ELEVATION)
 			continue;
 		if (lp->GetVisible())
-			lp->DrawLayer(this);
+			lp->DrawLayer(this, m_ui);
 	}
 	vtLayer *curr = g_bld->GetActiveLayer();
 	if (curr && (curr->GetType() == LT_ELEVATION || curr->GetType() == LT_IMAGE))
@@ -353,7 +344,7 @@ void BuilderView::DrawUTMBounds()
 			{
 				proj_point = ll;
 				trans2->Transform(1, &proj_point.x, &proj_point.y);
-				glVertex2d(proj_point.x, proj_point.y);
+				SendVertex(proj_point);
 			}
 			glEnd();
 		}
@@ -730,45 +721,6 @@ void BuilderView::DrawAreaTool(const DRECT &area)
 	DrawInverseRect(bottom + height - d, bottom + height + d);
 	DrawInverseRect(bottom + width + height - d, bottom + width + height + d);
 }
-
-
-////////////////////////////////////////////////////////////
-
-void BuilderView::OnBeginScroll(wxScrollWinEvent & event)
-{
-	if (!m_bScrolling)
-	{
-		VTLOG1("BeginScroll\n");
-		m_bScrolling = true;
-		// hide scale bar while scrolling
-		if (m_bScaleBar)
-			RefreshRect(m_ScaleBarArea);
-	}
-	event.Skip();
-}
-
-void BuilderView::OnEndScroll(wxScrollWinEvent & event)
-{
-	VTLOG1("EndScroll\n");
-	m_bScrolling = false;
-
-	// redraw scale bar when done scrolling
-	if (m_bScaleBar)
-		RefreshRect(m_ScaleBarArea);
-
-	event.Skip();
-}
-
-void BuilderView::OnOtherScrollEvents(wxScrollWinEvent & event)
-{
-	VTLOG("OnOtherScrollEvents (%d)\n", event.GetEventType());
-	if (m_bScaleBar)
-		RefreshRect(m_ScaleBarArea);
-	
-	// Swallow the event?
-	//event.Skip();
-}
-
 
 ////////////////////////////////////////////////////////////
 
@@ -1844,31 +1796,6 @@ void BuilderView::RunTest()
 				line[i] = p;
 			}
 		}
-	}
-#endif
-#if 0
-	{
-		vtProjection proj;
-		vtElevationGrid grid(DRECT(0, 1, 1, 0), 5, 5, true, proj);
-		for (int i = 0; i < 5; i++)
-		{
-			for (int j = 0; j < 5; j++)
-			{
-				if (i == 4 || j == 4)
-					grid.SetFValue(i, j, 1);
-				else
-					grid.SetFValue(i, j, 0);
-			}
-		}
-
-		vtBitmap bmp;
-		bmp.Allocate(4, 4, 24);
-
-		std::vector<RGBi> table;
-		table.push_back(RGBi(0,0,0));
-		table.push_back(RGBi(255,255,255));
-
-		grid.ColorDibFromTable(&bmp, table, 0, 1);
 	}
 #endif
 #if 0

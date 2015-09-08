@@ -17,8 +17,8 @@ class vtProjection;
 struct UIContext;
 
 /**
- * A layer is a single blob of data, generally stored in memory and drawn in
- * the main view.  Each layer has a type (Raw, Elevation, Image, etc.) and a CRS.
+ * A VTBuilder layer is a single blob of data, generally stored in memory and drawn
+ * in the main view.  Each layer has a type (Raw, Elevation, Image, etc.) and a CRS.
  * vtLayer is an abstract base class for all the layer classes.
  * It defines a set of operations which each layer class may implement.
  */
@@ -47,7 +47,7 @@ public:
 	// these must be implemented:
 	/// Get the extents
 	virtual bool GetExtent(DRECT &rect) = 0;
-	virtual void DrawLayer(vtScaledView *pView) = 0;
+	virtual void DrawLayer(vtScaledView *pView, UIContext &ui) = 0;
 	/// Transform the coordinates into another CRS
 	virtual bool TransformCoords(vtProjection &proj) = 0;
 	virtual bool OnSave(bool progress_callback(int) = NULL) = 0;

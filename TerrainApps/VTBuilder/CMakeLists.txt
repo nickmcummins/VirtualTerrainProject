@@ -18,7 +18,7 @@ set(BUILDERLIB_HEADER_FILES
 	ImportStructDlgOGR.h ImportVegDlg.h Layer.h NodeDlg.h Options.h RawDlg.h
 	RawLayer.h RenderOptionsDlg.h RoadDlg.h RoadLayer.h
 	RoadMapEdit.h SampleElevationDlg.h SampleImageDlg.h ScaledView.h StructLayer.h TileDlg.h Tin2d.h
-	UtilityLayer.h VegFieldsDlg.h VegLayer.h vtBitmap.h VTBuilder_UI.h vtImage.h
+	UIContext.h UtilityLayer.h VegFieldsDlg.h VegLayer.h vtBitmap.h VTBuilder_UI.h vtImage.h
 	WaterLayer.h)
 
 if(MSVC)

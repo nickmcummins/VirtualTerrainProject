@@ -51,10 +51,14 @@ public:
 		scale = m_dScale;
 		offset = m_offset;
 	}
+	void SetLocalOrigin(const DPoint2 &p);
+	void SendVertex(const DPoint2 &p);
+	void SendVertex(const double &x, const double &y);
 
 protected:
-	double	m_dScale;	// pixels per geographic unit
-	DPoint2 m_offset;
+	double	m_dScale;	// Pixels per geographic unit.
+	DPoint2 m_offset;	// View offset.
+	DPoint2 m_origin;	// Local origin to work around OpenGL's float precision.
 	wxSize  m_clientSize;
 };
 

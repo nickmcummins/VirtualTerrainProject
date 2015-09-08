@@ -11,7 +11,6 @@
 #include "VTBuilder_UI.h"
 
 #include "RoadMapEdit.h"
-#include "ScaledView.h"
 
 // WDR: class declarations
 

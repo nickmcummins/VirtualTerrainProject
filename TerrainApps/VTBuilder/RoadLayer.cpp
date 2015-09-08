@@ -48,7 +48,7 @@ bool vtRoadLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtRoadLayer::DrawLayer(vtScaledView *pView)
+void vtRoadLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 {
 	Draw(pView, m_bDrawNodes);
 }

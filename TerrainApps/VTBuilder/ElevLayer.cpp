@@ -32,7 +32,6 @@
 #include "Options.h"
 #include "RawDlg.h"
 #include "Tin2d.h"
-#include "vtBitmap.h"
 
 #if SUPPORT_QUIKGRID
   #include "vtdata/QuikGrid.h"
@@ -242,7 +241,7 @@ bool vtElevLayer::NeedsDraw()
 	return false;
 }
 
-void vtElevLayer::DrawLayer(vtScaledView *pView)
+void vtElevLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 {
 	if (m_pGrid)
 	{
@@ -258,6 +257,10 @@ void vtElevLayer::DrawLayer(vtScaledView *pView)
 		else
 			// If we have no data, just draw an outline
 			DrawLayerOutline(pView);
+	}
+	if (ui.m_bRubber)
+	{
+		pView->DrawLine(mTrim1, mTrim2);
 	}
 }
 
@@ -434,6 +437,11 @@ void vtElevLayer::SetupBitmap()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_ImageSize.x, m_ImageSize.y, 0, GL_RGBA,
 		GL_UNSIGNED_BYTE, m_Bitmap.GetData());
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
 	m_bNeedsDraw = true;
 }
 
@@ -531,18 +539,13 @@ void vtElevLayer::DrawLayerBitmap(vtScaledView *pView)
 	glDisable(GL_LIGHTING);
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
 	DRECT area = m_pGrid->GetAreaExtents();
 
 	glBegin(GL_QUADS);
-	glTexCoord2d(0.0, 0.0);		glVertex2d(area.left, area.bottom);
-	glTexCoord2d(1.0, 0.0); 	glVertex2d(area.right, area.bottom);
-	glTexCoord2d(1.0, 1.0); 	glVertex2d(area.right, area.top);
-	glTexCoord2d(0.0, 1.0); 	glVertex2d(area.left, area.top);
+	glTexCoord2d(0.0, 0.0);		pView->SendVertex(area.left, area.bottom);
+	glTexCoord2d(1.0, 0.0); 	pView->SendVertex(area.right, area.bottom);
+	glTexCoord2d(1.0, 1.0); 	pView->SendVertex(area.right, area.top);
+	glTexCoord2d(0.0, 1.0); 	pView->SendVertex(area.left, area.top);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);

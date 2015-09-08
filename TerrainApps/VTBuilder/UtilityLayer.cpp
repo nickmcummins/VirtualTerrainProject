@@ -32,7 +32,7 @@ bool vtUtilityLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtUtilityLayer::DrawLayer(vtScaledView *pView)
+void vtUtilityLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 {
 	uint i;
 	uint npoles = m_Poles.size();

@@ -8,11 +8,11 @@
 #pragma once
 
 #include "vtdata/vtTin.h"
-#include "ScaledView.h"
 
 class vtElevationGrid;
 class vtFeatureSetPoint3D;
 class vtFeatureSetPolygon;
+class vtScaledView;
 
 #include <set>
 

@@ -10,7 +10,6 @@
 #include "vtdata/RoadMap.h"
 #include "vtdata/Selectable.h"
 
-class vtScaledView;
 class vtRoadLayer;
 class vtScaledView;
 class vtDLGFile;

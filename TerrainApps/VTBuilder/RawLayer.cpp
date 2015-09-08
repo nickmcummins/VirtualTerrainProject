@@ -111,7 +111,7 @@ bool vtRawLayer::GetExtent(DRECT &rect)
 	return true;
 }
 
-void vtRawLayer::DrawLayer(vtScaledView *pView)
+void vtRawLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 {
 	if (!m_pSet)
 		return;
@@ -159,7 +159,7 @@ void vtRawLayer::DrawLayer(vtScaledView *pView)
 
 			if (bDrawSimple)
 			{
-				glVertex2d(p.x, p.y);
+				pView->SendVertex(p);
 			}
 		}
 		glEnd();
@@ -177,7 +177,7 @@ void vtRawLayer::DrawLayer(vtScaledView *pView)
 				if (pen == 1) { pView->SetColor(DefPen); pen = 0; }
 			}
 			const DPoint3 &p3 = pSetP3->GetPoint(i);
-			glVertex2d(p3.x, p3.y);
+			pView->SendVertex(p3.x, p3.y);
 		}
 		glEnd();
 	}

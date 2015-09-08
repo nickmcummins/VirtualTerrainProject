@@ -44,7 +44,6 @@
 #include "Options.h"
 #include "Tin2d.h"
 #include "TreeView.h"
-#include "vtBitmap.h"
 #include "vtImage.h"
 // Layers
 #include "ElevLayer.h"

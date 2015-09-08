@@ -66,7 +66,7 @@ bool vtWaterLayer::TransformCoords(vtProjection &proj_new)
 	return true;
 }
 
-void vtWaterLayer::DrawLayer(vtScaledView *pView)
+void vtWaterLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 {
 	pView->SetColor(RGBi(0, 40, 160));
 	//wxBrush WaterBrush(wxColor(0,200,200), wxSOLID);
