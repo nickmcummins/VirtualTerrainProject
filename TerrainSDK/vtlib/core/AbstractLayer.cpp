@@ -283,20 +283,31 @@ void vtAbstractLayer::CreateLabelGroup()
 		// otherwise, use the default
 		fontfile = "Arial.ttf";
 	}
+	VTLOG("Attempting to load font from '%s'\n", (const char *)fontfile);
+
 	// First, let the underlying scenegraph library try to find the font
 	m_pFont = osgText::readFontFile((const char *)fontfile);
-	if (!m_pFont.valid())
+	if (m_pFont.valid())
+	{
+		VTLOG("Successfully read font from '%s'\n", (const char *)fontfile);
+		return;
+	}
+	else
 	{
 		// look on VTP data paths
 		vtString vtname = "Fonts/" + fontfile;
-		fontfile = FindFileOnPaths(vtGetDataPath(), vtname);
-		if (fontfile != "")
-			m_pFont = osgText::readFontFile((const char *)fontfile);
+		vtString fontfile2 = FindFileOnPaths(vtGetDataPath(), vtname);
+		if (fontfile2 != "")
+		{
+			m_pFont = osgText::readFontFile((const char *)fontfile2);
+			if (m_pFont.valid())
+			{
+				VTLOG("Successfully read font from '%s'\n", (const char *)fontfile2);
+				return;
+			}
+		}
 	}
-	if (m_pFont.valid())
-		VTLOG("Successfully read font from '%s'\n", (const char *) fontfile);
-	else
-		VTLOG("Couldn't read font from file '%s', not creating labels.\n", (const char *) fontfile);
+	VTLOG("Couldn't load font from '%s', not creating labels.\n", (const char *) fontfile);
 }
 
 int vtAbstractLayer::GetObjectMaterialIndex(vtTagArray &style, uint iIndex)
