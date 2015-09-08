@@ -71,7 +71,6 @@ set_property(TARGET VTBuilder APPEND PROPERTY COMPILE_DEFINITIONS USE_OPENGL=1)
 # Windows specific stuff
 if (WIN32)
 	set_property(TARGET VTBuilder APPEND PROPERTY LINK_FLAGS_DEBUG "/NODEFAULTLIB:msvcrt")
-	set_property(TARGET VTBuilder APPEND PROPERTY LINK_FLAGS "/NODEFAULTLIB:msvcrt")
 endif (WIN32)
 
 # External libraries for this target

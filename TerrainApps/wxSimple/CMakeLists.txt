@@ -17,8 +17,7 @@ target_link_libraries(wxSimple wxosg vtlib minidata vtdata xmlhelper vtui)
 
 # Windows specific stuff
 if (WIN32)
-	set_property(TARGET wxSimple APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt;wxpngd;wxtiffd;wxjpegd;wxzlibd)
-	set_property(TARGET wxSimple APPEND PROPERTY LINK_FLAGS /NODEFAULTLIB:msvcrt;wxpng;wxtiff;wxjpeg;wxzlib)
+	set_property(TARGET wxSimple APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt)
 endif (WIN32)
 
 # External libraries for this target
