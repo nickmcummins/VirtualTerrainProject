@@ -366,7 +366,7 @@ void MapServerDlg::UpdateURL()
 			// TODO
 		}
 	}
-	int epsg = m_proj.GuessEPSGCode();
+	int epsg = m_crs.GuessEPSGCode();
 	if (epsg == -1)
 		epsg = 4326;		// 4326 = WGS84
 	vtString str;

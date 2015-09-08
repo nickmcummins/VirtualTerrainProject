@@ -18,18 +18,18 @@ class vtImageLayer : public vtLayer
 {
 public:
 	vtImageLayer();
-	vtImageLayer(const DRECT &area, const IPoint2 &size, const vtProjection &proj);
+	vtImageLayer(const DRECT &area, const IPoint2 &size, const vtCRS &crs);
 	virtual ~vtImageLayer();
 
 	// overrides for vtLayer methods
 	bool GetExtent(DRECT &rect);
 	void DrawLayer(vtScaledView *pView, UIContext &ui);
-	bool TransformCoords(vtProjection &proj);
+	bool TransformCoords(vtCRS &crs);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();
 	bool AppendDataFrom(vtLayer *pL);
-	void GetProjection(vtProjection &proj);
-	void SetProjection(const vtProjection &proj);
+	void GetCRS(vtCRS &crs);
+	void SetCRS(const vtCRS &crs);
 	void Offset(const DPoint2 &delta);
 
 	// optional overrides

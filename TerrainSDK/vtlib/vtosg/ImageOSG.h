@@ -114,12 +114,12 @@ public:
 
 	// In case the image was loaded from a georeferenced format (such as
 	//  GeoTIFF), provide access to the georef
-	vtProjection &GetProjection() { return m_proj; }
+	vtCRS &GetCRS() { return m_crs; }
 	DRECT &GetExtents() { return m_extents; }
 
 protected:
 	// These two fields are rarely used
-	vtProjection m_proj;
+	vtCRS m_crs;
 	DRECT m_extents;
 };
 typedef osg::ref_ptr<vtImageGeo> vtImageGeoPtr;

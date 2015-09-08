@@ -42,10 +42,10 @@ bool vtWaterLayer::OnLoad()
 	return true;
 }
 
-bool vtWaterLayer::TransformCoords(vtProjection &proj_new)
+bool vtWaterLayer::TransformCoords(vtCRS &crs_new)
 {
 	// Create conversion object
-	ScopedOCTransform trans(CreateCoordTransform(&m_proj, &proj_new));
+	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &crs_new));
 	if (!trans)
 		return false;		// inconvertible projections
 
@@ -118,14 +118,14 @@ bool vtWaterLayer::AppendDataFrom(vtLayer *pL)
 	return true;
 }
 
-void vtWaterLayer::GetProjection(vtProjection &proj)
+void vtWaterLayer::GetCRS(vtCRS &crs)
 {
-	proj = m_proj;
+	crs = m_crs;
 }
 
-void vtWaterLayer::SetProjection(const vtProjection &proj)
+void vtWaterLayer::SetCRS(const vtCRS &crs)
 {
-	m_proj = proj;
+	m_crs = crs;
 }
 
 void vtWaterLayer::Offset(const DPoint2 &p)
@@ -162,7 +162,7 @@ void vtWaterLayer::PaintDibWithWater(vtDIB *dib)
 void vtWaterLayer::AddElementsFromDLG(vtDLGFile *pDlg)
 {
 	// set projection
-	m_proj = pDlg->GetProjection();
+	m_crs = pDlg->GetCRS();
 
 	m_Lines.resize(pDlg->m_iLines);
 	m_IsBody.resize(pDlg->m_iLines);
@@ -206,7 +206,7 @@ void vtWaterLayer::AddElementsFromDLG(vtDLGFile *pDlg)
 }
 
 void vtWaterLayer::AddElementsFromSHP(const wxString &filename,
-									  const vtProjection &proj)
+									  const vtCRS &crs)
 {
 	// SHPOpen doesn't yet support utf-8 or wide filenames, so convert
 	vtString fname_local = UTF8ToLocal(filename.mb_str(wxConvUTF8));
@@ -225,7 +225,7 @@ void vtWaterLayer::AddElementsFromSHP(const wxString &filename,
 	if (nShapeType != SHPT_ARC && nShapeType != SHPT_POLYGON)
 		return;
 
-	m_proj = proj;	// Set projection
+	m_crs = crs;	// Set projection
 
 	// Initialize arrays
 	m_Lines.resize(nElem);
@@ -289,7 +289,7 @@ void vtWaterLayer::AddElementsFromOGR(GDALDataset *pDatasource,
 			// Get the projection (SpatialReference) from this layer
 			OGRSpatialReference *pSpatialRef = pLayer->GetSpatialRef();
 			if (pSpatialRef)
-				m_proj.SetSpatialReference(pSpatialRef);
+				m_crs.SetSpatialReference(pSpatialRef);
 
 			// get field indices
 			int index_entity = defn->GetFieldIndex("ENTITY_LABEL");

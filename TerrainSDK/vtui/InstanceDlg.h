@@ -32,7 +32,7 @@ public:
 	void ClearContent();
 	void AddContent(vtContentManager *mng);
 
-	void SetProjection(const vtProjection &proj) { m_proj = proj; }
+	void SetCRS(const vtCRS &crs) { m_crs = crs; }
 	void SetLocation(const DPoint2 &pos);
 //	wxString GetPath() { return GetModelFile()->GetValue(); }
 	vtTagArray *GetTagArray();
@@ -50,7 +50,7 @@ public:
 protected:
 	// WDR: member variable declarations for InstanceDlg
 	DPoint2			m_pos;
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 	bool			m_bContent;
 	int				m_iManager;
 	int				m_iItem;

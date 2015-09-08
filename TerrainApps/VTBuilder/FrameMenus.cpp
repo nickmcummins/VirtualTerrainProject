@@ -110,8 +110,8 @@ EVT_MENU(ID_LAYER_IMPORT_POINT,	MainFrame::OnLayerImportPoint)
 EVT_MENU(ID_LAYER_IMPORT_XML,	MainFrame::OnLayerImportXML)
 EVT_MENU(ID_LAYER_IMPORT_DXF,	MainFrame::OnLayerImportDXF)
 EVT_MENU(ID_LAYER_PROPS,		MainFrame::OnLayerProperties)
-EVT_MENU(ID_LAYER_CONVERTPROJ,	MainFrame::OnLayerConvert)
-EVT_MENU(ID_LAYER_SETPROJ,		MainFrame::OnLayerSetProjection)
+EVT_MENU(ID_LAYER_CONVERTCRS,	MainFrame::OnLayerConvertCRS)
+EVT_MENU(ID_LAYER_SETCRS,		MainFrame::OnLayerSetCRS)
 EVT_MENU(ID_LAYER_COMBINE,		MainFrame::OnLayerCombine)
 EVT_MENU(ID_EDIT_OFFSET,		MainFrame::OnEditOffset)
 
@@ -444,8 +444,8 @@ void MainFrame::CreateMenus()
 	layerMenu->AppendSeparator();
 	layerMenu->Append(ID_LAYER_COMBINE, _("&Combine Layers"), _("Combine"));
 	layerMenu->AppendSeparator();
-	layerMenu->Append(ID_LAYER_CONVERTPROJ, _("Convert Projection"), _("Convert"));
-	layerMenu->Append(ID_LAYER_SETPROJ, _("Set Projection"), _("Set Projection"));
+	layerMenu->Append(ID_LAYER_CONVERTCRS, _("Convert Coordinate System"), _("Convert Coordinate System"));
+	layerMenu->Append(ID_LAYER_SETCRS, _("Set Coordinate System"), _("Set Coordinate System"));
 	m_pMenuBar->Append(layerMenu, _("&Layer"));
 	menu_num++;
 
@@ -697,8 +697,8 @@ void MainFrame::OnProjectNew(wxCommandEvent &event)
 	RefreshTreeView();
 	RefreshToolbars();
 
-	vtProjection p;
-	SetProjection(p);
+	vtCRS p;
+	SetCRS(p);
 }
 
 wxString GetProjectFilter()
@@ -906,9 +906,9 @@ void MainFrame::OnBatchConvert(wxCommandEvent &event)
 			vtTin2d *tin = new vtTin2d(setpo3);
 
 			// inherit CRS from application
-			vtProjection proj;
-			g_bld->GetProjection(proj);
-			tin->m_proj = proj;
+			vtCRS crs;
+			g_bld->GetCRS(crs);
+			tin->m_crs = crs;
 
 			vtElevLayer *pEL = new vtElevLayer;
 			pEL->SetTin(tin);
@@ -1105,13 +1105,13 @@ void MainFrame::OnLayerNew(wxCommandEvent &event)
 	{
 		vtElevLayer *pEL = (vtElevLayer *)pL;
 		vtElevationGrid *grid = new vtElevationGrid(m_area, IPoint2(1025, 1025),
-			false, m_proj);
+			false, m_crs);
 		grid->FillWithSingleValue(1000);
 		pEL->SetGrid(grid);
 	}
 	else
 	{
-		pL->SetProjection(m_proj);
+		pL->SetCRS(m_crs);
 	}
 
 	SetActiveLayer(pL);
@@ -1450,11 +1450,11 @@ void MainFrame::OnUpdateAreaSampleImage(wxUpdateUIEvent& event)
 	event.Enable(LayersOfType(LT_IMAGE) > 0 && !m_area.IsEmpty());
 }
 
-void MainFrame::OnLayerConvert(wxCommandEvent &event)
+void MainFrame::OnLayerConvertCRS(wxCommandEvent &event)
 {
 	// ask for what projection to convert to
 	ProjectionDlg dlg(NULL, 200, _("Convert to what projection?"));
-	dlg.SetProjection(m_proj);
+	dlg.SetCRS(m_crs);
 
 	// might switch to utm, help provide a good guess for UTM zone
 	DPoint2 pos = EstimateGeoDataCenter();
@@ -1462,8 +1462,8 @@ void MainFrame::OnLayerConvert(wxCommandEvent &event)
 
 	if (dlg.ShowModal() == wxID_CANCEL)
 		return;
-	vtProjection proj;
-	dlg.GetProjection(proj);
+	vtCRS crs;
+	dlg.GetCRS(crs);
 
 	// count through the layer array, converting
 	int layers = m_Layers.size();
@@ -1473,7 +1473,7 @@ void MainFrame::OnLayerConvert(wxCommandEvent &event)
 		vtLayer *lp = m_Layers[i];
 
 		OpenProgressDialog(_("Reprojecting"), _T(""), false, this);
-		bool success = lp->TransformCoords(proj);
+		bool success = lp->TransformCoords(crs);
 		CloseProgressDialog();
 
 		if (success)
@@ -1491,18 +1491,18 @@ void MainFrame::OnLayerConvert(wxCommandEvent &event)
 				layers-succeeded, layers);
 	}
 
-	SetProjection(proj);
+	SetCRS(crs);
 	ZoomAll();
 	RefreshStatusBar();
 }
 
-void MainFrame::OnLayerSetProjection(wxCommandEvent &event)
+void MainFrame::OnLayerSetCRS(wxCommandEvent &event)
 {
 	// Allow the user to directly specify the projection for all loaded
 	// layers (override it, without reprojecting the layer's data)
 	// ask for what projection to convert to
 	ProjectionDlg dlg(NULL, -1, _("Set to what projection?"));
-	dlg.SetProjection(m_proj);
+	dlg.SetCRS(m_crs);
 
 	// might switch to utm, help provide a good guess for UTM zone
 	DPoint2 pos = EstimateGeoDataCenter();
@@ -1510,15 +1510,15 @@ void MainFrame::OnLayerSetProjection(wxCommandEvent &event)
 
 	if (dlg.ShowModal() == wxID_CANCEL)
 		return;
-	vtProjection proj;
-	dlg.GetProjection(proj);
+	vtCRS crs;
+	dlg.GetCRS(crs);
 
 	// count through the layer array, converting
 	int layers = m_Layers.size();
 	for (int i = 0; i < layers; i++)
-		m_Layers[i]->SetProjection(proj);
+		m_Layers[i]->SetCRS(crs);
 
-	SetProjection(proj);
+	SetCRS(crs);
 	ZoomAll();
 	RefreshStatusBar();
 }
@@ -1909,7 +1909,7 @@ void MainFrame::OnRoadClean(wxCommandEvent &event)
 	if (!pRL) return;
 
 	double dEpsilon;
-	if (m_proj.GetUnits() == LU_DEGREES)
+	if (m_crs.GetUnits() == LU_DEGREES)
 		dEpsilon = 1E-7;
 	else
 		dEpsilon = 1E-2;
@@ -2366,9 +2366,9 @@ void MainFrame::OnElevContours(wxCommandEvent& event)
 		raw->GetFeatureSet()->AddField("Elevation", FT_Float);
 
 		// copy CRS
-		vtProjection proj;
-		pEL->GetProjection(proj);
-		raw->SetProjection(proj);
+		vtCRS crs;
+		pEL->GetCRS(crs);
+		raw->SetCRS(crs);
 
 		AddLayer(raw);
 		RefreshTreeView();
@@ -2409,7 +2409,7 @@ void MainFrame::OnElevContours(wxCommandEvent& event)
 
 void MainFrame::OnElevCarve(wxCommandEvent &event)
 {
-	if (m_proj.IsGeographic())
+	if (m_crs.IsGeographic())
 	{
 		wxMessageBox(_("Sorry, but precise grid operations require a non-geographic coordinate\n system (meters as horizontal units, not degrees.)"),
 			_("Info"), wxOK);
@@ -2611,7 +2611,7 @@ void MainFrame::OnUpdateAreaMatch(wxUpdateUIEvent& event)
 void MainFrame::OnAreaTypeIn(wxCommandEvent &event)
 {
 	ExtentDlg dlg(NULL, -1, _("Edit Area"));
-	dlg.SetArea(m_area, (m_proj.IsGeographic() != 0));
+	dlg.SetArea(m_area, (m_crs.IsGeographic() != 0));
 	if (dlg.ShowModal() == wxID_OK)
 	{
 		m_area = dlg.m_area;
@@ -2623,7 +2623,7 @@ void MainFrame::OnAreaMatch(wxCommandEvent &event)
 {
 	MatchDlg dlg(NULL, -1, _("Match Area and Tiling to Layer"));
 	dlg.SetView(GetView());
-	dlg.SetArea(m_area, (m_proj.IsGeographic() != 0));
+	dlg.SetArea(m_area, (m_crs.IsGeographic() != 0));
 	if (dlg.ShowModal() == wxID_OK)
 	{
 		m_tileopts.cols = dlg.m_tile.x;
@@ -2693,7 +2693,7 @@ void MainFrame::OnAreaRequestWMS(wxCommandEvent& event)
 		m_pMapServerDlg = new MapServerDlg(this, -1, _T("WMS Request"));
 
 	m_pMapServerDlg->m_area = m_area;
-	m_pMapServerDlg->m_proj = m_proj;
+	m_pMapServerDlg->m_crs = m_crs;
 	m_pMapServerDlg->SetServerArray(m_wms_servers);
 
 	if (m_pMapServerDlg->ShowModal() != wxID_OK)
@@ -2770,7 +2770,7 @@ void MainFrame::OnAreaRequestWMS(wxCommandEvent& event)
 		if (success)
 		{
 			pIL->SetExtent(m_area);
-			pIL->SetProjection(m_proj);
+			pIL->SetCRS(m_crs);
 			AddLayerWithCheck(pIL);
 		}
 		else
@@ -2991,7 +2991,7 @@ void MainFrame::OnAreaVegDensity(wxCommandEvent& event)
 {
 	wxString str, s;
 
-	LinearUnits lu = m_proj.GetUnits();
+	LinearUnits lu = m_crs.GetUnits();
 	float xsize = m_area.Width() * GetMetersPerUnit(lu);
 	float ysize = m_area.Height() * GetMetersPerUnit(lu);
 	float area = xsize * ysize;
@@ -3314,7 +3314,7 @@ void MainFrame::OnStructureCleanFootprints(wxCommandEvent& event)
 		return;
 
 	double dEpsilon;
-	if (m_proj.GetUnits() == LU_DEGREES)
+	if (m_crs.GetUnits() == LU_DEGREES)
 		dEpsilon = 1E-7;
 	else
 		dEpsilon = 1E-2;
@@ -3485,7 +3485,7 @@ void MainFrame::OnRawSetType(wxCommandEvent& event)
 		//  setting geom type
 		wxString name = pRL->GetLayerFilename();
 		pRL->SetGeomType(types[cur_type]);
-		pRL->SetProjection(m_proj);
+		pRL->SetCRS(m_crs);
 		pRL->SetLayerFilename(name);
 		RefreshTreeStatus();
 	}
@@ -3791,7 +3791,7 @@ void MainFrame::OnRawGenElevation(wxCommandEvent& event)
 	DRECT extent;
 	pSet->ComputeExtent(extent);
 
-	bool bIsGeo = (m_proj.IsGeographic() != 0);
+	bool bIsGeo = (m_crs.IsGeographic() != 0);
 
 	GenGridDlg dlg(this, -1, _("Generate Grid from 3D Points"), bIsGeo);
 	dlg.m_fAreaX = extent.Width();

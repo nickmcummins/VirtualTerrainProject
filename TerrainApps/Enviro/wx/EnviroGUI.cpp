@@ -457,7 +457,7 @@ vtAbstractLayer *CreateNewAbstractPointLayer(vtTerrain *pTerr, bool bAskStyle)
 	pSet->AddField("Url", FT_String);
 
 	// Inherit projection
-	pSet->SetProjection(pTerr->GetProjection());
+	pSet->SetCRS(pTerr->GetCRS());
 
 	// Ask style for the new point layer
 	vtTagArray props;

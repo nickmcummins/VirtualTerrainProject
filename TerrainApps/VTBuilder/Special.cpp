@@ -366,8 +366,8 @@ void Builder::ElevCopy()
 
 	// Projection string.
 	char *wkt = NULL;
-	m_proj.exportToWkt( &wkt );
-	grid->GetProjection().exportToWkt(&wkt);
+	m_crs.exportToWkt( &wkt );
+	grid->GetCRS().exportToWkt(&wkt);
 	vtString wkt_str = wkt;
 	CPLFree(wkt);
 	clipSize += clip.CalcBinaryTagStorage(wkt_str.GetLength());
@@ -539,7 +539,7 @@ void Builder::ElevPasteNew()
 	// than code 1 (planetary body, Earth). Ignore projection
 	// formats other than WKT.
 
-	vtProjection proj;
+	vtCRS crs;
 	DRECT area;
 	float fElevScale = 1.0;
 
@@ -560,7 +560,7 @@ void Builder::ElevPasteNew()
 			psz[n] = 0;
 			//m_georef_info.set_projection(psz);
 			char *wkt = psz;
-			proj.importFromWkt(&wkt);
+			crs.importFromWkt(&wkt);
 			delete psz;
 		}
 
@@ -587,7 +587,7 @@ void Builder::ElevPasteNew()
 	}
 
 	// Create new layer
-	vtElevLayer *pEL = new vtElevLayer(area, IPoint2(width, breadth), bFP, 1.0f, proj);
+	vtElevLayer *pEL = new vtElevLayer(area, IPoint2(width, breadth), bFP, 1.0f, crs);
 
 	// Copy the elevations.
 	// Require packed pixel storage.

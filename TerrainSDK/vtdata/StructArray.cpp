@@ -65,7 +65,7 @@ vtBuilding *vtStructureArray::AddNewBuilding()
 	vtBuilding *nb = NewBuilding();
 
 	// Every building needs a link back up to its containing array's CRS.
-	nb->SetCRS(&m_proj);
+	nb->SetCRS(&m_crs);
 
 	push_back(nb);
 	return nb;
@@ -612,7 +612,7 @@ void StructureVisitor::startElement (const char * name, const XMLAttributes &att
 		{
 			const char *type  = atts.getValue("type");
 			const char *value = atts.getValue("value");
-			m_pSA->m_proj.SetTextDescription(type, value);
+			m_pSA->m_crs.SetTextDescription(type, value);
 		}
 		else if (string(name) == (string)"structures")
 		{
@@ -1290,7 +1290,7 @@ void StructVisitorGML::endElement(const char *name)
 	}
 	else if (m_state == 1 && (!strcmp(name, "SRS")))
 	{
-		m_pSA->m_proj.SetTextDescription("wkt", data);
+		m_pSA->m_crs.SetTextDescription("wkt", data);
 	}
 	else if (m_state == 10)
 	{
@@ -1411,7 +1411,7 @@ bool vtStructureArray::WriteXML(const char* filename, bool bGZip) const
 
 	// Write projection
 	char *wkt;
-	OGRErr err = m_proj.exportToWkt(&wkt);
+	OGRErr err = m_crs.exportToWkt(&wkt);
 	if (err != OGRERR_NONE)
 	{
 		throw xh_io_exception("Couldn't write CRS to file", xh_location(filename),
@@ -1421,7 +1421,7 @@ bool vtStructureArray::WriteXML(const char* filename, bool bGZip) const
 	gfprintf(out, "\n");
 	OGRFree(wkt);
 
-	bool bDegrees = (m_proj.IsGeographic() == 1);
+	bool bDegrees = (m_crs.IsGeographic() == 1);
 
 	for (uint i = 0; i < size(); i++)
 	{

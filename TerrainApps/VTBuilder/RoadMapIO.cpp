@@ -129,7 +129,7 @@ void RoadMapEdit::AddElementsFromDLG(vtDLGFile *pDlg)
 	DPoint2 buffer[BUFFER_SIZE];
 
 	// set projection
-	m_proj = pDlg->GetProjection();
+	m_crs = pDlg->GetCRS();
 
 	// expand extents to include the new DLG
 	if (!m_bValidExtents)
@@ -425,7 +425,7 @@ bool RoadMapEdit::ApplyCFCC(LinkEdit *pL, const char *str)
 	return bReject;
 }
 
-void RoadMapEdit::AddElementsFromSHP(const wxString &filename, const vtProjection &proj,
+void RoadMapEdit::AddElementsFromSHP(const wxString &filename, const vtCRS &crs,
 									 bool progress_callback(int))
 {
 	// SHPOpen doesn't yet support utf-8 or wide filenames, so convert
@@ -458,7 +458,7 @@ void RoadMapEdit::AddElementsFromSHP(const wxString &filename, const vtProjectio
 	}
 
 	// set projection
-	m_proj = proj;
+	m_crs = crs;
 
 	NodeEdit *pN1, *pN2;
 	LinkEdit *pL;
@@ -599,7 +599,7 @@ void RoadMapEdit::AddElementsFromOGR(GDALDataset *pDatasource,
 			// Get the projection (SpatialReference) from this layer
 			OGRSpatialReference *pSpatialRef = pLayer->GetSpatialRef();
 			if (pSpatialRef)
-				m_proj.SetSpatialReference(pSpatialRef);
+				m_crs.SetSpatialReference(pSpatialRef);
 
 			pNodeLookup = new NodeEditPtr[feature_count+1];
 
@@ -757,7 +757,7 @@ bool RoadMapEdit::AppendFromOGRLayer(OGRLayer *pLayer)
 	OGRSpatialReference *pSpatialRef = pLayer->GetSpatialRef();
 	if (pSpatialRef)
 	{
-		m_proj.SetSpatialReference(pSpatialRef);
+		m_crs.SetSpatialReference(pSpatialRef);
 		bGotCS = true;
 	}
 
@@ -805,7 +805,7 @@ bool RoadMapEdit::AppendFromOGRLayer(OGRLayer *pLayer)
 			OGRSpatialReference *pSpatialRef = pGeom->getSpatialReference();
 			if (pSpatialRef)
 			{
-				m_proj.SetSpatialReference(pSpatialRef);
+				m_crs.SetSpatialReference(pSpatialRef);
 				bGotCS = true;
 			}
 		}

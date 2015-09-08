@@ -28,11 +28,11 @@ public:
 	// Implement vtLayer methods
 	bool GetExtent(DRECT &rect);
 	void DrawLayer(vtScaledView *pView, UIContext &ui);
-	bool TransformCoords(vtProjection &proj);
+	bool TransformCoords(vtCRS &crs);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();
-	void GetProjection(vtProjection &proj);
-	void SetProjection(const vtProjection &proj);
+	void GetCRS(vtCRS &crs);
+	void SetCRS(const vtCRS &crs);
 	bool AppendDataFrom(vtLayer *pL);
 	void Offset(const DPoint2 &p);
 	void GetPropertyText(wxString &str);
@@ -61,7 +61,7 @@ public:
 	void UpdateResizeScale(BuilderView *pView, UIContext &ui);
 
 	void DrawBuildingHighlight(vtScaledView *pView);
-	bool AddElementsFromSHP(const wxString &filename, const vtProjection &proj, DRECT rect);
+	bool AddElementsFromSHP(const wxString &filename, const vtCRS &crs, DRECT rect);
 	void AddElementsFromDLG(vtDLGFile *pDlg);
 
 	bool EditBuildingProperties();

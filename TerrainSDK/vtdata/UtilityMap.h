@@ -75,8 +75,8 @@ public:
 	bool WriteOSM(const char *pathname);
 	bool ReadOSM(const char *pathname, bool progress_callback(int) = NULL);
 
-	void SetProjection(const vtProjection &proj);
-	bool TransformTo(vtProjection &proj);
+	void SetCRS(const vtCRS &crs);
+	bool TransformTo(vtCRS &crs);
 	void Offset(const DPoint2 &delta);
 
 protected:
@@ -85,7 +85,7 @@ protected:
 	std::vector<vtPole *> m_Poles;
 	std::vector<vtLine *> m_Lines;
 
-	vtProjection m_proj;
+	vtCRS m_crs;
 
 	int	m_iNextAvailableID;
 };

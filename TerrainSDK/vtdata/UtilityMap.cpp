@@ -86,9 +86,9 @@ bool vtUtilityMap::WriteOSM(const char *pathname)
 		return false;
 
 	// OSM only understands Geographic WGS84, so convert to that.
-	vtProjection wgs84_geo;
+	vtCRS wgs84_geo;
 	wgs84_geo.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
-	ScopedOCTransform trans(CreateCoordTransform(&m_proj, &wgs84_geo));
+	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &wgs84_geo));
 	if (!trans)
 	{
 		VTLOG1(" Couldn't transform coordinates\n");
@@ -193,9 +193,9 @@ UtilOSMVisitor::UtilOSMVisitor(vtUtilityMap *util) : m_state(PS_NONE)
 	m_util_layer = util;
 
 	// OSM is always in Geo WGS84
-	vtProjection proj;
-	proj.SetWellKnownGeogCS("WGS84");
-	m_util_layer->SetProjection(proj);
+	vtCRS crs;
+	crs.SetWellKnownGeogCS("WGS84");
+	m_util_layer->SetCRS(crs);
 }
 
 void UtilOSMVisitor::startElement(const char *name, const XMLAttributes &atts)
@@ -386,15 +386,15 @@ bool vtUtilityMap::ReadOSM(const char *pathname, bool progress_callback(int))
 	return true;
 }
 
-void vtUtilityMap::SetProjection(const vtProjection &proj)
+void vtUtilityMap::SetCRS(const vtCRS &crs)
 {
-	m_proj = proj;
+	m_crs = crs;
 }
 
-bool vtUtilityMap::TransformTo(vtProjection &proj)
+bool vtUtilityMap::TransformTo(vtCRS &crs)
 {
 	// Convert from (usually, Wgs84 Geographic) to what we need.
-	ScopedOCTransform trans(CreateCoordTransform(&m_proj, &proj));
+	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &crs));
 	if (!trans)
 	{
 		VTLOG1(" Couldn't transform coordinates\n");
@@ -407,7 +407,7 @@ bool vtUtilityMap::TransformTo(vtProjection &proj)
 	}
 
 	// Adopt new projection
-	m_proj = proj;
+	m_crs = crs;
 
 	return true;
 }

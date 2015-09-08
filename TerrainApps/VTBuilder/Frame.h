@@ -58,7 +58,7 @@ public:
 	void CreateToolbar();
 	void RefreshToolbars();
 	virtual void AddMainToolbars();
-	virtual void SetProjection(const vtProjection &p);
+	virtual void SetCRS(const vtCRS &p);
 
 protected:
 	void OnClose(wxCloseEvent &event);
@@ -105,8 +105,8 @@ protected:
 	void OnLayerImportXML(wxCommandEvent& event);
 	void OnLayerImportDXF(wxCommandEvent& event);
 	void OnLayerProperties(wxCommandEvent& event);
-	void OnLayerConvert(wxCommandEvent& event);
-	void OnLayerSetProjection(wxCommandEvent& event);
+	void OnLayerConvertCRS(wxCommandEvent& event);
+	void OnLayerSetCRS(wxCommandEvent& event);
 	void OnLayerCombine(wxCommandEvent& event);
 
 	void OnUpdateLayerSave(wxUpdateUIEvent& event);

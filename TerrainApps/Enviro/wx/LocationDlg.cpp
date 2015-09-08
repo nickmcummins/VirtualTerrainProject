@@ -270,7 +270,7 @@ vtAnimPath *LocationDlg::CreateAnimPath()
 	vtAnimPath *anim = new vtAnimPath;
 
 	// Ensure that anim knows the projection
-	anim->SetProjection(m_pSaver->GetAtProjection(), m_pSaver->GetLocalCS());
+	anim->SetCRS(m_pSaver->GetAtCRS(), m_pSaver->GetLocalCS());
 
 	return anim;
 }
@@ -673,7 +673,7 @@ void LocationDlg::OnLoadAnim( wxCommandEvent &event )
 		if (!pSet)
 			return;
 		anim = CreateAnimPath();
-		bSuccess = anim->CreateFromLineString(m_pSaver->GetAtProjection(), pSet);
+		bSuccess = anim->CreateFromLineString(m_pSaver->GetAtCRS(), pSet);
 		delete pSet;
 	}
 	if (bSuccess)

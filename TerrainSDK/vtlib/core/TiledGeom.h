@@ -30,7 +30,7 @@ public:
 	int lod0size;
 	DRECT earthextents;
 	float minheight, maxheight;	// for elevation tilesets only
-	vtProjection proj;
+	vtCRS crs;
 	LODMap lodmap;
 	bool bJPEG;
 };
@@ -81,7 +81,7 @@ public:
 	databuf FetchTile(const char *fname);
 
 	// CRS of this tileset
-	vtProjection m_proj;
+	vtCRS m_crs;
 
 	// detail level and vertex target
 	float m_fResolution;

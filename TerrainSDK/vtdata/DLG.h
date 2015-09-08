@@ -111,12 +111,12 @@ public:
 	std::vector<DLGArea> m_areas;
 	std::vector<DLGLine> m_lines;
 
-	vtProjection &GetProjection() { return m_proj; }
+	vtCRS &GetCRS() { return m_crs; }
 
 protected:
 	FILE *m_fp;
 
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 
 private:
 	// Don't let unsuspecting users stumble into assuming that object

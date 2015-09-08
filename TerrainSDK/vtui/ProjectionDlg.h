@@ -47,8 +47,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = wxDEFAULT_DIALOG_STYLE );
 
-	void SetProjection(const vtProjection &proj);
-	void GetProjection(vtProjection &proj);
+	void SetCRS(const vtCRS &crs);
+	void GetCRS(vtCRS &crs);
 	void SetGeoRefPoint(const DPoint2 &p) { m_GeoRefPoint = p; }
 
 protected:
@@ -77,7 +77,7 @@ private:
 	wxChoice	*m_pDatumCtrl;
 	wxChoice	*m_pProjCtrl;
 
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 	ProjType		m_eProj;
 	int		m_iDatum;
 	int		m_iZone;

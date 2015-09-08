@@ -231,9 +231,9 @@ void MainFrame::SetupUI()
 
 	RefreshToolbars();
 
-	vtProjection proj;
-	proj.SetWellKnownGeogCS("WGS84");
-	SetProjection(proj);
+	vtCRS crs;
+	crs.SetWellKnownGeogCS("WGS84");
+	SetCRS(crs);
 	RefreshStatusBar();
 
 	// Load structure defaults
@@ -453,9 +453,9 @@ void MainFrame::AddMainToolbars()
 ////////////////////////////////////////////////////////////////
 // Application Methods
 
-void MainFrame::SetProjection(const vtProjection &p)
+void MainFrame::SetCRS(const vtCRS &p)
 {
-	Builder::SetProjection(p);
+	Builder::SetCRS(p);
 
 	// inform the world map view
 	if (GetView())
@@ -463,11 +463,11 @@ void MainFrame::SetProjection(const vtProjection &p)
 
 	// inform the dialogs that care, if they're open
 	if (m_pDistanceDlg)
-		m_pDistanceDlg->SetProjection(m_proj);
+		m_pDistanceDlg->SetCRS(m_crs);
 	if (m_pInstanceDlg)
-		m_pInstanceDlg->SetProjection(m_proj);
+		m_pInstanceDlg->SetCRS(m_crs);
 	if (m_pProfileDlg)
-		m_pProfileDlg->SetProjection(m_proj);
+		m_pProfileDlg->SetCRS(m_crs);
 }
 
 bool MainFrame::AddLayerWithCheck(vtLayer *pLayer, bool bRefresh)
@@ -686,7 +686,7 @@ DistanceDlg2d *MainFrame::ShowDistanceDlg()
 		// Create new Distance Dialog
 		m_pDistanceDlg = new DistanceDlg2d(this, wxID_ANY, _("Distance Tool"),
 				wxPoint(200, 200), wxSize(600, 200), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
-		m_pDistanceDlg->SetProjection(m_proj);
+		m_pDistanceDlg->SetCRS(m_crs);
 		m_pDistanceDlg->SetFrame(this);
 	}
 	m_pDistanceDlg->Show(true);
@@ -790,7 +790,7 @@ InstanceDlg *MainFrame::ShowInstanceDlg(bool bShow)
 
 		for (uint i = 0; i < m_contents.size(); i++)
 			m_pInstanceDlg->AddContent(m_contents[i]);
-		m_pInstanceDlg->SetProjection(m_proj);
+		m_pInstanceDlg->SetCRS(m_crs);
 	}
 	if (m_pInstanceDlg)
 		m_pInstanceDlg->Show(bShow);
@@ -843,7 +843,7 @@ ProfileDlg *MainFrame::ShowProfileDlg()
 		BuildingProfileCallback *callback = new BuildingProfileCallback;
 		callback->m_frame = this;
 		m_pProfileDlg->SetCallback(callback);
-		m_pProfileDlg->SetProjection(m_proj);
+		m_pProfileDlg->SetCRS(m_crs);
 	}
 	m_pProfileDlg->Show(true);
 
@@ -937,7 +937,7 @@ bool MainFrame::SaveProject(const wxString &strPathName) const
 
 	// write projection info
 	char *wkt;
-	m_proj.exportToWkt(&wkt);
+	m_crs.exportToWkt(&wkt);
 	fprintf(fp, "Projection %s\n", wkt);
 	OGRFree(wkt);
 

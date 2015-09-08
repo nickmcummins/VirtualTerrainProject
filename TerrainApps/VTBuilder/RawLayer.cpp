@@ -102,7 +102,7 @@ bool vtRawLayer::GetExtent(DRECT &rect)
 		// to support zoom into a single point, create artificial size
 		if (rect.Width() == 0 || rect.Height() == 0)
 		{
-			if (GetAtProjection()->IsGeographic())
+			if (GetAtCRS()->IsGeographic())
 				rect.Grow(0.00002, 0.00002);
 			else
 				rect.Grow(2, 2);
@@ -249,10 +249,10 @@ void vtRawLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 	}
 }
 
-bool vtRawLayer::TransformCoords(vtProjection &proj)
+bool vtRawLayer::TransformCoords(vtCRS &crs)
 {
 	// Create conversion object
-	ScopedOCTransform trans(CreateCoordTransform(&(m_pSet->GetAtProjection()), &proj));
+	ScopedOCTransform trans(CreateCoordTransform(&(m_pSet->GetAtCRS()), &crs));
 	if (!trans.get())
 		return false;		// inconvertible projections
 
@@ -261,7 +261,7 @@ bool vtRawLayer::TransformCoords(vtProjection &proj)
 	if (!success)
 		DisplayAndLog("Warning: Some coordinates did not transform correctly.\n");
 
-	m_pSet->SetProjection(proj);
+	m_pSet->SetCRS(crs);
 	m_bExtentComputed = false;
 	SetModified(true);
 
@@ -308,8 +308,8 @@ bool vtRawLayer::OnLoad()
 
 	if (m_pSet)
 	{
-		vtProjection &proj = m_pSet->GetAtProjection();
-		if (!g_bld->ConfirmValidCRS(&proj))
+		vtCRS &crs = m_pSet->GetAtCRS();
+		if (!g_bld->ConfirmValidCRS(&crs))
 		{
 			delete m_pSet;
 			m_pSet = NULL;
@@ -342,23 +342,23 @@ bool vtRawLayer::AppendDataFrom(vtLayer *pL)
 	return true;
 }
 
-void vtRawLayer::GetProjection(vtProjection &proj)
+void vtRawLayer::GetCRS(vtCRS &crs)
 {
 	if (m_pSet)
-		proj = m_pSet->GetAtProjection();
+		crs = m_pSet->GetAtCRS();
 }
 
-void vtRawLayer::SetProjection(const vtProjection &proj)
+void vtRawLayer::SetCRS(const vtCRS &crs)
 {
 	if (m_pSet)
 	{
-		const vtProjection &current = m_pSet->GetAtProjection();
-		if (proj != current)
+		const vtCRS &current = m_pSet->GetAtCRS();
+		if (crs != current)
 		{
 			SetModified(true);
 			m_bExtentComputed = false;
 		}
-		m_pSet->SetProjection(proj);
+		m_pSet->SetCRS(crs);
 	}
 }
 

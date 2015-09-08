@@ -293,10 +293,10 @@ bool vtElevationGrid::LoadFromDEM(const char *szFileName,
 	{
 	case 0:		// geographic (lat-lon)
 		iUTMZone = -1;
-		bSuccessfulCRS = m_proj.SetProjectionSimple(false, iUTMZone, iDatum);
+		bSuccessfulCRS = m_crs.SetSimple(false, iUTMZone, iDatum);
 		break;
 	case 1:		// utm
-		m_proj.SetProjectionSimple(true, iUTMZone, iDatum);
+		m_crs.SetSimple(true, iUTMZone, iDatum);
 		break;
 	case 3:		// Albers Conical Equal Area
 		{
@@ -318,8 +318,8 @@ bool vtElevationGrid::LoadFromDEM(const char *szFileName,
 			double false_easting = dProjParams[6];
 			double false_northing = dProjParams[7];
 
-			m_proj.SetGeogCSFromDatum(iDatum);
-			m_proj.SetACEA(lat_1st_std_parallel, lat_2nd_std_parallel, lat_origin,
+			m_crs.SetGeogCSFromDatum(iDatum);
+			m_crs.SetACEA(lat_1st_std_parallel, lat_2nd_std_parallel, lat_origin,
 				lon_central_meridian, false_easting, false_northing);
 		}
 		break;

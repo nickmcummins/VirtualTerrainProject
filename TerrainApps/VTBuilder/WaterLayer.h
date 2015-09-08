@@ -31,12 +31,12 @@ public:
 
 	bool GetExtent(DRECT &rect);
 	void DrawLayer(vtScaledView *pView, UIContext &ui);
-	bool TransformCoords(vtProjection &proj);
+	bool TransformCoords(vtCRS &crs);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();
 	bool AppendDataFrom(vtLayer *pL);
-	void GetProjection(vtProjection &proj);
-	void SetProjection(const vtProjection &proj);
+	void GetCRS(vtCRS &crs);
+	void SetCRS(const vtCRS &crs);
 	void Offset(const DPoint2 &p);
 	void GetPropertyText(wxString &str);
 
@@ -46,7 +46,7 @@ public:
 	void PaintDibWithWater(vtDIB *dib);
 
 	void AddElementsFromDLG(vtDLGFile *pDlg);
-	void AddElementsFromSHP(const wxString &filename, const vtProjection &proj);
+	void AddElementsFromSHP(const wxString &filename, const vtCRS &crs);
 
 	// Import from SDTS via OGR
 	void AddElementsFromOGR(class GDALDataset *datasource,
@@ -58,7 +58,7 @@ protected:
 	// for now, just use plain vectors for everything
 	DLine2Array		m_Lines;
 	std::vector<bool>	m_IsBody;
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 };
 
 #endif

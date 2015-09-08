@@ -12,6 +12,7 @@
 #endif
 
 #include "vtdata/vtLog.h"
+#include "vtdata/GDALWrapper.h"
 #include "vtui/Helper.h"
 #include "vtui/ProjectionDlg.h"
 #include "minidata/LocalDatabuf.h"
@@ -386,11 +387,11 @@ vtImage::vtImage()
 }
 
 vtImage::vtImage(const DRECT &area, const IPoint2 &size,
-				 const vtProjection &proj)
+				 const vtCRS &crs)
 {
 	SetDefaults();
 	m_Extents = area;
-	m_proj = proj;
+	m_crs = crs;
 
 	// yes, we could use some error-checking here
 	vtBitmap *pBitmap = new vtBitmap;
@@ -459,13 +460,13 @@ void vtImage::DrawToView(vtScaledView *pView)
 	//	srcRect.width, srcRect.height);
 }
 
-bool vtImage::ConvertProjection(vtImage *pOld, vtProjection &NewProj,
-								int iSampleN, bool progress_callback(int))
+bool vtImage::ConvertCRS(vtImage *pOld, vtCRS &NewCRS,
+						 int iSampleN, bool progress_callback(int))
 {
 	// Create conversion object
-	const vtProjection *pSource, *pDest;
-	pSource = &pOld->GetAtProjection();
-	pDest = &NewProj;
+	const vtCRS *pSource, *pDest;
+	pSource = &pOld->GetAtCRS();
+	pDest = &NewCRS;
 
 	ScopedOCTransform trans(CreateCoordTransform(pSource, pDest));
 	if (!trans)
@@ -542,7 +543,7 @@ bool vtImage::ConvertProjection(vtImage *pOld, vtProjection &NewProj,
 		return false;
 
 	// Now we're ready to fill in the new image.
-	m_proj = NewProj;
+	m_crs = NewCRS;
 	vtBitmap *pBitmap = new vtBitmap;
 	if (!pBitmap->Allocate(size))
 		return false;
@@ -602,14 +603,14 @@ bool vtImage::ConvertProjection(vtImage *pOld, vtProjection &NewProj,
 	return true;
 }
 
-void vtImage::GetProjection(vtProjection &proj) const
+void vtImage::GetCRS(vtCRS &crs) const
 {
-	proj = m_proj;
+	crs = m_crs;
 }
 
-void vtImage::SetProjection(const vtProjection &proj)
+void vtImage::SetCRS(const vtCRS &crs)
 {
-	m_proj = proj;
+	m_crs = crs;
 }
 
 void vtImage::SetExtent(const DRECT &rect)
@@ -637,14 +638,14 @@ DPoint2 vtImage::GetSpacing(int bitmap) const
  * occurs when the only difference between the old and new projection
  * is choice of Datum.
  *
- * \param proj_new	The new projection to convert to.
+ * \param crs_new	The new projection to convert to.
  *
  * \return True if successful.
  */
-bool vtImage::ReprojectExtents(const vtProjection &proj_new)
+bool vtImage::ReprojectExtents(const vtCRS &crs_new)
 {
 	// Create conversion object
-	ScopedOCTransform trans(CreateCoordTransform(&m_proj, &proj_new));
+	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &crs_new));
 	if (!trans)
 		return false;	// inconvertible projections
 
@@ -655,7 +656,7 @@ bool vtImage::ReprojectExtents(const vtProjection &proj_new)
 	if (success != 2)
 		return false;	// inconvertible projections
 
-	m_proj = proj_new;
+	m_crs = crs_new;
 	return true;
 }
 
@@ -1021,19 +1022,19 @@ bool vtImage::ReadPPM(const char *fname, bool progress_callback(int))
 		}
 		if (coord_sys == 0)	// LL
 		{
-			m_proj.SetProjectionSimple(false, 0, datum);
+			m_crs.SetSimple(false, 0, datum);
 			ext.left /= 3600;	// arc-seconds to degrees
 			ext.right /= 3600;
 			ext.top /= 3600;
 			ext.bottom /= 3600;
 		}
 		else if (coord_sys == 1)	// UTM
-			m_proj.SetProjectionSimple(true, coord_zone, datum);
+			m_crs.SetSimple(true, coord_zone, datum);
 	}
 	else
 	{
 		// Set the projection (actually we don't know it)
-		m_proj.SetProjectionSimple(true, 1, EPSG_DATUM_WGS84);
+		m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 		ext.left = 0;
 		ext.top = size.y - 1;
@@ -1173,7 +1174,7 @@ bool vtImage::SaveToFile(const char *fname) const
 	GByte *raster = new GByte[size.x*size.y];
 
 	char *pszSRS_WKT = NULL;
-	m_proj.exportToWkt( &pszSRS_WKT );
+	m_crs.exportToWkt( &pszSRS_WKT );
 	pDataset->SetProjection(pszSRS_WKT);
 	CPLFree( pszSRS_WKT );
 
@@ -1257,7 +1258,7 @@ bool vtImage::LoadFromGDAL(const char *fname)
 
 		IPoint2 OriginalSize = Size;
 
-		vtProjection temp;
+		vtCRS temp;
 		bool bHaveProj = false;
 		pProjectionString = m_pDataset->GetProjectionRef();
 		if (pProjectionString)
@@ -1267,7 +1268,7 @@ bool vtImage::LoadFromGDAL(const char *fname)
 			// we must have a valid CRS, and it must not be local
 			if (err == OGRERR_NONE && !temp.IsLocal())
 			{
-				m_proj = temp;
+				m_crs = temp;
 				bHaveProj = true;
 			}
 		}
@@ -1277,14 +1278,14 @@ bool vtImage::LoadFromGDAL(const char *fname)
 			bool bSuccess = temp.ReadProjFile(fname_local);
 			if (bSuccess)
 			{
-				m_proj = temp;
+				m_crs = temp;
 				bHaveProj = true;
 			}
 		}
 		// if we still don't have it
 		if (!bHaveProj)
 		{
-			if (!g_bld->ConfirmValidCRS(&m_proj))
+			if (!g_bld->ConfirmValidCRS(&m_crs))
 				throw "Import Cancelled.";
 		}
 
@@ -1309,7 +1310,7 @@ bool vtImage::LoadFromGDAL(const char *fname)
 				DRECT ext;
 				ext.SetToZero();
 				ExtentDlg dlg(NULL, -1, _("Extents"));
-				dlg.SetArea(ext, (m_proj.IsGeographic() != 0));
+				dlg.SetArea(ext, (m_crs.IsGeographic() != 0));
 				if (dlg.ShowModal() == wxID_OK)
 					m_Extents = dlg.m_area;
 				else
@@ -1649,8 +1650,8 @@ bool vtImage::ReadFeaturesFromTerraserver(const DRECT &area, int iTheme,
 	m_Extents = area;
 
 	// Datum is always WGS84
-	m_proj.SetWellKnownGeogCS("WGS84");
-	m_proj.SetUTMZone(iUTMZone);
+	m_crs.SetWellKnownGeogCS("WGS84");
+	m_crs.SetUTMZone(iUTMZone);
 
 	if (MetersPerPixel == 1) TileScaleId = 10;
 	if (MetersPerPixel == 2) TileScaleId = 11;
@@ -1736,11 +1737,11 @@ bool vtImage::WriteTileset(TilingOptions &opts, BuilderView *pView)
 	DPoint2 tile_dim(area.Width()/opts.cols, area.Height()/opts.rows);
 	DPoint2 cell_size = tile_dim / base_tilesize;
 
-	vtString units = GetLinearUnitName(m_proj.GetUnits());
+	vtString units = GetLinearUnitName(m_crs.GetUnits());
 	units.MakeLower();
-	int zone = m_proj.GetUTMZone();
+	int zone = m_crs.GetUTMZone();
 	vtString crs;
-	if (m_proj.IsGeographic())
+	if (m_crs.IsGeographic())
 		crs = "LL";
 	else if (zone != 0)
 		crs = "UTM";
@@ -1817,7 +1818,7 @@ bool vtImage::WriteTileset(TilingOptions &opts, BuilderView *pView)
 	{
 		// Write .ini file
 		WriteTilesetHeader(opts.fname, opts.cols, opts.rows,
-			opts.lod0size, area, m_proj, INVALID_ELEVATION, INVALID_ELEVATION,
+			opts.lod0size, area, m_crs, INVALID_ELEVATION, INVALID_ELEVATION,
 			&lod_existence_map, bJPEG);
 
 		clock_t tm2 = clock();
@@ -1917,7 +1918,7 @@ bool vtImage::WriteTile(const TilingOptions &opts, BuilderView *pView, vtString 
 	output_buf.ysize = tilesize;
 	output_buf.zsize = 1;
 	output_buf.tsteps = 1;
-	output_buf.SetBounds(m_proj, tile_area);
+	output_buf.SetBounds(m_crs, tile_area);
 
 	// Write and optionally compress the image
 	WriteMiniImage(fname, opts, rgb_bytes, output_buf,

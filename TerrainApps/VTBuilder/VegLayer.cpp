@@ -212,9 +212,9 @@ void vtVegLayer::AddElementsFromLULC(vtLULCFile *pLULC)
 	SetVegType(VLT_Density);
 
 	//set projections
-	vtProjection proj_new;
-	proj_new.SetProjectionSimple(0, -1, EPSG_DATUM_WGS84);
-	SetProjection(proj_new);
+	vtCRS crs_new;
+	crs_new.SetSimple(0, -1, EPSG_DATUM_WGS84);
+	SetCRS(crs_new);
 
 	// figure out the number of polygons in file
 	uint size = 0;
@@ -287,7 +287,7 @@ void vtVegLayer::AddElementsFromLULC(vtLULCFile *pLULC)
  *		(string), or the ID of a biotype (int).
  */
 bool vtVegLayer::AddElementsFromSHP_Polys(const wxString &filename,
-										  const vtProjection &proj,
+										  const vtCRS &crs,
 										  int iField, VegImportFieldType datatype)
 {
 	// When working with float field data, must use C locale
@@ -362,7 +362,7 @@ bool vtVegLayer::AddElementsFromSHP_Polys(const wxString &filename,
 		m_field_biotype = m_pSet->AddField("Biotype", FT_Integer);
 	}
 
-	SetProjection(proj);
+	SetCRS(crs);
 
 	// Read Polys from SHP into Veg Poly
 	m_pSet->LoadGeomFromSHP(hSHP);
@@ -403,7 +403,7 @@ bool vtVegLayer::AddElementsFromSHP_Polys(const wxString &filename,
  * imported file are to be interpreted.
  */
 bool vtVegLayer::AddElementsFromSHP_Points(const wxString &filename,
-										   const vtProjection &proj,
+										   const vtCRS &crs,
 										   VegPointOptions &opt)
 {
 	// We will be creating plant instances
@@ -466,7 +466,7 @@ bool vtVegLayer::AddElementsFromSHP_Points(const wxString &filename,
 	}
 
 	// Set projection
-	SetProjection(proj);
+	SetCRS(crs);
 
 	// Initialize arrays
 	m_pSet->Reserve(nElem);

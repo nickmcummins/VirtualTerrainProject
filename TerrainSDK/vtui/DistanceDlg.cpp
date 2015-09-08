@@ -93,30 +93,30 @@ void DistanceDlg::Zero()
 	m_fVertical = FLT_MIN;
 }
 
-void DistanceDlg::SetProjection(const vtProjection &proj)
+void DistanceDlg::SetCRS(const vtCRS &crs)
 {
-	if (m_proj != proj)
+	if (m_crs != crs)
 	{
 		// Changing projection
 		Reset();
 	}
-	m_proj = proj;
+	m_crs = crs;
 
 	GetMapOffset()->SetValue(_T(""));
 	GetMapDist()->SetValue(_T(""));
 	GetGeodDist()->SetValue(_T(""));
 	UpdateAvailableUnits();
 
-	bool bIsGeo = (m_proj.IsGeographic() != FALSE);
+	bool bIsGeo = (m_crs.IsGeographic() != FALSE);
 	if (!bIsGeo)
 	{
 		// Free previous object
 		delete m_pTransformToGeo;
 
 		// We may need degrees later, but don't have them, prepare to compute them.
-		vtProjection geo;
-		CreateSimilarGeographicCRS(m_proj, geo);
-		m_pTransformToGeo = CreateCoordTransform(&m_proj, &geo);
+		vtCRS geo;
+		CreateSimilarGeographicCRS(m_crs, geo);
+		m_pTransformToGeo = CreateCoordTransform(&m_crs, &geo);
 	}
 	ShowValues();
 }
@@ -166,11 +166,11 @@ double GetScaleFromUnits(int units)
 void DistanceDlg::ShowValues()
 {
 	wxString str;
-	bool bIsGeo = (m_proj.IsGeographic() != FALSE);
+	bool bIsGeo = (m_crs.IsGeographic() != FALSE);
 	double scale;
 	double map_distance, geodesic_meters;
 
-	LinearUnits lu = m_proj.GetUnits();
+	LinearUnits lu = m_crs.GetUnits();
 
 	if (!bIsGeo && !m_pTransformToGeo)
 	{
@@ -208,7 +208,7 @@ void DistanceDlg::ShowValues()
 				map_distance += (m_path[i+1] - m_path[i]).Length();
 
 				// find geodesic distance
-				geodesic_meters += vtProjection::GeodesicDistance(geo_line[i], geo_line[i+1]);
+				geodesic_meters += vtCRS::GeodesicDistance(geo_line[i], geo_line[i+1]);
 			}
 		}
 
@@ -241,7 +241,7 @@ void DistanceDlg::ShowValues()
 			diff_degrees = geo2 - geo1;
 		}
 		// find geodesic distance
-		geodesic_meters = vtProjection::GeodesicDistance(geo1, geo2);
+		geodesic_meters = vtCRS::GeodesicDistance(geo1, geo2);
 
 		// Map Offset
 		if (m_iUnits1 == 0) // degrees
@@ -308,7 +308,7 @@ void DistanceDlg::ShowValues()
 
 void DistanceDlg::UpdateAvailableUnits()
 {
-	bool bIsGeo = (m_proj.IsGeographic() != FALSE);
+	bool bIsGeo = (m_crs.IsGeographic() != FALSE);
 	GetUnits2()->Enable(!bIsGeo);
 	GetMapDist()->Enable(!bIsGeo);
 
@@ -324,7 +324,7 @@ void DistanceDlg::UpdateAvailableUnits()
 		GetUnits1()->Append(_("US Survey Feet"));
 	}
 
-	switch (m_proj.GetUnits())
+	switch (m_crs.GetUnits())
 	{
 	case LU_DEGREES:
 		m_iUnits1 = 0;

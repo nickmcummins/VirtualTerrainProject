@@ -12,7 +12,7 @@ and distributed under a completely free <a href="../license.txt">open source lic
 	<td valign="top">
 	  <p>Coordinate Systems</p>
 	  <ul>
-		<li>vtProjection</li>
+		<li>vtCRS</li>
 		<li>LocalCS</li>
 		<li>DymaxIcosa</li>
 	  </ul>

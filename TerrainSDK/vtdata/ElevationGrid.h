@@ -35,7 +35,7 @@ public:
 	vtElevationGrid();
 	vtElevationGrid(const vtElevationGrid &rhs);
 	vtElevationGrid(const DRECT &area, const IPoint2 &size, bool bFloat,
-		const vtProjection &proj);
+		const vtCRS &crs);
 	virtual ~vtElevationGrid();
 
 	vtElevationGrid &operator=(const vtElevationGrid &rhs);
@@ -45,15 +45,15 @@ public:
 	bool CopyDataFrom(const vtElevationGrid &rhs);
 
 	bool Create(const DRECT &area, const IPoint2 &size, bool bFloat,
-		const vtProjection &proj, vtElevError *err = NULL);
+		const vtCRS &crs, vtElevError *err = NULL);
 	void FreeData();
 
 	void Clear();
 	void Invalidate();
-	bool ConvertProjection(vtElevationGrid *pOld, const vtProjection &NewProj,
+	bool ConvertCRS(vtElevationGrid *pOld, const vtCRS &NewProj,
 		float bUpgradeToFloat, bool progress_callback(int) = NULL,
 		vtElevError *err = NULL);
-	bool ReprojectExtents(const vtProjection &proj_new);
+	bool ReprojectExtents(const vtCRS &crs_new);
 	void Scale(float fScale, bool bDirect, bool bRecomputeExtents = true);
 	void VertOffset(float fAmount);
 	void ComputeHeightExtents();
@@ -140,9 +140,9 @@ public:
 	void GetEarthPoint(int i, int j, DPoint2 &p) const;
 	void GetEarthLocation(int i, int j, DPoint3 &loc) const;
 
-	vtProjection &GetProjection() { return m_proj; }
-	const vtProjection &GetProjection() const { return m_proj; }
-	void SetProjection(const vtProjection &proj);
+	vtCRS &GetCRS() { return m_crs; }
+	const vtCRS &GetCRS() const { return m_crs; }
+	void SetCRS(const vtCRS &crs);
 
 	bool GetCorners(DLine2 &line, bool bGeo) const;
 	void SetCorners(const DLine2 &line);
@@ -191,8 +191,8 @@ protected:
 					int components, double *x, double *y, double *z);
 	void SetError(vtElevError *err, vtElevError::ErrorType type, const char *szFormat, ...);
 
-	DPoint2		m_Corners[4];	// data corners, in the CRS of this terrain
-	vtProjection	m_proj;		// a grid always has some CRS
+	DPoint2	m_Corners[4];	// data corners, in the CRS of this terrain
+	vtCRS	m_crs;		// a grid always has some CRS
 
 	bool	AllocateGrid(vtElevError *err = NULL);
 	vtString	m_strOriginalDEMName;

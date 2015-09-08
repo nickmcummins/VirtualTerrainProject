@@ -134,10 +134,10 @@ public:
 	void AddToMRU(vtStringArray &arr, const vtString &fname);
 
 	// Projection
-	virtual void SetProjection(const vtProjection &p);
-	void GetProjection(vtProjection &p) { p = m_proj; }
-	vtProjection &GetAtProjection() { return m_proj; }
-	bool ConfirmValidCRS(vtProjection *pProj);
+	virtual void SetCRS(const vtCRS &p);
+	void GetCRS(vtCRS &p) { p = m_crs; }
+	vtCRS &GetAtCRS() { return m_crs; }
+	bool ConfirmValidCRS(vtCRS *pProj);
 
 	// Elevation
 	bool SampleCurrentTerrains(vtElevLayer *pTarget);
@@ -267,7 +267,7 @@ protected:
 	// Most-recently-used files
 	vtStringArray m_ProjectFiles, m_LayerFiles, m_ImportFiles;
 
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 	bool	m_bAdoptFirstCRS;	// If true, silenty assume user wants to
 								// use the CRS of the first layer they create
 };

@@ -65,13 +65,13 @@ vtAnimPath::~vtAnimPath()
 	delete m_pConvertFromWGS;
 }
 
-bool vtAnimPath::SetProjection(const vtProjection &proj, const LocalCS &conv)
+bool vtAnimPath::SetCRS(const vtCRS &crs, const LocalCS &conv)
 {
-	m_proj = proj;
+	m_crs = crs;
 	m_conv = conv;
 
 	// convert from projected to global CS
-	vtProjection global_proj;
+	vtCRS global_proj;
 	OGRErr err = global_proj.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
 	if (err != OGRERR_NONE)
 		return false;
@@ -79,8 +79,8 @@ bool vtAnimPath::SetProjection(const vtProjection &proj, const LocalCS &conv)
 	delete m_pConvertToWGS;
 	delete m_pConvertFromWGS;
 
-	m_pConvertToWGS = CreateCoordTransform(&m_proj, &global_proj, true);
-	m_pConvertFromWGS = CreateCoordTransform(&global_proj, &m_proj, true);
+	m_pConvertToWGS = CreateCoordTransform(&m_crs, &global_proj, true);
+	m_pConvertFromWGS = CreateCoordTransform(&global_proj, &m_crs, true);
 
 	return true;
 }
@@ -437,7 +437,7 @@ bool vtAnimPath::Read(const char *fname)
 
 ///////////////////////////////////////////////////////////////////////
 
-bool vtAnimPath::CreateFromLineString(const vtProjection &proj,
+bool vtAnimPath::CreateFromLineString(const vtCRS &crs,
 										vtFeatureSet *pSet)
 {
 	vtFeatureSetLineString *pSetLS2 = dynamic_cast<vtFeatureSetLineString *>(pSet);
@@ -449,11 +449,11 @@ bool vtAnimPath::CreateFromLineString(const vtProjection &proj,
 	m_TimeControlPointMap.clear();
 
 	ScopedOCTransform trans;
-	vtProjection &line_proj = pSet->GetAtProjection();
-	if (!proj.IsSame(&line_proj))
+	vtCRS &line_crs = pSet->GetAtCRS();
+	if (!crs.IsSame(&line_crs))
 	{
 		// need transformation from feature CRS to terrain CRS
-		trans.set(CreateCoordTransform(&line_proj, &proj, true));
+		trans.set(CreateCoordTransform(&line_crs, &crs, true));
 	}
 
 	FPoint3 pos;

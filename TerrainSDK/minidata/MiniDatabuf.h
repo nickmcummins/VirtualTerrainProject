@@ -64,7 +64,7 @@ public:
 
 	// A useful method to set the extents (in local CRS) and the corners
 	//  (in Geo WGS84) at the same time.
-	bool SetBounds(const vtProjection &proj, const DRECT &extents);
+	bool SetBounds(const vtCRS &crs, const DRECT &extents);
 
 	// allocate a new memory chunk
 	void alloc(unsigned int xs,unsigned int ys,unsigned int zs,unsigned int ts=1,unsigned int ty=0);
@@ -93,7 +93,7 @@ private:
 
 // Helper to write headers
 class DRECT;
-class vtProjection;
+class vtCRS;
 class LODMap	// A simple 2D array of min/max LOD values (log2)
 {
 public:
@@ -135,7 +135,7 @@ public:
 };
 
 bool WriteTilesetHeader(const char *filename, int cols, int rows, int lod0size,
-						const DRECT &area, const vtProjection &proj,
+						const DRECT &area, const vtCRS &crs,
 						float minheight=INVALID_ELEVATION, float maxheight=INVALID_ELEVATION,
 						LODMap *lodmap = NULL, bool bJPEG = false);
 

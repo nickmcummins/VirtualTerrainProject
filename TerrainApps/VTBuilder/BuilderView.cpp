@@ -181,7 +181,7 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 	const int iLayers = g_bld->NumLayers();
 
 	// Draw 'interrupted projection outline' for current projection
-	if (g_bld->GetAtProjection().IsDymaxion())
+	if (g_bld->GetAtCRS().IsDymaxion())
 		DrawDymaxionOutline();
 
 	// Draw the world map SHP file of country outline polys in latlon
@@ -293,7 +293,7 @@ void BuilderView::DrawUTMBounds()
 {
 	glColor3f(1, 0.5f, 0);		// Orange
 
-	const vtProjection &proj = g_bld->GetAtProjection();
+	const vtCRS &crs = g_bld->GetAtCRS();
 
 	int width, height;
 	GetClientSize(&width, &height);
@@ -302,7 +302,7 @@ void BuilderView::DrawUTMBounds()
 	wxPoint sp, array[4000];
 	int zone;
 
-	if (proj.IsGeographic())
+	if (crs.IsGeographic())
 	{
 		for (zone = 0; zone < 60; zone++)
 		{
@@ -316,10 +316,10 @@ void BuilderView::DrawUTMBounds()
 		int zone_end = 60;
 		DPoint2 proj_point;
 
-		vtProjection geo;
-		CreateSimilarGeographicCRS(proj, geo);
+		vtCRS geo;
+		CreateSimilarGeographicCRS(crs, geo);
 
-		ScopedOCTransform trans1(CreateCoordTransform(&proj, &geo));
+		ScopedOCTransform trans1(CreateCoordTransform(&crs, &geo));
 
 		// Avoid zones that are too far from our location.
 		ClientToWorld(wxPoint(0, height/2), proj_point);
@@ -334,7 +334,7 @@ void BuilderView::DrawUTMBounds()
 
 		// Now convert the longitude lines (boundaries between the UTM zones)
 		// to the current projection
-		ScopedOCTransform trans2(CreateCoordTransform(&geo, &proj));
+		ScopedOCTransform trans2(CreateCoordTransform(&geo, &crs));
 
 		for (int zone = zone_start; zone < zone_end; zone++)
 		{
@@ -430,14 +430,14 @@ bool BuilderView::ImportWorldMap()
 	return true;
 }
 
-void BuilderView::SetWMProj(const vtProjection &proj)
+void BuilderView::SetWMProj(const vtCRS &crs)
 {
 	uint i, j;
 
 	if (WMPoly.size() == 0)
 		return;
 
-	const char *proj_name = proj.GetProjectionNameShort();
+	const char *proj_name = crs.GetNameShort();
 	if (!strcmp(proj_name, "Geo") || !strcmp(proj_name, "Unknown"))
 	{
 		// the data is already in latlon so just use WMPoly
@@ -447,8 +447,8 @@ void BuilderView::SetWMProj(const vtProjection &proj)
 	}
 
 	// Otherwise, must convert from Geo to whatever project is desired
-	vtProjection Source;
-	CreateSimilarGeographicCRS(proj, Source);
+	vtCRS Source;
+	CreateSimilarGeographicCRS(crs, Source);
 
 #if VTDEBUG
 	// Check projection text
@@ -480,8 +480,8 @@ void BuilderView::SetWMProj(const vtProjection &proj)
 	delete m_pMapToCurrent;
 	delete m_pCurrentToMap;
 
-	m_pMapToCurrent = CreateCoordTransform(&Source, &proj);
-	m_pCurrentToMap = CreateCoordTransform(&proj, &Source);
+	m_pMapToCurrent = CreateCoordTransform(&Source, &crs);
+	m_pCurrentToMap = CreateCoordTransform(&crs, &Source);
 
 	if (!m_pMapToCurrent)
 	{
@@ -518,9 +518,9 @@ void BuilderView::DrawWorldMap()
 		m_bAttemptedLoad = true;
 		if (ImportWorldMap())
 		{
-			vtProjection proj;
-			g_bld->GetProjection(proj);
-			SetWMProj(proj);
+			vtCRS crs;
+			g_bld->GetCRS(crs);
+			SetWMProj(crs);
 		}
 		else
 		{
@@ -1653,10 +1653,10 @@ void BuilderView::RunTest()
 	{
 		// create grid of polygons
 		vtFeatureSetPolygon set;
-		vtProjection proj;
-		proj.SetWellKnownGeogCS("NAD83");
-		proj.SetUTMZone(5);
-		set.SetProjection(proj);
+		vtCRS crs;
+		crs.SetWellKnownGeogCS("NAD83");
+		crs.SetUTMZone(5);
+		set.SetCRS(crs);
 		DPoint2 base(215500, 2213000), spacing(1000,1000);
 		for (int i = 0; i < 12; i++)
 		{
@@ -1695,7 +1695,7 @@ void BuilderView::RunTest()
 	double right=0.0070670000277459621;
 	double bottom=0.00000000000000000;
 
-	double ScaleX = vtProjection::GeodesicDistance(DPoint2(left,bottom),DPoint2(right,bottom));
+	double ScaleX = vtCRS::GeodesicDistance(DPoint2(left,bottom),DPoint2(right,bottom));
 	double foo = ScaleX;
 #endif
 #if 0
@@ -1750,8 +1750,8 @@ void BuilderView::RunTest()
 	{
 		// create grid of points over current layer
 		vtFeatureSetPoint2D set;
-		vtProjection proj;
-		set.SetProjection(g_bld->GetAtProjection());
+		vtCRS crs;
+		set.SetCRS(g_bld->GetAtCRS());
 		DRECT area = g_bld->m_area;
 		set.AddField("filename", FT_String, 30);
 		set.AddField("rotation", FT_Float);
@@ -1775,7 +1775,7 @@ void BuilderView::RunTest()
 #if 0
 	{
 		vtStructureArray *sa = new vtStructureArray;
-		sa->m_proj.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
+		sa->m_crs.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
 		// 1557 buildings
 		sa->ReadXML("G:/Data-USA/Data-Hawaii/BuildingData/stage5.vtst");
 		//sa->ReadXML("G:/Data-USA/Data-Hawaii/BuildingData/one_building.vtst");

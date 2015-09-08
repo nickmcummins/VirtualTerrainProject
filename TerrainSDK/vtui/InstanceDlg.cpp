@@ -62,7 +62,7 @@ InstanceDlg::InstanceDlg( wxWindow *parent, wxWindowID id, const wxString &title
 
 void InstanceDlg::UpdateLoc()
 {
-	LinearUnits lu = m_proj.GetUnits();
+	LinearUnits lu = m_crs.GetUnits();
 
 	wxString str;
 	if (lu == LU_DEGREES)

@@ -193,7 +193,7 @@ void vtLayer::SetMessageText(const wxString &msg)
 		g_bld->m_pParentWindow->SetStatusText(msg);
 }
 
-void vtLayer::GetProjection(vtProjection &proj)
+void vtLayer::GetCRS(vtCRS &crs)
 {
 	// shouldn't get here.
 }

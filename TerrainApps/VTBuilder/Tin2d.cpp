@@ -44,7 +44,7 @@ vtTin2d::vtTin2d(vtElevationGrid *grid)
 
 	int cols, rows;
 	grid->GetDimensions(cols, rows);
-	m_proj = grid->GetProjection();
+	m_crs = grid->GetCRS();
 
 	// This isn't an optimal algorithm, but it's not a common operation, so
 	// cpu/mem efficiency isn't vital.
@@ -190,7 +190,7 @@ vtTin2d::vtTin2d(vtFeatureSetPoint3D *set)
 
 	ComputeExtents();
 	// Adopt CRS from the featureset
-	m_proj = set->GetAtProjection();
+	m_crs = set->GetAtCRS();
 }
 
 /**
@@ -242,7 +242,7 @@ vtTin2d::vtTin2d(vtFeatureSetPolygon *set, int iFieldNum, float fHeight)
 	}
 	ComputeExtents();
 	// Adopt CRS from the featureset
-	m_proj = set->GetAtProjection();
+	m_crs = set->GetAtCRS();
 
 	VTLOG1("Construct TIN from Polygons: done\n");
 }

@@ -413,8 +413,8 @@ void Builder::ExportBitmap(vtElevLayer *pEL, RenderOptions &ropt)
 	}
 
 	// Get attributes of existing layer
-	vtProjection proj;
-	pEL->GetProjection(proj);
+	vtCRS crs;
+	pEL->GetCRS(crs);
 	DRECT area;
 	pEL->GetAreaExtent(area);
 
@@ -433,7 +433,7 @@ void Builder::ExportBitmap(vtElevLayer *pEL, RenderOptions &ropt)
 	}
 	else
 	{
-		pOutputLayer = new vtImageLayer(area, size, proj);
+		pOutputLayer = new vtImageLayer(area, size, crs);
 		pBitmap = pOutputLayer->GetImage()->GetBitmap();
 	}
 
@@ -468,7 +468,7 @@ void Builder::ExportBitmap(vtElevLayer *pEL, RenderOptions &ropt)
 		if (ropt.m_bJPEG)
 			success = dib.WriteJPEG(fname, 99, progress_callback);
 		else
-			success = dib.WriteTIF(fname, &area, &proj, progress_callback);
+			success = dib.WriteTIF(fname, &area, &crs, progress_callback);
 		if (success)
 			DisplayAndLog("Successfully wrote to file '%s'", (const char *) fname);
 		else
@@ -868,7 +868,7 @@ bool Builder::SampleElevationToTileset(BuilderView *pView, TilingOptions &opts,
 			UpdateProgressDialog2(done*99/total, -1, _("Sampling elevation"));
 
 			vtElevationGrid base_lod(tile_area, IPoint2(base_tilesize+1, base_tilesize+1),
-				bFloat, m_proj);
+				bFloat, m_crs);
 
 			int iNumInvalid = 0;
 			bool bAllInvalid = true;
@@ -986,7 +986,7 @@ bool Builder::SampleElevationToTileset(BuilderView *pView, TilingOptions &opts,
 					output_buf.ysize = tilesize;
 					output_buf.zsize = 1;
 					output_buf.tsteps = 1;
-					output_buf.SetBounds(m_proj, tile_area);
+					output_buf.SetBounds(m_crs, tile_area);
 
 					int depth = dib.GetDepth() / 8;
 					int iUncompressedSize = tilesize * tilesize * depth;
@@ -1047,7 +1047,7 @@ bool Builder::SampleElevationToTileset(BuilderView *pView, TilingOptions &opts,
 				}
 
 				vtMiniDatabuf buf;
-				buf.SetBounds(m_proj, tile_area);
+				buf.SetBounds(m_crs, tile_area);
 				buf.alloc(tilesize+1, tilesize+1, 1, 1, bFloat ? 2 : 1);
 				float *fdata = (float *) buf.data;
 				short *sdata = (short *) buf.data;
@@ -1093,7 +1093,7 @@ bool Builder::SampleElevationToTileset(BuilderView *pView, TilingOptions &opts,
 
 	// Write .ini file
 	if (!WriteTilesetHeader(opts.fname, opts.cols, opts.rows, opts.lod0size,
-		m_area, m_proj, minheight, maxheight, &lod_existence_map, false))
+		m_area, m_crs, minheight, maxheight, &lod_existence_map, false))
 	{
 		vtDestroyDir(dirname);
 		return false;
@@ -1102,7 +1102,7 @@ bool Builder::SampleElevationToTileset(BuilderView *pView, TilingOptions &opts,
 	// Write .ini file for images
 	if (opts.bCreateDerivedImages)
 		WriteTilesetHeader(opts.fname_images, opts.cols, opts.rows,
-			opts.lod0size, m_area, m_proj, INVALID_ELEVATION, INVALID_ELEVATION,
+			opts.lod0size, m_area, m_crs, INVALID_ELEVATION, INVALID_ELEVATION,
 			&lod_existence_map, bJPEG);
 
 	return true;
@@ -1302,7 +1302,7 @@ bool Builder::SampleImageryToTileset(BuilderView *pView, TilingOptions &opts,
 
 				output_buf.zsize = 1;
 				output_buf.tsteps = 1;
-				output_buf.SetBounds(m_proj, image_area);
+				output_buf.SetBounds(m_crs, image_area);
 
 				// Write and optionally compress the image
 				WriteMiniImage(fname, opts, rgb_bytes, output_buf,
@@ -1318,7 +1318,7 @@ bool Builder::SampleImageryToTileset(BuilderView *pView, TilingOptions &opts,
 
 	// Write .ini file
 	WriteTilesetHeader(opts.fname, opts.cols, opts.rows, opts.lod0size,
-		m_area, m_proj, INVALID_ELEVATION, INVALID_ELEVATION, &lod_existence_map, bJPEG);
+		m_area, m_crs, INVALID_ELEVATION, INVALID_ELEVATION, &lod_existence_map, bJPEG);
 
 	clock_t tm2 = clock();
 	float elapsed = ((float)tm2 - tm1)/CLOCKS_PER_SEC;

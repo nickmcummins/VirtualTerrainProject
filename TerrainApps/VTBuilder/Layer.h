@@ -13,7 +13,7 @@
 
 class BuilderView;
 class vtScaledView;
-class vtProjection;
+class vtCRS;
 struct UIContext;
 
 /**
@@ -49,15 +49,15 @@ public:
 	virtual bool GetExtent(DRECT &rect) = 0;
 	virtual void DrawLayer(vtScaledView *pView, UIContext &ui) = 0;
 	/// Transform the coordinates into another CRS
-	virtual bool TransformCoords(vtProjection &proj) = 0;
+	virtual bool TransformCoords(vtCRS &crs) = 0;
 	virtual bool OnSave(bool progress_callback(int) = NULL) = 0;
 	virtual bool OnLoad() = 0;
 	/// Merge the contents of another layer (of the same type)
 	virtual bool AppendDataFrom(vtLayer *pL) = 0;
 	/// Get the CRS
-	virtual void GetProjection(vtProjection &proj) = 0;
+	virtual void GetCRS(vtCRS &crs) = 0;
 	/// Set the CRS, which does not reproject
-	virtual void SetProjection(const vtProjection &proj) = 0;
+	virtual void SetCRS(const vtCRS &crs) = 0;
 	/// Shift all the coordinates by a horizontal offset
 	virtual void Offset(const DPoint2 &delta);
 

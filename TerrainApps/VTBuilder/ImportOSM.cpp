@@ -73,7 +73,7 @@ private:
 	NodeMap m_nodes;
 	std::vector<NodeIdType> m_refs;
 
-	vtProjection m_proj;
+	vtCRS m_crs;
 
 	vtString	m_Name, m_URL;
 	LayerType	m_WayType;
@@ -98,7 +98,7 @@ VisitorOSM::VisitorOSM() : m_state(PS_NONE)
 	m_util_layer = NULL;
 
 	// OSM is always in Geo WGS84
-	m_proj.SetWellKnownGeogCS("WGS84");
+	m_crs.SetWellKnownGeogCS("WGS84");
 }
 
 void VisitorOSM::SetSignalLights()
@@ -530,7 +530,7 @@ void VisitorOSM::MakeRoad()
 	if (!m_road_layer)
 	{
 		m_road_layer = new vtRoadLayer;
-		m_road_layer->SetProjection(m_proj);
+		m_road_layer->SetCRS(m_crs);
 	}
 
 	LinkEdit *link = m_road_layer->AddNewLink();
@@ -645,7 +645,7 @@ void VisitorOSM::MakeStructure()
 	if (!m_struct_layer)
 	{
 		m_struct_layer = new vtStructureLayer;
-		m_struct_layer->SetProjection(m_proj);
+		m_struct_layer->SetCRS(m_crs);
 	}
 	if (m_eStructureType == ST_BUILDING)
 		MakeBuilding();
@@ -765,7 +765,7 @@ void VisitorOSM::StartPowerPole()
 	if (!m_util_layer)
 	{
 		m_util_layer = new vtUtilityLayer;
-		m_util_layer->SetProjection(m_proj);
+		m_util_layer->SetCRS(m_crs);
 		m_util_layer->SetModified(true);
 	}
 

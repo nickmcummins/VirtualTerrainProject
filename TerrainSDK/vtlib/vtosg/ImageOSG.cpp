@@ -12,6 +12,7 @@
 #include <osgDB/WriteFile>
 #include "gdal_priv.h"
 #include "vtdata/Projections.h"
+#include "vtdata/GDALWrapper.h"
 
 #ifndef LOG_IMAGE_LOAD
 #define LOG_IMAGE_LOAD 1
@@ -559,7 +560,7 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 		iYSize = pDataset->GetRasterYSize();
 
 		// Try getting CRS
-		vtProjection temp;
+		vtCRS temp;
 		bool bHaveProj = false;
 		const char *pProjectionString = pDataset->GetProjectionRef();
 		if (pProjectionString)
@@ -567,7 +568,7 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 			OGRErr err = temp.importFromWkt((char**)&pProjectionString);
 			if (err == OGRERR_NONE)
 			{
-				m_proj = temp;
+				m_crs = temp;
 				bHaveProj = true;
 			}
 		}
@@ -577,7 +578,7 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 			bool bSuccess = temp.ReadProjFile(filename);
 			if (bSuccess)
 			{
-				m_proj = temp;
+				m_crs = temp;
 				bHaveProj = true;
 			}
 		}
@@ -890,7 +891,7 @@ vtImageGeo::vtImageGeo()
 
 vtImageGeo::vtImageGeo(const vtImageGeo *copyfrom) : vtImage(*copyfrom)
 {
-	m_proj = copyfrom->m_proj;
+	m_crs = copyfrom->m_crs;
 	m_extents = copyfrom->m_extents;
 }
 

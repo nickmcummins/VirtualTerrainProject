@@ -263,7 +263,7 @@ public:
 	void SetEavesFelkel(float fLength);
 	void CopyStyleFrom(const vtBuilding * const pSource, bool bDoHeight);
 
-	void SetCRS(vtProjection *proj) { m_pCRS = proj; }
+	void SetCRS(vtCRS *proj) { m_pCRS = proj; }
 
 protected:
 	// information about each story
@@ -272,7 +272,7 @@ protected:
 	// Every building needs a link back up to its containing array, because
 	// that's where its CRS is stored, which it needs to know for LocalCoords.
 	// This is more simple and efficient than storing a CRS on every building.
-	vtProjection *m_pCRS;
+	vtCRS *m_pCRS;
 
 private:
 	void DeleteLevels();

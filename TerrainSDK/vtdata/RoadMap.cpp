@@ -766,7 +766,7 @@ bool vtRoadMap::ReadRMF(const char *filename)
 		{
 			quiet = fread(&iDatum, intSize, 1, fp);
 		}
-		m_proj.SetProjectionSimple(proj_type == 1, iUTMZone, iDatum);
+		m_crs.SetSimple(proj_type == 1, iUTMZone, iDatum);
 	}
 	else
 	{
@@ -774,7 +774,7 @@ bool vtRoadMap::ReadRMF(const char *filename)
 		short length = (short) dummy;
 		char wkt_buf[2000], *wkt = wkt_buf;
 		quiet = fread(wkt_buf, length, 1, fp);
-		OGRErr err = m_proj.importFromWkt((char **) &wkt);
+		OGRErr err = m_crs.importFromWkt((char **) &wkt);
 		if (err != OGRERR_NONE)
 			return false;
 	}
@@ -1017,7 +1017,7 @@ bool vtRoadMap::WriteRMF(const char *filename)
 
 	// Projection
 	char *wkt;
-	OGRErr err = m_proj.exportToWkt(&wkt);
+	OGRErr err = m_crs.exportToWkt(&wkt);
 	if (err != OGRERR_NONE)
 		return false;
 	short len = (short) strlen(wkt);

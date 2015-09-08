@@ -16,6 +16,7 @@
 
 #include "vtdata/vtLog.h"
 #include "vtdata/DataPath.h"
+#include "vtdata/GDALWrapper.h"
 #include "vtdata/MaterialDescriptor.h"
 #include <float.h>	// for FLT_MIN
 
@@ -166,9 +167,9 @@ bool Builder::LoadProject(const vtString &fname, vtScaledView *pView)
 		if (!strncmp(buf, "Projection ", 11))
 		{
 			// read projection info
-			vtProjection proj;
+			vtCRS crs;
 			char *wkt = buf + 11;
-			OGRErr err = proj.importFromWkt(&wkt);
+			OGRErr err = crs.importFromWkt(&wkt);
 			if (err != OGRERR_NONE)
 			{
 				DisplayAndLog("Had trouble parsing the projection information "
@@ -176,7 +177,7 @@ bool Builder::LoadProject(const vtString &fname, vtScaledView *pView)
 				fclose(fp);
 				return false;
 			}
-			SetProjection(proj);
+			SetCRS(crs);
 		}
 		if (!strncmp(buf, "PlantList ", 10))
 		{
@@ -436,29 +437,29 @@ bool Builder::AddLayerWithCheck(vtLayer *pLayer, bool bRefresh)
 {
 	VTLOG("AddLayerWithCheck(%lx)\n", pLayer);
 
-	vtProjection proj;
-	pLayer->GetProjection(proj);
+	vtCRS crs;
+	pLayer->GetCRS(crs);
 
 	bool bFirst = (m_Layers.size() == 0);
 	if (bFirst && m_bAdoptFirstCRS)
 	{
 		// if this is our first layer, adopt its projection
 		VTLOG1("  Adopting CRS from this layer.\n");
-		SetProjection(proj);
+		SetCRS(crs);
 	}
 	else
 	{
-		// check for Projection conflict
+		// check for CRS conflict
 		VTLOG1("  Checking CRS compatibility.\n");
-		if (!(m_proj == proj))
+		if (!(m_crs == crs))
 		{
 			int ret;
 			bool keep = false;
 			if (IsGUIApp())
 			{
 				char *str1, *str2;
-				m_proj.exportToProj4(&str1);
-				proj.exportToProj4(&str2);
+				m_crs.exportToProj4(&str1);
+				crs.exportToProj4(&str2);
 
 				wxString msg;
 				msg.Printf(_("The data already loaded is in:\n   %hs\n but the layer you are attempting to add:\n   %s\n is using:\n   %hs\n Would you like to attempt to convert it now to the existing projection?"),
@@ -478,7 +479,7 @@ bool Builder::AddLayerWithCheck(vtLayer *pLayer, bool bRefresh)
 			{
 				VTLOG1("  Reprojecting..\n");
 				OpenProgressDialog(_("Reprojecting"), _T(""), false, m_pParentWindow);
-				bool success = pLayer->TransformCoords(m_proj);
+				bool success = pLayer->TransformCoords(m_crs);
 				CloseProgressDialog();
 
 				if (success)
@@ -738,7 +739,7 @@ DRECT Builder::GetExtents()
 	}
 	if (has_bounds)
 		return rect;
-	else if (m_proj.IsDymaxion())
+	else if (m_crs.IsDymaxion())
 		return DRECT(0, 1.5*sqrt(3.0), 5.5, 0);	 // extents of Dymaxion map
 	else
 		return DRECT(-180, 90, 180, -90);	// degree extents of whole planet
@@ -753,11 +754,11 @@ DPoint2 Builder::EstimateGeoDataCenter()
 	DRECT rect = GetExtents();
 	DPoint2 pos = rect.GetCenter();
 
-	if (!m_proj.IsGeographic())
+	if (!m_crs.IsGeographic())
 	{
-		vtProjection geo;
-		CreateSimilarGeographicCRS(m_proj, geo);
-		ScopedOCTransform trans(CreateTransformIgnoringDatum(&m_proj, &geo));
+		vtCRS geo;
+		CreateSimilarGeographicCRS(m_crs, geo);
+		ScopedOCTransform trans(CreateTransformIgnoringDatum(&m_crs, &geo));
 		if (trans)
 			trans->Transform(1, &pos.x, &pos.y);
 	}
@@ -982,7 +983,7 @@ vtElevLayer *Builder::ElevationMath(vtElevLayer *pElev1, vtElevLayer *pElev2,
 
 	vtElevationGrid *grid = new vtElevationGrid;
 	vtElevError err;
-	grid->Create(extent, grid_size, true, m_proj, &err);
+	grid->Create(extent, grid_size, true, m_crs, &err);
 
 	OpenProgressDialog(_("Comparing Elevation Layers"), _T(""), false);
 
@@ -1322,13 +1323,13 @@ bool Builder::GetRGBUnderCursor(const DPoint2 &p, RGBi &rgb)
 	return success;
 }
 
-void Builder::SetProjection(const vtProjection &p)
+void Builder::SetCRS(const vtCRS &crs)
 {
 	char type[7], value[4000];
-	p.GetTextDescription(type, value);
+	crs.GetTextDescription(type, value);
 	VTLOG("Setting main projection to: %s, %s\n", type, value);
 
-	m_proj = p;
+	m_crs = crs;
 }
 
 
@@ -1441,7 +1442,7 @@ void Builder::AreaSampleElevation(BuilderView *pView)
 
 	// Make new terrain
 	vtElevLayer *pOutput = new vtElevLayer(dlg.m_area, dlg.m_Size,
-			dlg.m_bFloats, dlg.m_fVUnits, m_proj);
+			dlg.m_bFloats, dlg.m_fVUnits, m_crs);
 
 	if (!pOutput->GetGrid()->HasData())
 	{
@@ -1527,7 +1528,7 @@ void Builder::AreaSampleImages(BuilderView *pView)
 		return;
 
 	// Make new image
-	vtImageLayer *pOutputLayer = new vtImageLayer(dlg.m_area, dlg.m_Size, m_proj);
+	vtImageLayer *pOutputLayer = new vtImageLayer(dlg.m_area, dlg.m_Size, m_crs);
 	vtImage *pOutput = pOutputLayer->GetImage();
 
 	if (!pOutput->GetBitmap())
@@ -1632,9 +1633,9 @@ void Builder::GenerateVegetationPhase2(const char *vf_file, DRECT area,
 	vtPlantSpecies *ps;
 
 	// inherit projection from the main frame
-	vtProjection proj;
-	GetProjection(proj);
-	pia.SetProjection(proj);
+	vtCRS crs;
+	GetCRS(crs);
+	pia.SetCRS(crs);
 
 	m_BioRegion.ResetAmounts();
 	pia.SetSpeciesList(&m_SpeciesList);
@@ -1816,7 +1817,7 @@ void Builder::ReadDataPath()
 }
 
 
-bool Builder::ConfirmValidCRS(vtProjection *pProj)
+bool Builder::ConfirmValidCRS(vtCRS *pProj)
 {
 	if (!pProj->GetRoot())
 	{
@@ -1832,14 +1833,14 @@ bool Builder::ConfirmValidCRS(vtProjection *pProj)
 		if (res == wxYES)
 		{
 			ProjectionDlg dlg(NULL, -1, _("Please indicate projection"));
-			dlg.SetProjection(m_proj);
+			dlg.SetCRS(m_crs);
 
 			if (dlg.ShowModal() == wxID_CANCEL)
 				return false;
-			dlg.GetProjection(*pProj);
+			dlg.GetCRS(*pProj);
 		}
 		else if (res == wxNO)
-			*pProj = m_proj;
+			*pProj = m_crs;
 		else if (res == wxCANCEL)
 			return false;
 	}

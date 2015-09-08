@@ -811,8 +811,8 @@ bool vtPlantInstanceArray::ReadVF_version11(const char *fname)
 	quiet = fread(&zone, 4, 1, fp);
 	quiet = fread(&datum, 4, 1, fp);
 	if (utm)
-		m_proj.SetUTMZone(zone);
-	m_proj.SetDatum(datum);
+		m_crs.SetUTMZone(zone);
+	m_crs.SetDatum(datum);
 
 	int i, size;
 	quiet = fread(&size, 4, 1, fp);
@@ -884,7 +884,7 @@ bool vtPlantInstanceArray::ReadVF(const char *fname)
 
 	char wkt_buf[2000], *wkt = wkt_buf;
 	quiet = fread(wkt, len, 1, fp);
-	OGRErr err = m_proj.importFromWkt(&wkt);
+	OGRErr err = m_crs.importFromWkt(&wkt);
 	if (err != OGRERR_NONE)
 	{
 		// It shouldn't be fatal to encounter a missing or unparsable projection
@@ -982,7 +982,7 @@ bool vtPlantInstanceArray::WriteVF(const char *fname) const
 
 	// write SRS as WKT
 	char *wkt;
-	OGRErr err = m_proj.exportToWkt(&wkt);
+	OGRErr err = m_crs.exportToWkt(&wkt);
 	if (err != OGRERR_NONE)
 		return false;
 	len = (short) strlen(wkt);

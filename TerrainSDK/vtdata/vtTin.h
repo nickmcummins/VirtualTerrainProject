@@ -96,7 +96,7 @@ public:
 	void Offset(const DPoint2 &p);
 	void Scale(float fFactor);
 	void VertOffset(float fAmount);
-	bool ConvertProjection(const vtProjection &proj_new);
+	bool ConvertCRS(const vtCRS &crs_new);
 
 	// Accessors
 	void GetVert(int v, DPoint2 &p, float &z) const { p = m_vert[v]; z = m_z[v]; }
@@ -130,7 +130,7 @@ public:
 	double GetArea2D();
 	double GetArea3D();
 
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 
 protected:
 	bool TestTriangle(int tri, const DPoint2 &p, float &fAltitude) const;

@@ -154,7 +154,7 @@ bool vtTin::_ReadTinHeader(FILE *fp)
 		fread(wkt, proj_len, 1, fp);
 		wkt_buf[proj_len] = 0;
 
-		OGRErr err = m_proj.importFromWkt((char **) &wkt);
+		OGRErr err = m_crs.importFromWkt((char **) &wkt);
 		if (err != OGRERR_NONE)
 			return false;
 	}
@@ -1116,7 +1116,7 @@ bool vtTin::Write(const char *fname, bool progress_callback(int)) const
 		return false;
 
 	char *wkt;
-	OGRErr err = m_proj.exportToWkt(&wkt);
+	OGRErr err = m_crs.exportToWkt(&wkt);
 	if (err != OGRERR_NONE)
 	{
 		fclose(fp);
@@ -1439,10 +1439,10 @@ void vtTin::_GetLocalTrianglePoints(int iTriangle, FPoint3 &wp0, FPoint3 &wp1, F
 	m_LocalCS.EarthToLocal(DPoint3(p3.x, p3.y, m_z[v2]), wp2);
 }
 
-bool vtTin::ConvertProjection(const vtProjection &proj_new)
+bool vtTin::ConvertCRS(const vtCRS &crs_new)
 {
 	// Create conversion object
-	ScopedOCTransform trans(CreateCoordTransform(&m_proj, &proj_new));
+	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &crs_new));
 	if (!trans)
 		return false;		// inconvertible projections
 
@@ -1454,7 +1454,7 @@ bool vtTin::ConvertProjection(const vtProjection &proj_new)
 	}
 
 	// adopt new projection
-	m_proj = proj_new;
+	m_crs = crs_new;
 
 	return true;
 }

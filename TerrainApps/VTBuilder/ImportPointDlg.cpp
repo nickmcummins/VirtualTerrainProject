@@ -39,7 +39,7 @@ ImportPointDlg::ImportPointDlg( wxWindow *parent, wxWindowID id, const wxString 
 	m_iElevation = 0;
 	m_bImportField = false;
 	m_iImportField = 0;
-	m_proj.SetProjectionSimple(false, 0, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(false, 0, EPSG_DATUM_WGS84);
 	m_bFormat1 = true;
 	m_bFormat2 = false;
 	m_bFormat3 = false;
@@ -66,16 +66,16 @@ ImportPointDlg::ImportPointDlg( wxWindow *parent, wxWindowID id, const wxString 
 	GetSizer()->SetSizeHints(this);
 }
 
-void ImportPointDlg::SetCRS(const vtProjection &proj)
+void ImportPointDlg::SetCRS(const vtCRS &crs)
 {
-	m_proj = proj;
+	m_crs = crs;
 	RefreshProjString();
 }
 
 void ImportPointDlg::RefreshProjString()
 {
 	char *str1;
-	m_proj.exportToProj4(&str1);
+	m_crs.exportToProj4(&str1);
 	m_strCRS = wxString(str1, wxConvUTF8);
 	OGRFree(str1);
 
@@ -98,11 +98,11 @@ void ImportPointDlg::OnCheck(wxCommandEvent &event)
 void ImportPointDlg::OnSetCRS(wxCommandEvent &event)
 {
 	ProjectionDlg dlg(this, -1, _("Please indicate CRS"));
-	dlg.SetProjection(m_proj);
+	dlg.SetCRS(m_crs);
 
 	if (dlg.ShowModal() == wxID_OK)
 	{
-		dlg.GetProjection(m_proj);
+		dlg.GetCRS(m_crs);
 		RefreshProjString();
 	}
 }

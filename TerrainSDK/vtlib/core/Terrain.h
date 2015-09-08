@@ -314,8 +314,8 @@ public:
 	vtHeightField3d *GetHeightField() const;
 	vtHeightFieldGrid3d *GetHeightFieldGrid3d();
 	const LocalCS &GetLocalCS() const { return GetHeightField()->m_LocalCS; }
-	const vtProjection &GetProjection() const { return m_proj; }
-	bool IsGeographicCRS() const { return (m_proj.IsGeographic() == 1); }
+	const vtCRS &GetCRS() const { return m_crs; }
+	bool IsGeographicCRS() const { return (m_crs.IsGeographic() == 1); }
 	virtual bool FindAltitudeOnCulture(const FPoint3 &p3, float &fAltitude, bool bTrue, int iCultureFlags) const;
 	int GetShadowTextureUnit();
 
@@ -506,7 +506,7 @@ protected:
 
 	vtGroup		*m_pOverlay;
 
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 	bool			m_bIsCreated;
 };
 

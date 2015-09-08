@@ -106,8 +106,8 @@ public:
 	const LocalCS &GetLocalCS() { return m_LocalCS; }
 
 	/// Define the projection of the object attached to this LocationSaver
-	void SetProjection(const vtProjection &proj);
-	const vtProjection &GetAtProjection() const { return m_proj; }
+	void SetCRS(const vtCRS &crs);
+	const vtCRS &GetAtCRS() const { return m_crs; }
 
 	/// Get the location of the attached object and store it
 	bool StoreTo(uint num, const LocNameString &name = "");
@@ -121,7 +121,7 @@ protected:
 	// Store information necessary to convert from global earth CS
 	// to the local CS
 	LocalCS	m_LocalCS;
-	vtProjection		m_proj;
+	vtCRS		m_crs;
 	vtTransform			*m_pTransform;
 
 	vtString	m_strFilename;

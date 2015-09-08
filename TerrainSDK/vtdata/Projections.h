@@ -38,25 +38,26 @@ typedef scoped_ptr<OGRCoordinateTransformation> ScopedOCTransform;
 
 ///////////////////////////
 
-/**  The vtProjection class represents an earth coordinate reference system
+/**
+ * The vtCRS class represents an earth coordinate reference system
  * (CRS), which is generally a projected coordinate system (PCS).  It is
  * based on the class
  * <a href="http://www.gdal.org/ogr/classOGRSpatialReference.html">OGRSpatialReference</a>
- * which represents a full OpenGIS Spatial Reference System.  The vtProjection
+ * which represents a full OpenGIS Spatial Reference System.  The vtCRS
  * class extends OGRSpatialReference with several useful methods.
  */
-class vtProjection : public OGRSpatialReference
+class vtCRS : public OGRSpatialReference
 {
 public:
-	vtProjection();
-	~vtProjection();
+	vtCRS();
+	~vtCRS();
 
 	// Assignment
-	vtProjection &operator=(const vtProjection &ref);
+	vtCRS &operator=(const vtCRS &ref);
 
 	// Equality
-	bool operator==(const vtProjection &ref) const;
-	bool operator!=(const vtProjection &ref) const;
+	bool operator==(const vtCRS &ref) const;
+	bool operator!=(const vtCRS &ref) const;
 
 	void	SetUTMZone(int iZone);
 	int		GetUTMZone() const;
@@ -67,11 +68,11 @@ public:
 
 	OGRErr	SetGeogCSFromDatum(int iDatum);
 
-	bool	SetProjectionSimple(bool bUTM, int iUTMZone, int iDatum);
+	bool	SetSimple(bool bUTM, int iUTMZone, int iDatum);
 	void	SetSpatialReference(OGRSpatialReference *pRef);
 
-	const char *GetProjectionName() const;
-	const char *GetProjectionNameShort() const;
+	const char *GetName() const;
+	const char *GetNameShort() const;
 
 	bool GetTextDescription(char *type, char *value) const;
 	bool SetTextDescription(const char *type, const char *value);
@@ -129,10 +130,10 @@ void SetupEPSGDatums();
 
 StatePlaneInfo *GetStatePlaneTable();
 int NumStatePlanes();
-void CreateSimilarGeographicCRS(const vtProjection &source, vtProjection &geo);
-OCTransform *CreateTransformIgnoringDatum(const vtProjection *pSource, vtProjection *pTarget);
-OCTransform *CreateCoordTransform(const vtProjection *pSource,
-						  const vtProjection *pTarget, bool bLog = false);
+void CreateSimilarGeographicCRS(const vtCRS &source, vtCRS &geo);
+OCTransform *CreateTransformIgnoringDatum(const vtCRS *pSource, vtCRS *pTarget);
+OCTransform *CreateCoordTransform(const vtCRS *pSource,
+						  const vtCRS *pTarget, bool bLog = false);
 void TransformInPlace(OCTransform *transform, DPolygon2 &poly);
 void TransformInPlace(OCTransform *transform, DLine2 &line);
 
@@ -162,61 +163,4 @@ double MetersPerLongitude(double latitude);
  * look for the corresponding world file.
  */
 bool ReadAssociatedWorldFile(const char *filename_base, double params[6]);
-
-///////////////////////////
-
-// Stick this here for now, although it really belongs in its own module
-
-class GDALInitResult
-{
-public:
-	GDALInitResult() { hasGDAL_DATA = false; hasPROJ_LIB = false; hasPROJSO = false; }
-
-	bool hasGDAL_DATA;
-	bool hasPROJ_LIB;
-	bool hasPROJSO;
-
-	bool Success() { return hasGDAL_DATA && hasPROJ_LIB && hasPROJSO; }
-};
-
-class GDALWrapper
-{
-public:
-	GDALWrapper();
-	~GDALWrapper();
-
-	void RequestGDALFormats();
-	void RequestOGRFormats();
-	bool Init();
-	GDALInitResult* GetInitResult() { return &m_initResult; }
-	bool TestPROJ4();
-
-protected:
-	bool FindGDALData();
-	bool FindPROJ4Data();
-	bool FindPROJ4SO();
-
-	bool m_bGDALFormatsRegistered;
-	bool m_bOGRFormatsRegistered;
-	GDALInitResult m_initResult;
-};
-
-extern GDALWrapper g_GDALWrapper;
-
-#ifdef WIN32
-	#define DEFAULT_LOCATION_GDAL_DATA "../../GDAL-data/"
-	#define DEFAULT_LOCATION_PROJ_LIB "../../PROJ4-data/"
-#elif __APPLE__
-	#define DEFAULT_LOCATION_GDAL_DATA "Shared/share/gdal/"
-	#define DEFAULT_LOCATION_PROJ_LIB "Shared/share/proj/"
-	#define DEFAULT_LOCATION_PROJSO "Shared/lib/"
-#else // other unixes
-	#define DEFAULT_LOCATION_GDAL_DATA "/usr/local/share/gdal/"
-	#define DEFAULT_LOCATION_PROJ_LIB "/usr/local/share/proj/"
-#  if _LP64
-#       define DEFAULT_LOCATION_PROJSO "/usr/local/lib64/"
-#  else
-#       define DEFAULT_LOCATION_PROJSO "/usr/local/lib/"
-#  endif
-#endif
 

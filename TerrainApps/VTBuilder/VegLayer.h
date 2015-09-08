@@ -36,7 +36,7 @@ public:
 	~vtVegLayer();
 
 	// Projection
-	vtProjection m_proj;
+	vtCRS m_crs;
 
 	// Basics to overwrite vtLayer / vtRawLayer
 	bool OnSave(bool progress_callback(int) = NULL);
@@ -51,9 +51,9 @@ public:
 
 	// Importing data into veglayer
 	void AddElementsFromLULC(vtLULCFile *pLULC);
-	bool AddElementsFromSHP_Polys(const wxString &filename, const vtProjection &proj,
+	bool AddElementsFromSHP_Polys(const wxString &filename, const vtCRS &crs,
 		int fieldindex, VegImportFieldType datatype);
-	bool AddElementsFromSHP_Points(const wxString &filename, const vtProjection &proj,
+	bool AddElementsFromSHP_Points(const wxString &filename, const vtCRS &crs,
 		VegPointOptions &opt);
 
 	// Search functionality

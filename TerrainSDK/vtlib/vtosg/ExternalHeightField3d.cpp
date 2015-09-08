@@ -179,12 +179,12 @@ osg::Node *vtExternalHeightField3d::CreateGeometry()
 	return m_pNode.get();
 }
 
-vtProjection &vtExternalHeightField3d::GetProjection()
+vtCRS &vtExternalHeightField3d::GetCRS()
 {
 	return m_Projection;
 }
 
-const vtProjection &vtExternalHeightField3d::GetProjection() const
+const vtCRS &vtExternalHeightField3d::GetCRS() const
 {
 	return m_Projection;
 }

@@ -26,12 +26,12 @@ public:
 	// implementation of vtLayer methods
 	bool GetExtent(DRECT &rect);
 	void DrawLayer(vtScaledView *pView, UIContext &ui);
-	bool TransformCoords(vtProjection &proj);
+	bool TransformCoords(vtCRS &crs);
 	bool OnSave(bool progress_callback(int) = NULL);
 	bool OnLoad();
 	bool AppendDataFrom(vtLayer *pL);
-	void GetProjection(vtProjection &proj);
-	void SetProjection(const vtProjection &proj);
+	void GetCRS(vtCRS &crs);
+	void SetCRS(const vtCRS &crs);
 	void Offset(const DPoint2 &p);
 	void GetPropertyText(wxString &strIn);
 	void OnLeftDown(BuilderView *pView, UIContext &ui);
@@ -48,10 +48,10 @@ public:
 	void SetDrawStyle(const DrawStyle &style) { m_DrawStyle = style; }
 	DrawStyle GetDrawStyle() { return m_DrawStyle; }
 
-	vtProjection *GetAtProjection()
+	vtCRS *GetAtCRS()
 	{
 		if (m_pSet)
-			return &(m_pSet->GetAtProjection());
+			return &(m_pSet->GetAtCRS());
 		else
 			return NULL;
 	}

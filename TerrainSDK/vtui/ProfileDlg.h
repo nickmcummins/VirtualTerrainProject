@@ -59,7 +59,7 @@ public:
 	void UpdateMessageText();
 	void UpdateEnabling();
 
-	void SetProjection(const vtProjection &proj);
+	void SetCRS(const vtCRS &crs);
 	void SetPath(const DLine2 &path);
 	void SetPoints(const DPoint2 &p1, const DPoint2 &p2);
 	void SetCallback(ProfileCallback *callback);
@@ -85,7 +85,7 @@ private:
 	std::vector<float> m_values;
 	std::vector<float> m_values_culture;
 	std::vector<bool> m_visible;
-	vtProjection    m_proj;
+	vtCRS    m_crs;
 	DPoint2 m_p1, m_p2;
 	DLine2 m_path;
 	wxSize m_clientsize;

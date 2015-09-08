@@ -89,14 +89,14 @@ class vtImage
 public:
 	vtImage();
 	vtImage(const DRECT &area, const IPoint2 &size,
-		const vtProjection &proj);
+		const vtCRS &crs);
 	virtual ~vtImage();
 
 	bool GetExtent(DRECT &rect) const;
 	void SetExtent(const DRECT &rect);
 	void DrawToView(vtScaledView *pView);
-	bool ConvertProjection(vtImage *input, vtProjection &proj_new,
-						   int iSampleN, bool progress_callback(int) = NULL);
+	bool ConvertCRS(vtImage *input, vtCRS &crs_new,
+					int iSampleN, bool progress_callback(int) = NULL);
 
 	DPoint2 GetSpacing(int bitmap = 0) const;
 	vtBitmap *GetBitmap() {
@@ -105,10 +105,10 @@ public:
 		return NULL;
 	}
 
-	void GetProjection(vtProjection &proj) const;
-	vtProjection &GetAtProjection() { return m_proj; }
-	void SetProjection(const vtProjection &proj);
-	bool ReprojectExtents(const vtProjection &proj_new);
+	void GetCRS(vtCRS &crs) const;
+	vtCRS &GetAtCRS() { return m_crs; }
+	void SetCRS(const vtCRS &crs);
+	bool ReprojectExtents(const vtCRS &crs_new);
 
 	void GetDimensions(int &xsize, int &ysize) const
 	{
@@ -161,7 +161,7 @@ protected:
 	void SetDefaults();
 	void CleanupGDALUsage();
 
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 
 	DRECT   m_Extents;
 

@@ -148,7 +148,7 @@ public:
 	// override to catch edit hightlighting
 	virtual void SetEditedEdge(vtBuilding *bld, int lev, int edge);
 
-	vtProjection m_proj;
+	vtCRS m_crs;
 
 protected:
 	vtString	m_strFilename;

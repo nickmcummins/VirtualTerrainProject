@@ -206,8 +206,8 @@ public:
 	double GetDoubleValue(uint iRecord, uint iField) const;
 	bool GetBoolValue(uint iRecord, uint iField) const;
 
-	void SetProjection(const vtProjection &proj) { m_proj = proj; }
-	vtProjection &GetAtProjection() { return m_proj; }
+	void SetCRS(const vtCRS &crs) { m_crs = crs; }
+	vtCRS &GetAtCRS() { return m_crs; }
 
 	vtFeature *GetFeature(uint iIndex) const { return m_Features[iIndex]; }
 	vtFeature *GetFirstSelectedFeature() const;
@@ -229,7 +229,7 @@ protected:
 	std::vector<vtFeature*> m_Features;
 
 	vtArray<Field*> m_fields;
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 
 	// remember the filename these feature were loaded from or saved to
 	vtString	m_strFilename;

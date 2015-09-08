@@ -9,6 +9,7 @@
 #include "vtLog.h"
 #include "DxfParser.h"
 #include "FilePath.h"
+#include "GDALWrapper.h"
 
 //
 // Construct / Destruct
@@ -127,7 +128,7 @@ bool vtFeatureSet::SaveToSHP(const char *filename, bool progress_callback(int)) 
 	vtString prjname = filename;
 	prjname = prjname.Left(prjname.GetLength() - 4);
 	prjname += ".prj";
-	m_proj.WriteProjFile(prjname);
+	m_crs.WriteProjFile(prjname);
 
 	VTLOG1(" SaveToSHP: Done\n");
 	return true;
@@ -164,7 +165,7 @@ bool vtFeatureSet::LoadFromSHP(const char *fname, bool progress_callback(int))
 	SetFilename(fname);
 
 	// Attempt to load corresponding .prj file, if there is one
-	m_proj.ReadProjFile(fname);
+	m_crs.ReadProjFile(fname);
 
 	// Read corresponding attributes (DBF fields and records)
 	LoadDataFromDBF(fname, progress_callback);
@@ -432,9 +433,9 @@ vtFeatureSet *vtFeatureLoader::LoadFromIGC(const char *filename)
 	vtFeatureSetLineString3D *pSet = new vtFeatureSetLineString3D;
 
 	// Geographic WGS-84 can be assumed
-	vtProjection proj;
-	proj.SetProjectionSimple(false, 0, EPSG_DATUM_WGS84);
-	pSet->SetProjection(proj);
+	vtCRS crs;
+	crs.SetSimple(false, 0, EPSG_DATUM_WGS84);
+	pSet->SetCRS(crs);
 
 	DLine3 dline;
 
@@ -594,7 +595,7 @@ bool vtFeatureSet::LoadFromOGR(OGRLayer *pLayer,
 	OGRSpatialReference *pSpatialRef = pLayer->GetSpatialRef();
 	if (pSpatialRef)
 	{
-		m_proj.SetSpatialReference(pSpatialRef);
+		m_crs.SetSpatialReference(pSpatialRef);
 		bGotCS = true;
 	}
 
@@ -663,7 +664,7 @@ bool vtFeatureSet::LoadFromOGR(OGRLayer *pLayer,
 			OGRSpatialReference *pSpatialRef = pGeom->getSpatialReference();
 			if (pSpatialRef)
 			{
-				m_proj.SetSpatialReference(pSpatialRef);
+				m_crs.SetSpatialReference(pSpatialRef);
 				bGotCS = true;
 			}
 		}

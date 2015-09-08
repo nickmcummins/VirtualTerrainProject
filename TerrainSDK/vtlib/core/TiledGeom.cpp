@@ -188,7 +188,7 @@ bool TiledDatasetDescription::Read(const char *dataset_fname)
 		{
 			// read CRS from WKT
 			char *wktp = buf + 4;	// skip "CRS="
-			proj.importFromWkt(&wktp);
+			crs.importFromWkt(&wktp);
 		}
 		if (!strncmp(buf, "RowLODs", 7))
 		{
@@ -234,15 +234,15 @@ bool TiledDatasetDescription::GetCorners(DLine2 &line, bool bGeo) const
 	line[3].x = earthextents.right;
 	line[3].y = earthextents.bottom;
 
-	if (bGeo && !proj.IsGeographic())
+	if (bGeo && !crs.IsGeographic())
 	{
 		// must convert from whatever we are, to geo
-		vtProjection Dest;
+		vtCRS Dest;
 		Dest.SetWellKnownGeogCS("WGS84");
 
 		// This is safe (won't fail on tricky Datum conversions) but might
 		//  be slightly inaccurate
-		ScopedOCTransform trans(CreateTransformIgnoringDatum(&proj, &Dest));
+		ScopedOCTransform trans(CreateTransformIgnoringDatum(&crs, &Dest));
 
 		if (!trans)
 		{
@@ -503,8 +503,8 @@ bool vtTiledGeom::ReadTileList(const char *dataset_fname_elev,
 	//  so simply take them from the elevation dataset.
 
 	// Set up earth->world heightfield properties
-	m_proj = m_elev_info.proj;
-	Initialize(m_proj.GetUnits(), m_elev_info.earthextents, m_elev_info.minheight, m_elev_info.maxheight);
+	m_crs = m_elev_info.crs;
+	Initialize(m_crs.GetUnits(), m_elev_info.earthextents, m_elev_info.minheight, m_elev_info.maxheight);
 
 	cols = m_elev_info.cols;
 	rows = m_elev_info.rows;

@@ -1134,8 +1134,8 @@ void EnviroFrame::SetTerrainToGUI(vtTerrain *pTerrain)
 		m_pLocationDlg->SetLocSaver(pTerrain->GetLocSaver());
 		m_pLocationDlg->SetAnimContainer(pTerrain->GetAnimContainer());
 
-		m_pInstanceDlg->SetProjection(pTerrain->GetProjection());
-		m_pDistanceDlg->SetProjection(pTerrain->GetProjection());
+		m_pInstanceDlg->SetCRS(pTerrain->GetCRS());
+		m_pDistanceDlg->SetCRS(pTerrain->GetCRS());
 
 		// Fill instance dialog with global and terrain-specific content
 		m_pInstanceDlg->ClearContent();
@@ -1157,10 +1157,10 @@ void EnviroFrame::SetTerrainToGUI(vtTerrain *pTerrain)
 	}
 	else
 	{
-		vtProjection geo;
+		vtCRS geo;
 		OGRErr err = geo.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
 		if (err == OGRERR_NONE)
-			m_pDistanceDlg->SetProjection(geo);
+			m_pDistanceDlg->SetCRS(geo);
 	}
 	// Update Title
 	SetTitle(wxGetApp().MakeFrameTitle(pTerrain));
@@ -1277,7 +1277,7 @@ bool EnviroFrame::LoadTerrainLayer(vtString &fname)
 		ab_layer->SetLayerName(fname);
 
 		// TODO here: progress dialog on load?
-		if (ab_layer->Load(pTerr->GetProjection(), NULL))
+		if (ab_layer->Load(pTerr->GetCRS(), NULL))
 		{
 			VTLOG("Successfully read features from file '%s'\n", (const char *) fname);
 
@@ -1531,7 +1531,7 @@ ProfileDlg *EnviroFrame::ShowProfileDlg()
 		EnviroProfileCallback *callback = new EnviroProfileCallback;
 		m_pProfileDlg->SetCallback(callback);
 
-		m_pProfileDlg->SetProjection(g_App.GetCurrentTerrain()->GetProjection());
+		m_pProfileDlg->SetCRS(g_App.GetCurrentTerrain()->GetCRS());
 	}
 	m_pProfileDlg->Show(true);
 	return m_pProfileDlg;

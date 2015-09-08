@@ -288,7 +288,7 @@ public:
 	bool ReadRMF(const char *filename);
 	bool WriteRMF(const char *filename);
 
-	vtProjection &GetAtProjection() { return m_proj; }
+	vtCRS &GetAtCRS() { return m_crs; }
 
 protected:
 	DRECT	m_extents;			// the extent of the roads in the RoadMap
@@ -297,7 +297,7 @@ protected:
 	TLink	*m_pFirstLink;
 	TNode	*m_pFirstNode;
 
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 };
 
 #endif	// ROADMAPH

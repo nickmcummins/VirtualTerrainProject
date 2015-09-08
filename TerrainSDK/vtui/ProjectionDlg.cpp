@@ -101,9 +101,9 @@ ProjectionDlg::ProjectionDlg( wxWindow *parent, wxWindowID id, const wxString &t
 	m_bInitializedUI = true;
 }
 
-void ProjectionDlg::SetProjection(const vtProjection &proj)
+void ProjectionDlg::SetCRS(const vtCRS &crs)
 {
-	m_proj = proj;
+	m_crs = crs;
 	SetUIFromProjection();
 }
 
@@ -159,7 +159,7 @@ void ProjectionDlg::UpdateControlStatus()
 	case PT_UTM:
 		m_pParamCtrl->Enable(false);
 		m_pZoneCtrl->Enable(true);
-		real_zone = m_proj.GetUTMZone();
+		real_zone = m_crs.GetUTMZone();
 		for (i = -60; i <= -1; i++)
 		{
 			str.Printf(_T("Zone %d"), i);
@@ -198,7 +198,7 @@ void ProjectionDlg::UpdateControlStatus()
 		m_pZoneCtrl->Enable(false);
 		break;
 	}
-	m_iDatum = m_proj.GetDatum();
+	m_iDatum = m_crs.GetDatum();
 	UpdateDatumStatus();
 	UpdateEllipsoid();
 
@@ -218,7 +218,7 @@ void ProjectionDlg::UpdateControlStatus()
 	// manually transfer value
 	for (uint j = 0; j < m_pHorizCtrl->GetCount(); j++)
 	{
-		if ((long int) m_pHorizCtrl->GetClientData(j) == m_proj.GetUnits())
+		if ((long int) m_pHorizCtrl->GetClientData(j) == m_crs.GetUnits())
 			m_pHorizCtrl->SetSelection(j);
 	}
 
@@ -252,7 +252,7 @@ void ProjectionDlg::UpdateDatumStatus()
 void ProjectionDlg::UpdateEllipsoid()
 {
 	wxString str;
-	const char *ellip = m_proj.GetAttrValue("SPHEROID");
+	const char *ellip = m_crs.GetAttrValue("SPHEROID");
 	if (ellip)
 		str = wxString(ellip, wxConvUTF8);
 
@@ -263,7 +263,7 @@ void ProjectionDlg::DisplayProjectionSpecificParams()
 {
 	m_pParamCtrl->DeleteAllItems();
 
-	OGR_SRSNode *root = m_proj.GetRoot();
+	OGR_SRSNode *root = m_crs.GetRoot();
 	if (!root)
 	{
 		m_pParamCtrl->InsertItem(0, _("(Invalid projection)"));
@@ -298,17 +298,17 @@ void ProjectionDlg::DisplayProjectionSpecificParams()
 
 void ProjectionDlg::SetUIFromProjection()
 {
-	if (m_proj.IsDymaxion())
+	if (m_crs.IsDymaxion())
 		SetProjectionUI(PT_DYMAX);
-	else if (m_proj.IsGeographic())
+	else if (m_crs.IsGeographic())
 		SetProjectionUI(PT_GEO);
 	else
 	{
-		const char *proj_string = m_proj.GetProjectionName();
+		const char *proj_string = m_crs.GetName();
 
 		if (!strcmp(proj_string, SRS_PT_TRANSVERSE_MERCATOR))
 		{
-			if (m_proj.GetUTMZone() != 0)
+			if (m_crs.GetUTMZone() != 0)
 				SetProjectionUI(PT_UTM);
 			else
 				SetProjectionUI(PT_TM);
@@ -359,7 +359,7 @@ void ProjectionDlg::SetUIFromProjection()
 		//  about Oblique Stereographic, which is what i believe is meant.
 		else if (!strcmp(proj_string, "Double_Stereographic"))
 		{
-			OGR_SRSNode *node = m_proj.GetAttrNode("PROJECTION");
+			OGR_SRSNode *node = m_crs.GetAttrNode("PROJECTION");
 			node = node->GetChild(0);
 			node->SetValue(SRS_PT_OBLIQUE_STEREOGRAPHIC);
 			SetProjectionUI(PT_OS);
@@ -373,9 +373,9 @@ void ProjectionDlg::SetUIFromProjection()
 	}
 }
 
-void ProjectionDlg::GetProjection(vtProjection &proj)
+void ProjectionDlg::GetCRS(vtCRS &crs)
 {
-	proj = m_proj;
+	crs = m_crs;
 }
 
 
@@ -388,7 +388,7 @@ void ProjectionDlg::OnProjSave( wxCommandEvent &event )
 	if (saveFile.ShowModal() == wxID_CANCEL)
 		return;
 	wxString strPathName = saveFile.GetPath();
-	m_proj.WriteProjFile(strPathName.mb_str(wxConvUTF8));
+	m_crs.WriteProjFile(strPathName.mb_str(wxConvUTF8));
 }
 
 void ProjectionDlg::OnProjLoad( wxCommandEvent &event )
@@ -398,7 +398,7 @@ void ProjectionDlg::OnProjLoad( wxCommandEvent &event )
 	if (loadFile.ShowModal() != wxID_OK)
 		return;
 	wxString strPathName = loadFile.GetPath();
-	if (m_proj.ReadProjFile(strPathName.mb_str(wxConvUTF8)))
+	if (m_crs.ReadProjFile(strPathName.mb_str(wxConvUTF8)))
 		SetUIFromProjection();
 	else
 		wxMessageBox(_("Couldn't load projection from that file.\n"));
@@ -407,14 +407,14 @@ void ProjectionDlg::OnProjLoad( wxCommandEvent &event )
 void ProjectionDlg::OnDatum( wxCommandEvent &event )
 {
 	// operate on a copy for safety
-	vtProjection copy = m_proj;
+	vtCRS copy = m_crs;
 	int sel = event.GetInt();
 	int datum_new = ((long int) m_pDatumCtrl->GetClientData(sel)) - CHOICE_OFFSET;
 	OGRErr err = copy.SetDatum(datum_new);
 	if (err == OGRERR_NONE)
 	{
 		// succeeded
-		m_proj = copy;
+		m_crs = copy;
 		m_iDatum = datum_new;
 	}
 	else
@@ -431,7 +431,7 @@ void ProjectionDlg::OnItemRightClick( wxListEvent &event )
 {
 	int item_clicked = event.GetIndex();
 
-	OGR_SRSNode *root = m_proj.GetRoot();
+	OGR_SRSNode *root = m_crs.GetRoot();
 	OGR_SRSNode *node, *par1, *par2;
 	const char *value;
 	int children = root->GetChildCount();
@@ -477,15 +477,15 @@ void ProjectionDlg::OnHorizUnits( wxCommandEvent &event )
 
 	if (iUnits == LU_METERS)
 	{
-		m_proj.SetLinearUnits(SRS_UL_METER, 1.0);
+		m_crs.SetLinearUnits(SRS_UL_METER, 1.0);
 	}
 	if (iUnits == LU_FEET_INT)
 	{
-		m_proj.SetLinearUnits(SRS_UL_FOOT, GetMetersPerUnit(iUnits));
+		m_crs.SetLinearUnits(SRS_UL_FOOT, GetMetersPerUnit(iUnits));
 	}
 	if (iUnits == LU_FEET_US)
 	{
-		m_proj.SetLinearUnits(SRS_UL_US_FOOT, GetMetersPerUnit(iUnits));
+		m_crs.SetLinearUnits(SRS_UL_US_FOOT, GetMetersPerUnit(iUnits));
 	}
 
 	TransferDataToWindow();
@@ -498,7 +498,7 @@ void ProjectionDlg::OnZone( wxCommandEvent &event )
 
 	void *vval = m_pZoneCtrl->GetClientData(m_iZone);
 	long int val = (long int) vval - 100;
-	m_proj.SetUTMZone(val);
+	m_crs.SetUTMZone(val);
 
 	UpdateControlStatus();
 }
@@ -512,7 +512,7 @@ void ProjectionDlg::OnSetEPSG( wxCommandEvent &event )
 {
 	// 4001 - 4904 for GCS values, 2000 - 3993 or 20004 - 32766 for PCS
 	// Get an integer
-	int value = m_proj.GuessEPSGCode();
+	int value = m_crs.GuessEPSGCode();
 	int minv = 2000;
 	int maxv = 32766;
 	value = wxGetNumberFromUser(_T(""), _("Enter EPSG code:"), _("Input"),
@@ -520,7 +520,7 @@ void ProjectionDlg::OnSetEPSG( wxCommandEvent &event )
 	if (value < 0)
 		return;
 
-	OGRErr result = m_proj.importFromEPSG(value);
+	OGRErr result = m_crs.importFromEPSG(value);
 	if (result == OGRERR_FAILURE)
 		wxMessageBox(_("Couldn't set EPSG coordinate system."));
 	else
@@ -534,12 +534,12 @@ void ProjectionDlg::OnProjChoice( wxCommandEvent &event )
 	// Even lightweight tasks can runs into trouble with the Locale ./, issue.
 	ScopedLocale normal_numbers(LC_NUMERIC, "C");
 
-	m_proj.SetGeogCSFromDatum(m_iDatum);
+	m_crs.SetGeogCSFromDatum(m_iDatum);
 
 	m_eProj = (ProjType) m_iProj;
 
 	if (m_eProj != PT_DYMAX)
-		m_proj.SetDymaxion(false);
+		m_crs.SetDymaxion(false);
 
 	switch (m_eProj)
 	{
@@ -550,68 +550,68 @@ void ProjectionDlg::OnProjChoice( wxCommandEvent &event )
 		// To be polite, suggest a UTM zone based roughly on where the user
 		//  might have some data.
 		m_iZone = GuessZoneFromGeo(m_GeoRefPoint);
-		m_proj.SetUTMZone(m_iZone);
+		m_crs.SetUTMZone(m_iZone);
 		break;
 	case PT_ALBERS:
 		// Put in some default values
-		m_proj.SetACEA( 60.0, 68.0, 59.0, -132.5, 500000, 500000 );
+		m_crs.SetACEA( 60.0, 68.0, 59.0, -132.5, 500000, 500000 );
 		break;
 	case PT_HOM:
 		// Put in some default values; these are for Alaska Zone 1
-		m_proj.SetHOM( 57, -133.66666666666666,
+		m_crs.SetHOM( 57, -133.66666666666666,
 			323.13010236111114, 323.13010236111114,
 			0.9999, 5000000, -5000000 );
 		break;
 	case PT_KROVAK:
 		// Put in some default values
-		m_proj.SetKrovak(49.5, 24.83333333333333,
+		m_crs.SetKrovak(49.5, 24.83333333333333,
 			30.28813975277778, 78.5, 0.9999, 0, 0);
 		break;
 	case PT_LAEA:
 		// Put in some default values
-		m_proj.SetLAEA( 51, -150, 1000000, 0 );
+		m_crs.SetLAEA( 51, -150, 1000000, 0 );
 		break;
 	case PT_LCC:
 		// Put in some default values
-		m_proj.SetLCC( 10, 20, 0, 15, 0, 0 );
+		m_crs.SetLCC( 10, 20, 0, 15, 0, 0 );
 		break;
 	case PT_LCC1SP:
 		// Put in some default values
-		m_proj.SetLCC1SP( 30, 10, 1.0, 0, 0 );
+		m_crs.SetLCC1SP( 30, 10, 1.0, 0, 0 );
 		break;
 	case PT_NZMG:
 		// Put in some default values
-		m_proj.SetNZMG( 41, 173, 2510000, 6023150 );
+		m_crs.SetNZMG( 41, 173, 2510000, 6023150 );
 		break;
 	case PT_MERC:
 		// Put in some default values
-		m_proj.SetMercator(0.0, 0.0, 1.0, 0, 0);
+		m_crs.SetMercator(0.0, 0.0, 1.0, 0, 0);
 		break;
 	case PT_TM:
 		// Put in some default values
 		// These are for the OSGB projection, a common case
-		m_proj.SetTM(49.0, -2.0, 0.999601272, 400000, -100000);
+		m_crs.SetTM(49.0, -2.0, 0.999601272, 400000, -100000);
 		break;
 	case PT_SINUS:
 		// Put in some default values
-		m_proj.SetSinusoidal(0, 0, 0); // dfCenterLong, dfFalseEasting, dfFalseNorthing
+		m_crs.SetSinusoidal(0, 0, 0); // dfCenterLong, dfFalseEasting, dfFalseNorthing
 		break;
 	case PT_STEREO:
 		// Put in some default values
-		m_proj.SetStereographic( 0.0, 0.0, 1.0, 0.0, 0.0);
+		m_crs.SetStereographic( 0.0, 0.0, 1.0, 0.0, 0.0);
 		break;
 	case PT_OS:
 		// Put in some default values
 		// These are for Stereo70 (Romania)
-		m_proj.SetOS(45.0, 25.0, 0.999750,500000, 500000);
+		m_crs.SetOS(45.0, 25.0, 0.999750,500000, 500000);
 		break;
 	case PT_PS:
 		// Put in some default values
 		// These are for the IBCAO polar bathymetry
-		m_proj.SetPS(90.0, 0.0, 1.0, 0.0, 0.0);
+		m_crs.SetPS(90.0, 0.0, 1.0, 0.0, 0.0);
 		break;
 	case PT_DYMAX:
-		m_proj.SetDymaxion(true);
+		m_crs.SetDymaxion(true);
 		break;
 	}
 
@@ -639,11 +639,11 @@ void ProjectionDlg::AskStatePlane()
 
 	OGRErr result;
 	if (dialog.m_bFeet)
-		result = m_proj.SetStatePlane(usgs_code, bNAD83, SRS_UL_FOOT, GetMetersPerUnit(LU_FEET_INT));
+		result = m_crs.SetStatePlane(usgs_code, bNAD83, SRS_UL_FOOT, GetMetersPerUnit(LU_FEET_INT));
 	else if (dialog.m_bFeetUS)
-		result = m_proj.SetStatePlane(usgs_code, bNAD83, SRS_UL_US_FOOT, GetMetersPerUnit(LU_FEET_US));
+		result = m_crs.SetStatePlane(usgs_code, bNAD83, SRS_UL_US_FOOT, GetMetersPerUnit(LU_FEET_US));
 	else
-		result = m_proj.SetStatePlane(usgs_code, bNAD83);
+		result = m_crs.SetStatePlane(usgs_code, bNAD83);
 
 	if (result == OGRERR_FAILURE)
 	{

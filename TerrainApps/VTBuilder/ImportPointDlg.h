@@ -37,13 +37,13 @@ public:
 	bool m_bImportField;
 	int m_iImportField;
 	wxString m_strCRS;
-	vtProjection m_proj;
+	vtCRS m_crs;
 	bool m_bFormat1;
 	bool m_bFormat2;
 	bool m_bFormat3;
 	bool m_bLongitudeWest;
 
-	void SetCRS(const vtProjection &proj);
+	void SetCRS(const vtCRS &crs);
 	void RefreshProjString();
 
 	// WDR: method declarations for ImportPointDlg

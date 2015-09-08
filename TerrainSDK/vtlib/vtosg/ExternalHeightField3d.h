@@ -14,7 +14,7 @@
 #endif
 
 class vtGeode;
-class vtProjection;
+class vtCRS;
 namespace osgTerrain
 {
 	class Layer;
@@ -33,8 +33,8 @@ public:
 	bool Initialize(const char *external_data);
 	osg::Node *CreateGeometry();
 
-	vtProjection &GetProjection();
-	const vtProjection &GetProjection() const;
+	vtCRS &GetCRS();
+	const vtCRS &GetCRS() const;
 
 	bool FindAltitudeOnEarth(const DPoint2 &p, float &fAltitude, bool bTrue = false) const;
 	bool FindAltitudeAtPoint(const FPoint3 &p3, float &fAltitude, bool bTrue = false, int iCultureFlags = 0, FPoint3 *vNormal = NULL) const;
@@ -44,7 +44,7 @@ private:
 	osg::ref_ptr<osg::Node> m_pNode;
 	osg::PagedLOD			*m_pLOD;
 	osgTerrain::Layer		*m_pLayer;
-	vtProjection			m_Projection;
+	vtCRS			m_Projection;
 	osg::Matrix				m_TransfromOSGModel2VTPWorld;
 	osg::Matrix				m_TransformVTPWorld2OSGModel;
 	osgSim::HeightAboveTerrain *m_pHat;

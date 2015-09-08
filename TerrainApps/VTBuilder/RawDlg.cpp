@@ -69,7 +69,7 @@ RawDlg::RawDlg( wxWindow *parent, wxWindowID id, const wxString &title,
 void RawDlg::OnExtents( wxCommandEvent &event )
 {
 	ExtentDlg dlg(NULL, -1, _("Elevation Grid Extents"));
-	dlg.SetArea(m_extents, (m_proj.IsGeographic() != 0));
+	dlg.SetArea(m_extents, (m_crs.IsGeographic() != 0));
 	if (dlg.ShowModal() == wxID_OK)
 		m_extents = dlg.m_area;
 }
@@ -77,10 +77,10 @@ void RawDlg::OnExtents( wxCommandEvent &event )
 void RawDlg::OnCRS( wxCommandEvent &event )
 {
 	ProjectionDlg dlg(NULL, -1, _("Please indicate CRS"));
-	dlg.SetProjection(m_proj);
+	dlg.SetCRS(m_crs);
 
 	if (dlg.ShowModal() == wxID_OK)
-		dlg.GetProjection(m_proj);
+		dlg.GetCRS(m_crs);
 }
 
 void RawDlg::OnRadio( wxCommandEvent &event )
@@ -122,9 +122,9 @@ void RawDlg::UpdateExtents()
 void RawDlg::UpdateProjection()
 {
 	if (m_bCrsSimple)
-		m_proj.SetProjectionSimple(true, 1, EPSG_DATUM_WGS84);
+		m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 	if (m_bCrsCurrent)
-		m_proj = m_original;
+		m_crs = m_original;
 }
 
 

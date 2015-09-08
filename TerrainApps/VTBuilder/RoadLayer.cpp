@@ -85,9 +85,9 @@ bool vtRoadLayer::OnLoad()
 	return true;
 }
 
-void vtRoadLayer::GetProjection(vtProjection &proj)
+void vtRoadLayer::GetCRS(vtCRS &crs)
 {
-	proj = vtRoadMap::GetAtProjection();
+	crs = vtRoadMap::GetAtCRS();
 }
 
 bool vtRoadLayer::AppendDataFrom(vtLayer *pL)
@@ -169,13 +169,13 @@ void vtRoadLayer::MoveSelectedNodes(const DPoint2 &offset)
 	}
 }
 
-bool vtRoadLayer::TransformCoords(vtProjection &proj_new)
+bool vtRoadLayer::TransformCoords(vtCRS &crs_new)
 {
 	// Create conversion object
-	vtProjection Source;
-	GetProjection(Source);
+	vtCRS Source;
+	GetCRS(Source);
 
-	ScopedOCTransform trans(CreateCoordTransform(&Source, &proj_new));
+	ScopedOCTransform trans(CreateCoordTransform(&Source, &crs_new));
 	if (!trans)
 		return false;		// inconvertible projections
 
@@ -191,19 +191,19 @@ bool vtRoadLayer::TransformCoords(vtProjection &proj_new)
 		trans->Transform(1, &(n->Pos().x), &(n->Pos().y));
 
 	// set the vtRoadMap projection
-	m_proj = proj_new;
+	m_crs = crs_new;
 	SetModified(true);
 
 	m_bValidExtents = false;
 	return true;
 }
 
-void vtRoadLayer::SetProjection(const vtProjection &proj)
+void vtRoadLayer::SetCRS(const vtCRS &crs)
 {
-	if (m_proj == proj)
+	if (m_crs == crs)
 		return;
 
-	m_proj = proj;
+	m_crs = crs;
 
 	// Extents are still valid, but we should recompute things like displayed
 	// link widths, which may have different values in another projection.
@@ -552,9 +552,9 @@ bool vtRoadLayer::SelectArea(const DRECT &box, bool nodemode, bool crossSelect)
 void vtRoadLayer::DoClean(double epsilon)
 {
 	// check projection
-	vtProjection proj;
-	GetProjection(proj);
-	bool bDegrees = (proj.IsGeographic() != 0);
+	vtCRS crs;
+	GetCRS(crs);
+	bool bDegrees = (crs.IsGeographic() != 0);
 
 	int count;
 	OpenProgressDialog(_("Cleaning RoadMap"), _T(""));

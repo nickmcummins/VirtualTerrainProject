@@ -145,7 +145,7 @@ public:
 
 	// Import from SHP
 	bool ApplyCFCC(LinkEdit *pR, const char *str);
-	void AddElementsFromSHP(const wxString &filename, const vtProjection &proj,
+	void AddElementsFromSHP(const wxString &filename, const vtCRS &crs,
 		bool progress_callback(int) = NULL);
 
 	// Import from OGR, for formats like SDTS

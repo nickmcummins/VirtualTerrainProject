@@ -17,6 +17,7 @@
 #include "DoubleProgDlg.h"
 
 #include "vtdata/FilePath.h"	// for dir_iter
+#include "vtdata/GDALWrapper.h"
 #include "vtdata/Projections.h"
 #include "vtdata/vtLog.h"
 #include "vtdata/vtDIB.h"

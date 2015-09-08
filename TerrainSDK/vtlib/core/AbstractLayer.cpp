@@ -42,7 +42,8 @@ vtAbstractLayer::~vtAbstractLayer()
 	delete m_pSet;
 }
 
-bool vtAbstractLayer::Load(const vtProjection &proj, vtFeatureLoader *loader, bool progress_callback(int))
+bool vtAbstractLayer::Load(const vtCRS &crs, vtFeatureLoader *loader,
+	bool progress_callback(int))
 {
 	// Load the features: use the loader we are provided, or the default
 	vtFeatureSet *feat = NULL;
@@ -82,30 +83,30 @@ bool vtAbstractLayer::Load(const vtProjection &proj, vtFeatureLoader *loader, bo
 
 	// We may need to convert from the CRS of the featureset to the CRS of the
 	//  terrain (before converting from terrain to world coordinates)
-	vtProjection &proj_feat = m_pSet->GetAtProjection();
+	vtCRS &crs_feat = m_pSet->GetAtCRS();
 
-	VTLOG("  features: projection has root: %p\n", proj_feat.GetRoot());
+	VTLOG("  features: projection has root: %p\n", crs_feat.GetRoot());
 	char type[7], value[4000];
-	if (proj_feat.GetRoot())
+	if (crs_feat.GetRoot())
 	{
-		proj_feat.GetTextDescription(type, value);
+		crs_feat.GetTextDescription(type, value);
 		VTLOG("   (%s: %s)\n", type, value);
 	}
-	VTLOG("   terrain: projection has root: %p\n", proj.GetRoot());
-	if (proj.GetRoot())
+	VTLOG("   terrain: projection has root: %p\n", crs.GetRoot());
+	if (crs.GetRoot())
 	{
-		proj.GetTextDescription(type, value);
+		crs.GetTextDescription(type, value);
 		VTLOG("   (%s: %s)\n", type, value);
 	}
 
 	// If we have two valid CRSs, and they are not the same, then we need a transform
-	if (proj_feat.GetRoot() && proj.GetRoot())
+	if (crs_feat.GetRoot() && crs.GetRoot())
 	{
 		VTLOG1("  Testing if they are the same: ");
-		if (!proj_feat.IsSame(&proj))
+		if (!crs_feat.IsSame(&crs))
 		{
 			VTLOG1("CRS is different, making a transform.\n");
-			m_pOCTransform.reset(CreateCoordTransform(&proj_feat, &proj, true));
+			m_pOCTransform.reset(CreateCoordTransform(&crs_feat, &crs, true));
 		}
 		else
 			VTLOG1("Yes. No transform needed.\n");

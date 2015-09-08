@@ -19,15 +19,15 @@
 
 // A useful method to set the extents (in local CRS) and the corners
 //  (in Geo WGS84) at the same time.
-bool vtMiniDatabuf::SetBounds(const vtProjection &proj, const DRECT &extents)
+bool vtMiniDatabuf::SetBounds(const vtCRS &crs, const DRECT &extents)
 {
 	// First, set the extent rectangle
 	set_extents(extents.left, extents.right, extents.bottom, extents.top);
 
 	// Create transform from local to Geo-WGS84
-	vtProjection geo;
+	vtCRS geo;
 	geo.SetWellKnownGeogCS("WGS84");
-	ScopedOCTransform trans(CreateCoordTransform(&proj, &geo));
+	ScopedOCTransform trans(CreateCoordTransform(&crs, &geo));
 
 	if (!trans)
 		return false;

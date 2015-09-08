@@ -60,8 +60,8 @@ void SelectDlg::SetRawLayer(vtRawLayer *pRL)
 
 void SelectDlg::OnInitDialog(wxInitDialogEvent& event)
 {
-	vtProjection proj;
-	m_pLayer->GetProjection(proj);
+	vtCRS proj;
+	m_pLayer->GetCRS(proj);
 
 	m_iFauxFields = 0;
 	vtFeatureSet *pSet = m_pLayer->GetFeatureSet();

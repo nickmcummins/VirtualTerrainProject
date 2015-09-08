@@ -97,15 +97,15 @@ void MiniDatabuf::set_LLWGS84corners(float sw_corner_x,float sw_corner_y,
 
 // A useful method to set the extents (in local CRS) and the corners
 //  (in Geo WGS84) at the same time.
-bool MiniDatabuf::SetBounds(const vtProjection &proj, const DRECT &extents)
+bool MiniDatabuf::SetBounds(const vtCRS &crs, const DRECT &extents)
 {
 	// First, set the extent rectangle
 	set_extents((float)extents.left, (float)extents.right, (float)extents.bottom, (float)extents.top);
 
 	// Create transform from local to Geo-WGS84
-	vtProjection geo;
+	vtCRS geo;
 	geo.SetWellKnownGeogCS("WGS84");
-	ScopedOCTransform trans(CreateCoordTransform(&proj, &geo));
+	ScopedOCTransform trans(CreateCoordTransform(&crs, &geo));
 
 	if (!trans)
 		return false;
@@ -349,12 +349,12 @@ void MiniDatabuf::swapbytes()
 
 #endif // !USE_LIBMINI_DATABUF
 
-int mapCRS2MINI(const vtProjection &proj)
+int mapCRS2MINI(const vtCRS &crs)
 {
-    const char *crsname=proj.GetAttrValue("PROJECTION");
+    const char *crsname = crs.GetAttrValue("PROJECTION");
 
-    if (proj.IsGeographic()) return(1);
-    else if (proj.GetUTMZone()!=0) return(2);
+    if (crs.IsGeographic()) return(1);
+    else if (crs.GetUTMZone()!=0) return(2);
     else if (EQUAL(crsname,SRS_PT_MERCATOR_1SP)) return(3);
 
     return(0);
@@ -386,7 +386,7 @@ int mapEPSG2MINI(int epsgdatum)
 }
 
 bool WriteTilesetHeader(const char *filename, int cols, int rows, int lod0size,
-						const DRECT &area, const vtProjection &proj,
+						const DRECT &area, const vtCRS &crs,
 						float minheight, float maxheight,
 						LODMap *lodmap, bool bJPEG)
 {
@@ -403,7 +403,7 @@ bool WriteTilesetHeader(const char *filename, int cols, int rows, int lod0size,
 	fprintf(fp, "Extent_Bottom=%.16lg\n", area.bottom);
 	fprintf(fp, "Extent_Top=%.16lg\n", area.top);
 	// write CRS, but pretty it up a bit
-	OGRSpatialReference *poSimpleClone = proj.Clone();
+	OGRSpatialReference *poSimpleClone = crs.Clone();
 	poSimpleClone->GetRoot()->StripNodes( "AXIS" );
 	poSimpleClone->GetRoot()->StripNodes( "AUTHORITY" );
 	char *wkt;
@@ -435,9 +435,9 @@ bool WriteTilesetHeader(const char *filename, int cols, int rows, int lod0size,
 	}
 
 	// create a transformation that will map from the current projection to Lat/Lon WGS84
-	vtProjection proj_llwgs84;
-	proj_llwgs84.SetWellKnownGeogCS("WGS84");
-	OCTransform *LLWGS84transform=CreateCoordTransform(&proj,&proj_llwgs84);
+	vtCRS crs_llwgs84;
+	crs_llwgs84.SetWellKnownGeogCS("WGS84");
+	OCTransform *LLWGS84transform = CreateCoordTransform(&crs, &crs_llwgs84);
 
 	// write center point of the tileset in Lat/Lon WGS84
 	// this is helpful for libMini to compute an approximate translation
@@ -459,10 +459,10 @@ bool WriteTilesetHeader(const char *filename, int cols, int rows, int lod0size,
 	// write CRS info
 	// this is helpful for libMini to easily identify the coordinate reference system
 	// supported CRS are: Geographic, UTM, Mercator
-	const int crs=mapCRS2MINI(proj);
-	const int datum=mapEPSG2MINI(proj.GetDatum());
-	const int utmzone=proj.GetUTMZone();
-	fprintf(fp, "CoordSys=(%d,%d,%d)\n",crs,datum,utmzone);
+	const int crsnum=mapCRS2MINI(crs);
+	const int datum=mapEPSG2MINI(crs.GetDatum());
+	const int utmzone= crs.GetUTMZone();
+	fprintf(fp, "CoordSys=(%d,%d,%d)\n", crsnum,datum,utmzone);
 
 	if (bJPEG)
 		fprintf(fp, "Format=JPEG\n");

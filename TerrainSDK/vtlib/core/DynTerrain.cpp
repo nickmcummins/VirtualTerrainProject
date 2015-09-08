@@ -37,7 +37,7 @@ vtDynTerrainGeom::~vtDynTerrainGeom()
 DTErr vtDynTerrainGeom::BasicInit(const vtElevationGrid *pGrid)
 {
 	// initialize the HeightFieldGrid3D
-	const LinearUnits units = pGrid->GetProjection().GetUnits();
+	const LinearUnits units = pGrid->GetCRS().GetUnits();
 
 	float fMinHeight, fMaxHeight;
 	pGrid->GetHeightExtents(fMinHeight, fMaxHeight);

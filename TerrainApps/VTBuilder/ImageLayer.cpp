@@ -25,10 +25,10 @@ vtImageLayer::vtImageLayer() : vtLayer(LT_IMAGE)
 }
 
 vtImageLayer::vtImageLayer(const DRECT &area, const IPoint2 &size,
-						   const vtProjection &proj) : vtLayer(LT_IMAGE)
+						   const vtCRS &crs) : vtLayer(LT_IMAGE)
 {
 	m_wsFilename = _("Untitled");
-	m_pImage = new vtImage(area, size, proj);
+	m_pImage = new vtImage(area, size, crs);
 }
 
 vtImageLayer::~vtImageLayer()
@@ -47,23 +47,23 @@ void vtImageLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 	m_pImage->DrawToView(pView);
 }
 
-bool vtImageLayer::TransformCoords(vtProjection &proj_new)
+bool vtImageLayer::TransformCoords(vtCRS &crs_new)
 {
-	vtProjection proj_old;
-	GetProjection(proj_old);
+	vtCRS crs_old;
+	GetCRS(crs_old);
 
-	if (proj_old == proj_new)
+	if (crs_old == crs_new)
 		return true;		// No conversion necessary
 
 	bool success = false;
 
 	// Check to see if the projections differ *only* by datum
-	vtProjection test = proj_old;
-	test.SetDatum(proj_new.GetDatum());
-	if (test == proj_new)
+	vtCRS test = crs_old;
+	test.SetDatum(crs_new.GetDatum());
+	if (test == crs_new)
 	{
 		// Easy case: we only change the extents
-		success = m_pImage->ReprojectExtents(proj_new);
+		success = m_pImage->ReprojectExtents(crs_new);
 	}
 	else
 	{
@@ -73,7 +73,7 @@ bool vtImageLayer::TransformCoords(vtProjection &proj_new)
 		int iSampleN = g_Options.GetValueInt(TAG_SAMPLING_N);
 
 		OpenProgressDialog(_("Converting Image CRS"), _T(""));
-		success = img_new->ConvertProjection(m_pImage, proj_new, iSampleN,
+		success = img_new->ConvertCRS(m_pImage, crs_new, iSampleN,
 			progress_callback);
 
 		if (success)
@@ -110,14 +110,14 @@ bool vtImageLayer::AppendDataFrom(vtLayer *pL)
 	return false;
 }
 
-void vtImageLayer::GetProjection(vtProjection &proj)
+void vtImageLayer::GetCRS(vtCRS &crs)
 {
-	m_pImage->GetProjection(proj);
+	m_pImage->GetCRS(crs);
 }
 
-void vtImageLayer::SetProjection(const vtProjection &proj)
+void vtImageLayer::SetCRS(const vtCRS &crs)
 {
-	m_pImage->SetProjection(proj);
+	m_pImage->SetCRS(crs);
 }
 
 void vtImageLayer::Offset(const DPoint2 &delta)
@@ -149,8 +149,8 @@ void vtImageLayer::GetPropertyText(wxString &strIn)
 	}
 
 	IPoint2 size = m_pImage->GetDimensions();
-	vtProjection proj;
-	m_pImage->GetProjection(proj);
+	vtCRS proj;
+	m_pImage->GetCRS(proj);
 
 	strIn.Printf(_("Dimensions %d by %d pixels"), size.x, size.y);
 	strIn += _T("\n");
@@ -247,7 +247,7 @@ bool vtImageLayer::ImportFromDB(const char *szFileName, bool progress_callback(i
 #if USE_LIBMINI_DATABUF
 	DRECT area;
 	bool bAlpha;
-	vtProjection proj;	// Projection is always unknown
+	vtCRS crs;	// CRS is always unknown
 
 	vtMiniDatabuf dbuf;
 	dbuf.loaddata(szFileName);
@@ -262,7 +262,7 @@ bool vtImageLayer::ImportFromDB(const char *szFileName, bool progress_callback(i
 	area.SetRect(dbuf.nwx, dbuf.nwy, dbuf.sex, dbuf.sey);
 
 	m_wsFilename = _("Untitled");
-	m_pImage = new vtImage(area, IPoint2(dbuf.xsize, dbuf.ysize), proj);
+	m_pImage = new vtImage(area, IPoint2(dbuf.xsize, dbuf.ysize), crs);
 
 	RGBf rgb;
 	RGBAf rgba;

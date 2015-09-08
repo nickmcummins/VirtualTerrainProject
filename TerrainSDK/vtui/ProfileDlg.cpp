@@ -92,9 +92,9 @@ ProfileDlg::ProfileDlg( wxWindow *parent, wxWindowID id,
 	UpdateEnabling();
 }
 
-void ProfileDlg::SetProjection(const vtProjection &proj)
+void ProfileDlg::SetCRS(const vtCRS &crs)
 {
-	m_proj = proj;
+	m_crs = crs;
 }
 
 void ProfileDlg::SetPoints(const DPoint2 &p1, const DPoint2 &p2)
@@ -111,16 +111,16 @@ void ProfileDlg::SetPoints(const DPoint2 &p1, const DPoint2 &p2)
 	DPoint2 geo1, geo2;		// points 1 and 2 in geographic CS
 	geo1 = m_p1;
 	geo2 = m_p2;
-	if (!m_proj.IsGeographic())
+	if (!m_crs.IsGeographic())
 	{
 		// convert points to geographic CS
-		vtProjection geo;
-		CreateSimilarGeographicCRS(m_proj, geo);
-		ScopedOCTransform trans(CreateCoordTransform(&m_proj, &geo));
+		vtCRS geo;
+		CreateSimilarGeographicCRS(m_crs, geo);
+		ScopedOCTransform trans(CreateCoordTransform(&m_crs, &geo));
 		trans->Transform(1, &geo1.x, &geo1.y);
 		trans->Transform(1, &geo2.x, &geo2.y);
 	}
-	m_fGeodesicDistance = vtProjection::GeodesicDistance(geo1, geo2);
+	m_fGeodesicDistance = vtCRS::GeodesicDistance(geo1, geo2);
 	m_fGeoDistAtPoint.resize(2);
 	m_fGeoDistAtPoint[0] = 0.0f;
 	m_fGeoDistAtPoint[1] = m_fGeodesicDistance;
@@ -144,12 +144,12 @@ void ProfileDlg::SetPath(const DLine2 &path)
 	if (len > 1)
 	{
 		DLine2 m_path_geo = m_path;		// path in geographic CS
-		if (!m_proj.IsGeographic())
+		if (!m_crs.IsGeographic())
 		{
 			// convert points to geographic CS
-			vtProjection geo;
-			CreateSimilarGeographicCRS(m_proj, geo);
-			ScopedOCTransform trans(CreateCoordTransform(&m_proj, &geo));
+			vtCRS geo;
+			CreateSimilarGeographicCRS(m_crs, geo);
+			ScopedOCTransform trans(CreateCoordTransform(&m_crs, &geo));
 			for (i = 0; i < len; i++)
 				trans->Transform(1, &(m_path_geo[i].x), &(m_path_geo[i].y));
 		}
@@ -157,7 +157,7 @@ void ProfileDlg::SetPath(const DLine2 &path)
 		m_fGeoDistAtPoint[0] = 0.0;
 		for (i = 0; i < len-1; i++)
 		{
-			m_fGeodesicDistance += vtProjection::GeodesicDistance(m_path_geo[i],
+			m_fGeodesicDistance += vtCRS::GeodesicDistance(m_path_geo[i],
 				m_path_geo[i+1]);
 			m_fGeoDistAtPoint[i+1] = m_fGeodesicDistance;
 		}
@@ -1821,7 +1821,7 @@ void ProfileDlg::DrawTraceToDXF(FILE *fp)
 
 	// Label the local origin
 	const char *format;
-	if (m_proj.IsGeographic())
+	if (m_crs.IsGeographic())
 		format = "(%2.7f, %2.7f)";
 	else
 		format = "(%7.2f, %7.2f)";

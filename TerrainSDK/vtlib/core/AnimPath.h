@@ -62,7 +62,7 @@ public:
 	virtual ~vtAnimPath();
 
 	/// Must tell the AnimPath what projection its points are in, for serialization.
-	bool SetProjection(const vtProjection &proj, const LocalCS &conv);
+	bool SetCRS(const vtCRS &crs, const LocalCS &conv);
 
 	/// Get the transformation matrix for a point in time.
 	bool GetMatrix(double time, FMatrix4 &matrix, bool bPosOnly) const
@@ -129,7 +129,7 @@ public:
 	bool Write(const char *fname);
 	bool Read(const char *fname);
 
-	bool CreateFromLineString(const vtProjection &proj, vtFeatureSet *pSet);
+	bool CreateFromLineString(const vtCRS &crs, vtFeatureSet *pSet);
 
 protected:
 	void InterpolateControlPoints(TimeControlPointMap::const_iterator &a,
@@ -145,7 +145,7 @@ protected:
 	ControlPoint	m_LoopControlPoint;
 
 	// For dealing with global projection
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 	OCTransform		*m_pConvertToWGS;
 	OCTransform		*m_pConvertFromWGS;
 	LocalCS m_conv;

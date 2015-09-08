@@ -44,7 +44,7 @@ public:
 	void DrawDymaxionOutline();
 
 	// World Map
-	void SetWMProj(const vtProjection &p);
+	void SetWMProj(const vtCRS &p);
 
 	// Key handler
 	void OnChar(wxKeyEvent& event);

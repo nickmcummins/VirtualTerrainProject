@@ -25,6 +25,7 @@ extern "C" {
 #include "vtLog.h"
 #include "ByteOrder.h"
 #include "FilePath.h"
+#include "GDALWrapper.h"
 
 // GDAL for TIFF support
 #include "gdal_priv.h"
@@ -688,7 +689,7 @@ bool vtDIB::WritePNG(const char *fname)
  * \return True if successful.
  */
 bool vtDIB::WriteTIF(const char *fname, const DRECT *area,
-					 const vtProjection *proj, bool progress_callback(int))
+					 const vtCRS *proj, bool progress_callback(int))
 {
 	g_GDALWrapper.RequestGDALFormats();
 

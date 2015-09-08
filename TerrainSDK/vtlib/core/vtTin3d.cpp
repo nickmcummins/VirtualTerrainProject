@@ -43,7 +43,7 @@ bool vtTin3d::Read(const char *fname, bool progress_callback(int))
 	if (!vtTin::Read(fname, progress_callback))
 		return false;
 
-	Initialize(m_proj.GetUnits(), m_EarthExtents, m_fMinHeight, m_fMaxHeight);
+	Initialize(m_crs.GetUnits(), m_EarthExtents, m_fMinHeight, m_fMaxHeight);
 	return true;
 }
 

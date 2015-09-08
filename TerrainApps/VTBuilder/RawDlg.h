@@ -48,8 +48,8 @@ public:
 	bool m_bCrsExact;
 
 	DRECT m_extents;
-	vtProjection m_proj;
-	vtProjection m_original;
+	vtCRS m_crs;
+	vtCRS m_original;
 
 private:
 	// WDR: member variable declarations for RawDlg

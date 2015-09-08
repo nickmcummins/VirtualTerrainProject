@@ -60,7 +60,7 @@ public:
 	int m_iFormat;	// 0 = JPEG, 1 = PNG, 2 = GeoTIFF
 	wxString m_strToFile;
 	OGCServerArray *m_pServers;
-	vtProjection m_proj;
+	vtCRS m_crs;
 
 private:
 	// WDR: member variable declarations for MapServerDlg.cpp

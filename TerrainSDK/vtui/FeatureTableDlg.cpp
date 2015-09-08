@@ -74,8 +74,8 @@ void FeatureTableDlg::SetFeatureSet(vtFeatureSet *pFeatures)
 		return;
 	}
 
-	vtProjection &proj = pFeatures->GetAtProjection();
-	m_bGeo = (proj.IsGeographic() != 0);
+	vtCRS &crs = pFeatures->GetAtCRS();
+	m_bGeo = (crs.IsGeographic() != 0);
 
 	GetList()->Enable(true);
 	GetChoiceShow()->Enable(true);

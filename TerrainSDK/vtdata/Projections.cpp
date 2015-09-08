@@ -38,22 +38,22 @@ const char *datumToStringShort(DATUM d); // old function
 static void MassageDatumFromWKT(vtString &strDatum );
 
 /////////////////////////////////////////////////////////////////////////////
-// Implementation of class vtProjection
+// Implementation of class vtCRS
 //
 
-vtProjection::vtProjection() : OGRSpatialReference()
+vtCRS::vtCRS() : OGRSpatialReference()
 {
 	m_bDymaxion = false;
 }
 
-vtProjection::~vtProjection()
+vtCRS::~vtCRS()
 {
 }
 
 /**
  * Assignment operator.
  */
-vtProjection &vtProjection::operator=(const vtProjection &ref)
+vtCRS &vtCRS::operator=(const vtCRS &ref)
 {
 	// copy projection
 	if (ref.GetRoot() != NULL)
@@ -68,7 +68,7 @@ vtProjection &vtProjection::operator=(const vtProjection &ref)
 /**
  * Equality operator.
  */
-bool vtProjection::operator==(const vtProjection &ref) const
+bool vtCRS::operator==(const vtCRS &ref) const
 {
 	if (m_bDymaxion != ref.m_bDymaxion)
 		return false;
@@ -86,7 +86,7 @@ bool vtProjection::operator==(const vtProjection &ref) const
 /**
  * Inequality operator.
  */
-bool vtProjection::operator!=(const vtProjection &ref) const
+bool vtCRS::operator!=(const vtCRS &ref) const
 {
 	if (m_bDymaxion != ref.m_bDymaxion)
 		return true;
@@ -109,7 +109,7 @@ bool vtProjection::operator!=(const vtProjection &ref) const
 	- 1 through 60 for the northern hemisphere
 	- -1 through -60 for the southern hemisphere
  */
-void vtProjection::SetUTMZone(int iZone)
+void vtCRS::SetUTMZone(int iZone)
 {
 	// It appears that even lightweight tasks like getting UTM zone
 	//  runs into trouble with the Locale ./, issue.
@@ -133,7 +133,7 @@ void vtProjection::SetUTMZone(int iZone)
  *  - -1 through -60 for the southern hemisphere
  *  - 0 if the projection is not UTM
  */
-int	vtProjection::GetUTMZone() const
+int	vtCRS::GetUTMZone() const
 {
 	// It appears that even lightweight tasks like getting UTM zone
 	//  runs into trouble with the Locale ./, issue.
@@ -156,7 +156,7 @@ int	vtProjection::GetUTMZone() const
 	- NAD83		6269
 	- WGS84		6326
  */
-OGRErr vtProjection::SetDatum(int iDatum)
+OGRErr vtCRS::SetDatum(int iDatum)
 {
 	OGRErr err;
 
@@ -172,7 +172,7 @@ OGRErr vtProjection::SetDatum(int iDatum)
 	{
 		// For a projected CS (PROJCS), we only want to change the geographic
 		// part (GEOGCS).  Step 1: create the desired GEOCS
-		vtProjection geo;
+		vtCRS geo;
 		err = geo.SetGeogCSFromDatum(iDatum);
 		if (err != OGRERR_NONE)
 			return err;
@@ -192,7 +192,7 @@ OGRErr vtProjection::SetDatum(int iDatum)
  * Return the datum as an EPSG code (an integer in the range of 6120 - 6904),
  * or -1 if the datum could not be determined.
  */
-int vtProjection::GetDatum() const
+int vtCRS::GetDatum() const
 {
 	// Convert new DATUM string to old Datum enum
 	const char *datum_string = GetAttrValue("DATUM");
@@ -220,7 +220,7 @@ int vtProjection::GetDatum() const
 	- LU_FEET_INT - Feet (International Foot)
 	- LU_FEET_US - Feet (U.S. Survey Foot)
  */
-LinearUnits vtProjection::GetUnits() const
+LinearUnits vtCRS::GetUnits() const
 {
 	if (IsDymaxion())
 		return LU_UNITEDGE;
@@ -251,7 +251,7 @@ LinearUnits vtProjection::GetUnits() const
 /**
  * Set the projection by copying from a OGRSpatialReference.
  */
-void vtProjection::SetSpatialReference(OGRSpatialReference *pRef)
+void vtCRS::SetSpatialReference(OGRSpatialReference *pRef)
 {
 	*((OGRSpatialReference *)this) = *pRef;
 }
@@ -262,7 +262,7 @@ void vtProjection::SetSpatialReference(OGRSpatialReference *pRef)
  * \par Example:
  *	"Geographic", "Transverse_Mercator", "Albers_Conic_Equal_Area"
  */
-const char *vtProjection::GetProjectionName() const
+const char *vtCRS::GetName() const
 {
 	if (IsDymaxion())
 		return "Dymax";
@@ -280,7 +280,7 @@ const char *vtProjection::GetProjectionName() const
  * Example values are "Geo", "UTM", "TM", "Albers", "LCC", etc.
  * or "Unknown" if it is unknown.
  */
-const char *vtProjection::GetProjectionNameShort() const
+const char *vtCRS::GetNameShort() const
 {
 	if (IsDymaxion())
 		return "Dymax";
@@ -330,7 +330,7 @@ const char *vtProjection::GetProjectionNameShort() const
  * Set the projection to a fresh, new geographical coordinate system
  * based on the indicated Datum.
  */
-OGRErr vtProjection::SetGeogCSFromDatum(int iDatum)
+OGRErr vtCRS::SetGeogCSFromDatum(int iDatum)
 {
 	// It appears that even lightweight tasks like setting up a geographic
 	//  CRS somehow runs into trouble with the Locale ./, issue.
@@ -413,7 +413,7 @@ OGRErr vtProjection::SetGeogCSFromDatum(int iDatum)
  *		hemisphere, -1 through -60 for the southern hemisphere.
  * \param iDatum The Datum as either an old USGS code or an EPSG code
  */
-bool vtProjection::SetProjectionSimple(bool bUTM, int iUTMZone, int iDatum)
+bool vtCRS::SetSimple(bool bUTM, int iUTMZone, int iDatum)
 {
 	// Avoid trouble with '.' and ',' in Europe
 	ScopedLocale normal_numbers(LC_NUMERIC, "C");
@@ -439,7 +439,7 @@ bool vtProjection::SetProjectionSimple(bool bUTM, int iUTMZone, int iDatum)
  * This buffer should be at least 2048 characters long to contain either
  * a simple or WKT description.
  */
-bool vtProjection::GetTextDescription(char *type, char *value) const
+bool vtCRS::GetTextDescription(char *type, char *value) const
 {
 	int datum = GetDatum();
 	const char *datum_string = DatumToStringShort(datum);
@@ -487,7 +487,7 @@ bool vtProjection::GetTextDescription(char *type, char *value) const
 	proj.SetTextDescription("simple", "utm, datum WGS_84, zone 11");
 	\endcode
  */
-bool vtProjection::SetTextDescription(const char *type, const char *value)
+bool vtCRS::SetTextDescription(const char *type, const char *value)
 {
 	if (!strcmp(type, "simple"))
 	{
@@ -554,7 +554,7 @@ FILE *OpenCorrespondingPrjFile(vtString &filename, const char *mode)
  *
  * \return true if successful.
  */
-bool vtProjection::ReadProjFile(const char *filename)
+bool vtCRS::ReadProjFile(const char *filename)
 {
 	vtString prj_name = filename;
 	FILE *fp = OpenCorrespondingPrjFile(prj_name, "rb");
@@ -590,7 +590,7 @@ bool vtProjection::ReadProjFile(const char *filename)
  *
  * \return true if successful.
  */
-bool vtProjection::WriteProjFile(const char *filename) const
+bool vtCRS::WriteProjFile(const char *filename) const
 {
 	vtString fname = filename;
 	FILE *fp2 = OpenCorrespondingPrjFile(fname, "wb");
@@ -612,7 +612,7 @@ bool vtProjection::WriteProjFile(const char *filename) const
  * return the geodesic arc distance in meters.  The WGS84 spheroid
  * is used.
  */
-double vtProjection::GeodesicDistance(const DPoint2 &geo1, const DPoint2 &geo2,
+double vtCRS::GeodesicDistance(const DPoint2 &geo1, const DPoint2 &geo2,
 	bool bQuick)
 {
 	if (bQuick)
@@ -648,7 +648,7 @@ double vtProjection::GeodesicDistance(const DPoint2 &geo1, const DPoint2 &geo2,
 	return gd.S;
 }
 
-void vtProjection::LogDescription() const
+void vtCRS::LogDescription() const
 {
 	LinearUnits lu = GetUnits();
 
@@ -674,7 +674,7 @@ void vtProjection::LogDescription() const
  *
  * \return An EPSG coordinate system code, or -1 if it couldn't be guessed.
  */
-int vtProjection::GuessEPSGCode() const
+int vtCRS::GuessEPSGCode() const
 {
 	int iCoordSystem = -1;
 	int iDatum = GetDatum();
@@ -709,8 +709,8 @@ int vtProjection::GuessEPSGCode() const
  * Given a non-geographic projection, produce a geographic projection which
  * has the same datum/ellipsoid values.
  */
-void CreateSimilarGeographicCRS(const vtProjection &source,
-	vtProjection &geo)
+void CreateSimilarGeographicCRS(const vtCRS &source,
+	vtCRS &geo)
 {
 	geo.SetWellKnownGeogCS("WGS84");
 
@@ -954,9 +954,9 @@ double EstimateDegreesToMeters(double latitude)
  * Create a conversion between projections, making the assumption that
  * the Datum of the target is the same as the Datum of the source.
  */
-OCTransform *CreateTransformIgnoringDatum(const vtProjection *pSource, vtProjection *pTarget)
+OCTransform *CreateTransformIgnoringDatum(const vtCRS *pSource, vtCRS *pTarget)
 {
-	vtProjection DummyTarget = *pTarget;
+	vtCRS DummyTarget = *pTarget;
 
 	const char *datum_string = pSource->GetAttrValue("DATUM");
 
@@ -1055,8 +1055,8 @@ int DymaxOCT::TransformEx(int nCount, double *x, double *y, double *z, int *pabS
 }
 
 // display debugging information to the log
-void LogConvertingProjections(const vtProjection *pSource,
-							  const vtProjection *pTarget)
+void LogConvertingProjections(const vtCRS *pSource,
+							  const vtCRS *pTarget)
 {
 #if 0
 	char *wkt1, *wkt2;
@@ -1079,13 +1079,13 @@ void LogConvertingProjections(const vtProjection *pSource,
 
 /**
  * Use this function instead of OGRCreateCoordinateTransformation to create
- * a transformation between two vtProjections.  Not only does it get around
+ * a transformation between two vtCRSs.  Not only does it get around
  * the 'const' issue with the arguments to the OGR function, but it also
  * has a handy logging option, and can deal with any additional projections
- * that vtProjection adds to OGRSpatialReference.
+ * that vtCRS adds to OGRSpatialReference.
  */
-OCTransform *CreateCoordTransform(const vtProjection *pSource,
-						  const vtProjection *pTarget, bool bLog)
+OCTransform *CreateCoordTransform(const vtCRS *pSource,
+						  const vtCRS *pTarget, bool bLog)
 {
 	// It appears that even lightweight tasks like setting up a CRS Transform
 	//  somehow runs into trouble with the Locale ./, issue.
@@ -1241,217 +1241,4 @@ static void MassageDatumFromWKT(vtString &strDatum )
 	}
 	strDatum.Replace('_', ' ');
 }
-
-
-/////////////////////////////////////////////////////////
-
-// GDAL
-#include "gdal_priv.h"
-#include "cpl_multiproc.h"	// for CPLCleanupTLS
-
-// OGR
-#include <ogrsf_frmts.h>
-
-// sends all GDAL/OGR/PROJ.4 messages to the VTP log output
-void CPL_STDCALL cpl_error_handler(CPLErr eErrClass, int err_no, const char *msg)
-{
-	if (eErrClass == CE_Debug)
-		VTLOG1("CPL Debug: ");
-	else if (eErrClass == CE_Warning)
-		VTLOG("CPL Warning %d: ", err_no);
-	else
-		VTLOG("CPL Error %d: ", err_no);
-	VTLOG1(msg);
-	VTLOG1("\n");
-}
-
-// A singleton for this class
-GDALWrapper g_GDALWrapper;
-
-GDALWrapper::GDALWrapper()
-{
-	m_bGDALFormatsRegistered = false;
-	m_bOGRFormatsRegistered = false;
-
-	// send all GDAL/OGR/PROJ.4 messages to the VTP log output
-	CPLPushErrorHandler(cpl_error_handler);
-
-	// tell it to send all debugging messages
-	CPLSetConfigOption("CPL_DEBUG", "ON");
-}
-
-GDALWrapper::~GDALWrapper()
-{
-	// this must be called before CPLCleanupTLS
-	CPLPopErrorHandler();
-
-	// Destroying the regsitered format drivers only needs to be done
-	// once at exit.
-	if (m_bGDALFormatsRegistered)
-	{
-		GDALDestroyDriverManager();
-	}
-
-	// Call OSRCleanup just in case, because any usage of OGR (e.g.
-	// projections) might have caused stuff to be loaded that's not unloaded
-	// unless OSRCleanup is called, which is only done in the GeoTIFF driver
-	// unregistering.  So this handles the situation where we've use OGR
-	// but not GDAL.
-	OSRCleanup();
-	CPLFinderClean();
-	CPLFreeConfig();
-#if GDAL_VERSION_NUM >= 1310
-	CPLCleanupTLS();	// this function was added in GDAL 1.3.1
-	VSICleanupFileManager();
-#endif
-
-	if (m_bOGRFormatsRegistered)
-	{
-		// TODO: still necessary to clean up memory with GDAL 2.0?
-		//OGRSFDriverRegistrar *reg = OGRSFDriverRegistrar::GetRegistrar();
-		//delete reg;
-	}
-}
-
-void GDALWrapper::RequestGDALFormats()
-{
-	if (!m_bGDALFormatsRegistered)
-	{
-		GDALAllRegister();
-		m_bGDALFormatsRegistered = true;
-	}
-}
-
-void GDALWrapper::RequestOGRFormats()
-{
-	if (!m_bOGRFormatsRegistered)
-	{
-		OGRRegisterAll();
-		m_bOGRFormatsRegistered = true;
-	}
-}
-
-bool GDALWrapper::Init()
-{
-	// check for correctly set up environment variables and locatable files
-	m_initResult.hasGDAL_DATA = FindGDALData();
-	m_initResult.hasPROJ_LIB = FindPROJ4Data();
-	m_initResult.hasPROJSO = FindPROJ4SO();
-	VTLOG("GDAL_DATA/PROJ_LIB/PROJSO tests has: %d %d %d\n", m_initResult.hasGDAL_DATA, m_initResult.hasPROJ_LIB, m_initResult.hasPROJSO);
-
-	return m_initResult.Success();
-}
-
-bool GDALWrapper::FindGDALData()
-{
-	vtStringArray dpg;
-
-	const char *gdalenv = getenv("GDAL_DATA");
-	VTLOG("getenv GDAL_DATA: '%s'\n", gdalenv ? gdalenv : "NULL");
-	if (gdalenv != NULL)
-		dpg.push_back(vtString(gdalenv)+"/");
-
-	dpg.push_back(vtString(DEFAULT_LOCATION_GDAL_DATA));
-#if VTUNIX
-	// add the usual unix paths
-	dpg.push_back(vtString("/usr/local/share/gdal/"));
-#endif
-
-	vtString pcsPath = FindFileOnPaths(dpg, "pcs.csv");
-	vtString datumPath = FindFileOnPaths(dpg, "gdal_datum.csv");
-	dpg.pop_back();
-	if (pcsPath == vtEmptyString || datumPath == vtEmptyString)
-		return false;
-
-	if (ExtractPath(pcsPath, false) != ExtractPath(datumPath, false))
-		VTLOG("Warning: multiple versions of GDAL data installed: %s and %s.\n", (const char*)pcsPath, (const char*)datumPath);
-
-	vtString newpath = ExtractPath(datumPath, false);
-	if (gdalenv == NULL || newpath != gdalenv)
-		SetEnvironmentVar("GDAL_DATA", newpath);
-	return true;
-}
-
-bool GDALWrapper::FindPROJ4Data()
-{
-	vtStringArray dpp;
-
-	const char *proj4 = getenv("PROJ_LIB");
-	VTLOG("getenv PROJ_LIB: '%s'\n", proj4 ? proj4 : "NULL");
-	if (proj4 != NULL)
-		dpp.push_back(vtString(proj4)+"/");
-
-	dpp.push_back(vtString(DEFAULT_LOCATION_PROJ_LIB));
-#if VTUNIX
-	// add the usual unix paths
-	dpp.push_back(vtString("/usr/local/share/proj/"));
-#endif
-
-	vtString fname = FindFileOnPaths(dpp, "nad83");
-	FILE *fp = (fname != "") ? vtFileOpen((const char *)fname, "rb") : NULL;
-	if (fp == NULL)
-		return false;
-	else
-		fclose(fp);
-
-	vtString newpath = ExtractPath(fname, false);
-	if (proj4 == NULL || newpath != proj4)
-		SetEnvironmentVar("PROJ_LIB", newpath);
-	return true;
-}
-
-bool GDALWrapper::FindPROJ4SO()
-{
-#ifndef WIN32
-	vtStringArray dpso;
-	dpso.push_back(vtString(DEFAULT_LOCATION_PROJSO));
-	// add the usual unix paths
-
-// On 64-bit Linux, 64-bit libs are in lib64
-#ifdef _LP64
-	dpso.push_back(vtString("/usr/local/lib64/"));
-	dpso.push_back(vtString("/usr/lib64/"));
-#else
-	dpso.push_back(vtString("/usr/local/lib/"));
-	dpso.push_back(vtString("/usr/lib/"));
-#endif
-
-	// On non-Windows platform, we have to look for the library itself
-	vtString soExtension = ".unknown"; // for no platform.
-	vtString soName = "libproj";
-#if __APPLE__
-	soExtension = ".dylib";
-#else // other unixes
-	soExtension = ".so.0";
-#endif
-
-	vtString fname = FindFileOnPaths(dpso, soName + soExtension);
-	FILE *fp = (fname != "") ? vtFileOpen((const char *)fname, "rb") : NULL;
-	if (fp == NULL)
-		return false;
-	else
-		fclose(fp);
-
-	CPLSetConfigOption("PROJSO", fname);
-#endif	// WIN32
-	return true;
-}
-
-bool GDALWrapper::TestPROJ4()
-{
-	// Avoid trouble with '.' and ',' in Europe
-	ScopedLocale normal_numbers(LC_NUMERIC, "C");
-
-	// Now test that PROJ4 is working.
-	VTLOG1("Testing ability to create coordinate transforms.\n");
-	vtProjection proj1, proj2;
-	proj1.SetUTM(1);
-	proj2.SetUTM(2);
-	ScopedOCTransform trans(CreateCoordTransform(&proj1, &proj2));
-	if (trans.get())
-		return true;
-
-	return false;
-}
-
 

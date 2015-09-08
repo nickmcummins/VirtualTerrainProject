@@ -59,7 +59,7 @@ vtElevLayer::vtElevLayer() : vtLayer(LT_ELEVATION)
 }
 
 vtElevLayer::vtElevLayer(const DRECT &area, const IPoint2 &size,
-	bool bFloats, float fScale, const vtProjection &proj) : vtLayer(LT_ELEVATION)
+	bool bFloats, float fScale, const vtCRS &crs) : vtLayer(LT_ELEVATION)
 {
 	SetupDefaults();
 
@@ -67,7 +67,7 @@ vtElevLayer::vtElevLayer(const DRECT &area, const IPoint2 &size,
 		size.x, size.y, bFloats);
 
 	m_pTin = NULL;
-	m_pGrid = new vtElevationGrid(area, size, bFloats, proj);
+	m_pGrid = new vtElevationGrid(area, size, bFloats, crs);
 	if (!m_pGrid->HasData())
 		VTLOG1(" Grid allocation failed.\n");
 
@@ -155,25 +155,25 @@ bool vtElevLayer::OnLoad()
 	return success;
 }
 
-bool vtElevLayer::TransformCoords(vtProjection &proj_new)
+bool vtElevLayer::TransformCoords(vtCRS &crs_new)
 {
 	VTLOG("vtElevLayer::TransformCoords\n");
 
-	vtProjection proj_old;
-	GetProjection(proj_old);
+	vtCRS crs_old;
+	GetCRS(crs_old);
 
-	if (proj_old == proj_new)
+	if (crs_old == crs_new)
 		return true;		// No conversion necessary
 
 	bool success = false;
 	if (m_pGrid)
 	{
 		// Check to see if the projections differ *only* by datum
-		vtProjection test = proj_old;
-		test.SetDatum(proj_new.GetDatum());
-		if (test == proj_new)
+		vtCRS test = crs_old;
+		test.SetDatum(crs_new.GetDatum());
+		if (test == crs_new)
 		{
-			success = m_pGrid->ReprojectExtents(proj_new);
+			success = m_pGrid->ReprojectExtents(crs_new);
 		}
 		else
 		{
@@ -204,8 +204,8 @@ bool vtElevLayer::TransformCoords(vtProjection &proj_new)
 			vtElevationGrid *grid_new = new vtElevationGrid;
 
 			vtElevError err;
-			success = grid_new->ConvertProjection(m_pGrid, proj_new,
-				bUpgradeToFloat, progress_callback, &err);
+			success = grid_new->ConvertCRS(m_pGrid, crs_new, bUpgradeToFloat,
+				progress_callback, &err);
 
 			if (success)
 			{
@@ -223,7 +223,7 @@ bool vtElevLayer::TransformCoords(vtProjection &proj_new)
 	}
 	if (m_pTin)
 	{
-		success = m_pTin->ConvertProjection(proj_new);
+		success = m_pTin->ConvertCRS(crs_new);
 	}
 	SetModified(true);
 
@@ -630,8 +630,8 @@ void vtElevLayer::ReImage()
  */
 void vtElevLayer::DetermineMeterSpacing()
 {
-	vtProjection &proj = m_pGrid->GetProjection();
-	if (proj.IsGeographic())
+	vtCRS &crs = m_pGrid->GetCRS();
+	if (crs.IsGeographic())
 	{
 		const DRECT &area = m_pGrid->GetEarthExtents();
 
@@ -642,7 +642,7 @@ void vtElevLayer::DetermineMeterSpacing()
 	{
 		// Linear units-based projections are much simpler
 		const DPoint2 &spacing = m_pGrid->GetSpacing();
-		m_fSpacing = spacing.x * GetMetersPerUnit(proj.GetUnits());
+		m_fSpacing = spacing.x * GetMetersPerUnit(crs.GetUnits());
 	}
 }
 
@@ -691,36 +691,36 @@ bool vtElevLayer::GetHeightExtents(float &fMinHeight, float &fMaxHeight) const
 	return true;
 }
 
-void vtElevLayer::GetProjection(vtProjection &proj)
+void vtElevLayer::GetCRS(vtCRS &crs)
 {
 	if (m_pGrid)
-		proj = m_pGrid->GetProjection();
+		crs = m_pGrid->GetCRS();
 	else if (m_pTin)
-		proj = m_pTin->m_proj;
+		crs = m_pTin->m_crs;
 }
 
-void vtElevLayer::SetProjection(const vtProjection &proj)
+void vtElevLayer::SetCRS(const vtCRS &crs)
 {
 	if (m_pGrid)
 	{
-		const vtProjection &current = m_pGrid->GetProjection();
-		if (proj != current)
+		const vtCRS &current = m_pGrid->GetCRS();
+		if (crs != current)
 			SetModified(true);
 
 		// if units change, meter extents of grid (and the shading which is
 		//  derived from them) need to be recomputed
 		LinearUnits oldunits = current.GetUnits();
-		m_pGrid->SetProjection(proj);
-		if (proj.GetUnits() != oldunits)
+		m_pGrid->SetCRS(crs);
+		if (crs.GetUnits() != oldunits)
 			ReRender();
 	}
 	if (m_pTin)
 	{
-		const vtProjection &current = m_pTin->m_proj;
-		if (proj != current)
+		const vtCRS &current = m_pTin->m_crs;
+		if (crs != current)
 			SetModified(true);
 
-		m_pTin->m_proj = proj;
+		m_pTin->m_crs = crs;
 	}
 }
 
@@ -885,7 +885,7 @@ bool vtElevLayer::ImportFromFile(const wxString &strFileName,
 		dlg.m_fSpacing = 30.0f;
 		dlg.m_bBigEndian = false;
 		dlg.m_extents.SetToZero();
-		g_bld->GetProjection(dlg.m_original);
+		g_bld->GetCRS(dlg.m_original);
 
 		if (dlg.ShowModal() == wxID_OK)
 		{
@@ -896,7 +896,7 @@ bool vtElevLayer::ImportFromFile(const wxString &strFileName,
 		if (success)
 		{
 			m_pGrid->SetEarthExtents(dlg.m_extents);
-			m_pGrid->SetProjection(dlg.m_proj);
+			m_pGrid->SetCRS(dlg.m_crs);
 		}
 	}
 	else if (!strExt.CmpNoCase(_T("ntf")))
@@ -919,11 +919,11 @@ bool vtElevLayer::ImportFromFile(const wxString &strFileName,
 	if (!success)
 		return false;
 
-	vtProjection *pProj;
+	vtCRS *pProj;
 	if (m_pGrid)
-		pProj = &m_pGrid->GetProjection();
+		pProj = &m_pGrid->GetCRS();
 	else
-		pProj = &m_pTin->m_proj;
+		pProj = &m_pTin->m_crs;
 
 	// We should ask for a CRS before asking for extents
 	if (!g_bld->ConfirmValidCRS(pProj))
@@ -1051,7 +1051,7 @@ bool vtElevLayer::CreateFromPoints(vtFeatureSet *set, const IPoint2 &size,
 	}
 
 	// copy the result to a ElevationGrid
-	m_pGrid = new vtElevationGrid(extent, size, true, set->GetAtProjection());
+	m_pGrid = new vtElevationGrid(extent, size, true, set->GetAtCRS());
 
 	for (int x = 0; x < size.x; x++)
 		for (int y = 0; y < size.y; y++)
@@ -1218,7 +1218,7 @@ void vtElevLayer::GetPropertyText(wxString &strIn)
 		str.Printf(_("Grid size: %d x %d\n"), cols, rows);
 		result += str;
 
-		bool bGeo = (m_pGrid->GetProjection().IsGeographic() != 0);
+		bool bGeo = (m_pGrid->GetCRS().IsGeographic() != 0);
 		result += _("Grid spacing: ");
 		const DPoint2 &spacing = m_pGrid->GetSpacing();
 		result += wxString(FormatCoord(bGeo, spacing.x), wxConvUTF8);
@@ -1290,7 +1290,7 @@ void vtElevLayer::GetPropertyText(wxString &strIn)
 			mem_bytes, (float)mem_bytes/1024, (float)mem_bytes/1024/1024);
 		result += str;
 
-		LinearUnits units = m_pTin->m_proj.GetUnits();
+		LinearUnits units = m_pTin->m_crs.GetUnits();
 		vtString unit_name = GetLinearUnitName(units);
 		str.Printf(_T("Surface area (2D): %g Square %s\n"),
 			m_pTin->GetArea2D(), (const char *) unit_name);
@@ -1403,17 +1403,7 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 	DPoint2 tile_dim(area.Width()/opts.cols, area.Height()/opts.rows);
 	DPoint2 cell_size = tile_dim / base_tilesize;
 
-	const vtProjection &proj = m_pGrid->GetProjection();
-	vtString units = GetLinearUnitName(proj.GetUnits());
-	units.MakeLower();
-	int zone = proj.GetUTMZone();
-	vtString crs;
-	if (proj.IsGeographic())
-		crs = "LL";
-	else if (zone != 0)
-		crs = "UTM";
-	else
-		crs = "Other";
+	const vtCRS &crs = m_pGrid->GetCRS();
 
 	// Try to create directory to hold the tiles
 	vtString dirname = opts.fname;
@@ -1489,7 +1479,7 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 
 			// Extract the highest LOD we need
 			vtElevationGrid base_lod(tile_area, IPoint2(base_tilesize+1, base_tilesize+1),
-				bFloat, proj);
+				bFloat, crs);
 
 			bool bAllInvalid = true;
 			bool bAllZero = true;
@@ -1597,7 +1587,7 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 					output_buf.ysize = tilesize;
 					output_buf.zsize = 1;
 					output_buf.tsteps = 1;
-					output_buf.SetBounds(proj, tile_area);
+					output_buf.SetBounds(crs, tile_area);
 
 					int depth = dib.GetDepth() / 8;
 					int iUncompressedSize = tilesize * tilesize * depth;
@@ -1652,7 +1642,7 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 				UpdateProgressDialog2(done*99/total, 0, msg);
 
 				vtMiniDatabuf buf;
-				buf.SetBounds(proj, tile_area);
+				buf.SetBounds(crs, tile_area);
 				buf.alloc(tilesize+1, tilesize+1, 1, 1, bFloat ? 2 : 1);
 				float *fdata = (float *) buf.data;
 				short *sdata = (short *) buf.data;
@@ -1687,7 +1677,7 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 
 	// Write .ini file
 	if (!WriteTilesetHeader(opts.fname, opts.cols, opts.rows, opts.lod0size,
-		area, proj, minheight, maxheight, &lod_existence_map, false))
+		area, crs, minheight, maxheight, &lod_existence_map, false))
 	{
 		vtDestroyDir(dirname);
 		return false;
@@ -1697,7 +1687,7 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 	{
 		// Write .ini file for images
 		WriteTilesetHeader(opts.fname_images, opts.cols, opts.rows,
-			opts.lod0size, area, proj, INVALID_ELEVATION, INVALID_ELEVATION,
+			opts.lod0size, area, crs, INVALID_ELEVATION, INVALID_ELEVATION,
 			&lod_existence_map, bJPEG);
 	}
 
@@ -1722,7 +1712,7 @@ bool vtElevLayer::ImportFromDB(const char *szFileName, bool progress_callback(in
 #if USE_LIBMINI_DATABUF
 	DRECT area;
 	bool bFloat;
-	vtProjection proj;	// Projection is always unknown
+	vtCRS crs;	// CRS is always unknown
 
 	vtMiniDatabuf dbuf;
 	dbuf.loaddata(szFileName);
@@ -1736,7 +1726,7 @@ bool vtElevLayer::ImportFromDB(const char *szFileName, bool progress_callback(in
 
 	area.SetRect(dbuf.nwx, dbuf.nwy, dbuf.sex, dbuf.sey);
 
-	if (!m_pGrid->Create(area, IPoint2(dbuf.xsize, dbuf.ysize), bFloat, proj))
+	if (!m_pGrid->Create(area, IPoint2(dbuf.xsize, dbuf.ysize), bFloat, crs))
 		return false;
 
 	int i, j;

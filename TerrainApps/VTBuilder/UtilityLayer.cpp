@@ -81,22 +81,22 @@ bool vtUtilityLayer::OnLoad()
 	return false;
 }
 
-void vtUtilityLayer::GetProjection(vtProjection &proj)
+void vtUtilityLayer::GetCRS(vtCRS &crs)
 {
-	proj = m_proj;
+	crs = m_crs;
 }
 
-void vtUtilityLayer::SetProjection(const vtProjection &proj)
+void vtUtilityLayer::SetCRS(const vtCRS &crs)
 {
-	vtUtilityMap::SetProjection(proj);
+	vtUtilityMap::SetCRS(crs);
 }
 
-bool vtUtilityLayer::TransformCoords(vtProjection &proj)
+bool vtUtilityLayer::TransformCoords(vtCRS &crs)
 {
-	if (proj == m_proj)
+	if (crs == m_crs)
 		return true;
 
-	return vtUtilityMap::TransformTo(proj);
+	return vtUtilityMap::TransformTo(crs);
 }
 
 bool vtUtilityLayer::AppendDataFrom(vtLayer *pL)

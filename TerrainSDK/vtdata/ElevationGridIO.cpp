@@ -16,12 +16,13 @@
 using namespace std;
 
 #include "config_vtdata.h"
-#include "vtLog.h"
-#include "vtDIB.h"
-#include "ElevationGrid.h"
 #include "ByteOrder.h"
-#include "vtString.h"
+#include "ElevationGrid.h"
 #include "FilePath.h"
+#include "GDALWrapper.h"
+#include "vtDIB.h"
+#include "vtLog.h"
+#include "vtString.h"
 
 // Headers for PNG support, which uses the library "libpng"
 #include "png.h"
@@ -212,7 +213,7 @@ bool vtElevationGrid::LoadFrom3TX(const char *szFileName,
 	DRECT ext(lon, lat+1, lon+1, lat);
 	SetEarthExtents(ext);
 
-	m_proj.SetProjectionSimple(false, 0, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(false, 0, EPSG_DATUM_WGS84);
 
 	m_iSize.Set(1201, 1201);
 	m_bFloatMode = false;
@@ -325,8 +326,8 @@ bool vtElevationGrid::LoadFromASC(const char *szFileName,
 
 	// There is no projection info in a ASC file, but there might be
 	//  an accompanying .prj file, usually in the old ESRI .prj format.
-	if (!m_proj.ReadProjFile(szFileName))
-		m_proj.Clear();
+	if (!m_crs.ReadProjFile(szFileName))
+		m_crs.Clear();
 
 	// Some ASC files contain integer data, some contain floating point.
 	// There's no way for us to know in advance, so just assume float.
@@ -407,7 +408,7 @@ bool vtElevationGrid::LoadFromTerragen(const char *szFileName,
 
 	if (progress_callback != NULL) progress_callback(0);
 
-	m_proj.SetProjectionSimple(true, 1, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 	m_bFloatMode = false;
 
@@ -577,7 +578,7 @@ bool vtElevationGrid::LoadFromDTED(const char *szFileName,
 
 	// all DTEDs are geographic and in integer meters
 	// datum is always WGS84
-	m_proj.SetProjectionSimple(false, 0, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(false, 0, EPSG_DATUM_WGS84);
 	m_bFloatMode = false;
 
 	// check for correct format
@@ -815,7 +816,7 @@ bool vtElevationGrid::LoadFromGTOPO30(const char *szFileName,
 	if (progress_callback != NULL) progress_callback(5);
 
 	// Projection is always geographic, integer
-	m_proj.SetProjectionSimple(false, 0, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(false, 0, EPSG_DATUM_WGS84);
 	m_bFloatMode = false;
 
 	m_EarthExtents.left = gh.ULXMap;
@@ -960,7 +961,7 @@ bool vtElevationGrid::LoadFromGLOBE(const char *szFileName,
 	if (progress_callback != NULL) progress_callback(5);
 
 	// Projection is always geographic, integer
-	m_proj.SetProjectionSimple(false, 0, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(false, 0, EPSG_DATUM_WGS84);
 	m_bFloatMode = false;
 
 	ComputeCornersFromExtents();
@@ -1014,7 +1015,7 @@ bool vtElevationGrid::LoadFromDSAA(const char* szFileName, bool progress_callbac
 	if (fscanf(fp, "%lf%lf\n", &zlo, &zhi) != 2) return false;
 
 	// Set the projection (actually we don't know it)
-	m_proj.SetProjectionSimple(true, 1, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 	// set the corresponding vtElevationGrid info
 	m_bFloatMode = true;
@@ -1158,7 +1159,7 @@ bool vtElevationGrid::LoadFromGRD(const char *szFileName,
 	}
 	// Set the projection.  GRD doesn't tell us projection, so we simply
 	//  default to UTM zone 1.
-	m_proj.SetProjectionSimple(true, 1, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 	// set the corresponding vtElevationGrid info
 	m_bFloatMode = true;
@@ -1351,7 +1352,7 @@ bool vtElevationGrid::LoadFromPGM(const char *szFileName, bool progress_callback
 		}
 		if (coord_sys == 0)	// LL
 		{
-			m_proj.SetProjectionSimple(false, 0, datum);
+			m_crs.SetSimple(false, 0, datum);
 			if (bArcSeconds)
 			{
 				ext.left /= 3600;	// arc-seconds to degrees
@@ -1361,12 +1362,12 @@ bool vtElevationGrid::LoadFromPGM(const char *szFileName, bool progress_callback
 			}
 		}
 		else if (coord_sys == 1)	// UTM
-			m_proj.SetProjectionSimple(true, coord_zone, datum);
+			m_crs.SetSimple(true, coord_zone, datum);
 	}
 	else
 	{
 		// Set the projection (actually we don't know it)
-		m_proj.SetProjectionSimple(true, 1, EPSG_DATUM_WGS84);
+		m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 		ext.left = 0;
 		ext.top = ysize-1;
@@ -1569,7 +1570,7 @@ bool vtElevationGrid::SaveToGeoTIFF(const char *szFileName) const
 	pDataset->SetGeoTransform(adfGeoTransform);
 
 	char *pszSRS_WKT = NULL;
-	m_proj.exportToWkt( &pszSRS_WKT );
+	m_crs.exportToWkt( &pszSRS_WKT );
 	pDataset->SetProjection(pszSRS_WKT);
 	CPLFree( pszSRS_WKT );
 
@@ -1648,11 +1649,11 @@ bool vtElevationGrid::LoadWithGDAL(const char *szFileName,
 	// Get the projection information
 	const char *str1 = poDataset->GetProjectionRef();
 	char *str2 = (char *) str1;
-	OGRErr ogr_err = m_proj.importFromWkt(&str2);
+	OGRErr ogr_err = m_crs.importFromWkt(&str2);
 	if (ogr_err != OGRERR_NONE)
 	{
 		// No projection info; just assume that it's geographic
-		m_proj.Clear();
+		m_crs.Clear();
 	}
 
 	// Get spacing and extents
@@ -1886,7 +1887,7 @@ bool vtElevationGrid::ParseNTF5(GDALDataset *pDatasource, vtString &msg,
 
 	m_iSize.x = iColCount;
 	m_iSize.y = iRowCount;
-	m_proj.SetSpatialReference(pSpatialRef);
+	m_crs.SetSpatialReference(pSpatialRef);
 
 	// One online reference says of NTF elevation:
 	// "Height values are rounded to the nearest metre", hence integers.
@@ -2026,7 +2027,7 @@ bool vtElevationGrid::LoadFromRAW(const char *szFileName, int width, int height,
 	m_EarthExtents.bottom = 0;
 	ComputeCornersFromExtents();
 
-	m_proj.SetProjectionSimple(true, 1, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 	if (bytes_per_element == 4)
 		m_bFloatMode = true;
 	else
@@ -2172,21 +2173,21 @@ bool vtElevationGrid::LoadFromMicroDEM(const char *szFileName, bool progress_cal
 	switch (digitize_datum)
 	{
 	case 0: //WGS72
-		m_proj.SetProjectionSimple(dem_type==0, utm_zone, EPSG_DATUM_WGS72);
+		m_crs.SetSimple(dem_type==0, utm_zone, EPSG_DATUM_WGS72);
 		break;
 	case 1: //WGS84
-		m_proj.SetProjectionSimple(dem_type==0, utm_zone, EPSG_DATUM_WGS84);
+		m_crs.SetSimple(dem_type==0, utm_zone, EPSG_DATUM_WGS84);
 		break;
 	case 2: //NAD27
-		m_proj.SetProjectionSimple(dem_type==0, utm_zone, EPSG_DATUM_NAD27);
+		m_crs.SetSimple(dem_type==0, utm_zone, EPSG_DATUM_NAD27);
 		break;
 	case 3: //NAD83
-		m_proj.SetProjectionSimple(dem_type==0, utm_zone, EPSG_DATUM_NAD83);
+		m_crs.SetSimple(dem_type==0, utm_zone, EPSG_DATUM_NAD83);
 		break;
 	case 4: //Spherical
 	case 5: //Local
 	default:
-		m_proj.SetProjectionSimple(dem_type==0, utm_zone, EPSG_DATUM_WGS84);
+		m_crs.SetSimple(dem_type==0, utm_zone, EPSG_DATUM_WGS84);
 		break;
 	}
 
@@ -2474,7 +2475,7 @@ bool vtElevationGrid::LoadFromXYZ(FILE *fp, const char *pattern, bool progress_c
 	}
 
 	// Create the grid, then go back and read all the points
-	vtProjection unknown;
+	vtCRS unknown;
 	Create(extents, IPoint2(iColumns, iRows), !bInteger, unknown);
 
 	DPoint2 base(extents.left, extents.bottom);
@@ -2559,7 +2560,7 @@ bool vtElevationGrid::LoadFromHGT(const char *szFileName, bool progress_callback
 	ComputeCornersFromExtents();
 
 	// Projection is always geographic, integer
-	m_proj.SetProjectionSimple(false, 0, EPSG_DATUM_WGS84);
+	m_crs.SetSimple(false, 0, EPSG_DATUM_WGS84);
 	m_bFloatMode = false;
 
 	if (b1arcsec)
@@ -2802,7 +2803,7 @@ bool vtElevationGrid::SaveToASC(const char *szFileName,
 
 	// There is no projection info in a ASC file, but we can create
 	//  an accompanying .prj file, in the WKT-style .prj format.
-	m_proj.WriteProjFile(szFileName);
+	m_crs.WriteProjFile(szFileName);
 
 	return true;
 }
@@ -2925,7 +2926,7 @@ bool vtElevationGrid::SaveToXYZ(const char *szFileName, bool progress_callback(i
 	if (!fp)
 		return false;
 
-	bool bGeo = (m_proj.IsGeographic() != 0);
+	bool bGeo = (m_crs.IsGeographic() != 0);
 
 	DPoint3 loc;
 	for (int i = 0; i < m_iSize.x; i++)

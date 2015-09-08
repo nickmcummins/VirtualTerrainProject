@@ -72,7 +72,7 @@ bool vtStructureArray::ReadBCF(const char* pathname)
 	{
 		quiet = fscanf(fp, "utm_zone %d\n", &zone);
 	}
-	m_proj.SetUTMZone(zone);
+	m_crs.SetUTMZone(zone);
 
 	int i, j, count;
 	DPoint2 p;
@@ -616,7 +616,7 @@ void vtStructureArray::AddElementsFromOGR_RAW(GDALDataset *pDatasource,
 	// Get the projection (SpatialReference) from this layer
 	OGRSpatialReference *pSpatialRef = pLayer->GetSpatialRef();
 	if (pSpatialRef)
-		m_proj.SetSpatialReference(pSpatialRef);
+		m_crs.SetSpatialReference(pSpatialRef);
 
 	switch (opt.type)
 	{

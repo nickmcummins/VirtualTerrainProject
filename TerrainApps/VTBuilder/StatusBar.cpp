@@ -72,20 +72,20 @@ void MyStatusBar::SetTexts(MainFrame *frame)
 {
 //	VTLOG(" StatusBar SetTexts: ");
 
-	vtProjection &proj = frame->GetAtProjection();
-	bool bGeo = (proj.IsGeographic() != 0);
+	vtCRS &crs = frame->GetAtCRS();
+	bool bGeo = (crs.IsGeographic() != 0);
 
-	wxString str(proj.GetProjectionNameShort(), wxConvUTF8);
+	wxString str(crs.GetNameShort(), wxConvUTF8);
 	SetStatusText(str, Field_Coord);
 
-	int zone = proj.GetUTMZone();
+	int zone = crs.GetUTMZone();
 	if (zone != 0)
 		str.Printf(_("Zone %d"), zone);
 	else
 		str = _T("");
 	SetStatusText(str, Field_Zone);
 
-	str = wxString(DatumToStringShort(proj.GetDatum()), wxConvUTF8);
+	str = wxString(DatumToStringShort(crs.GetDatum()), wxConvUTF8);
 	SetStatusText(str, Field_Datum);
 
 	DPoint2 p;
@@ -94,7 +94,7 @@ void MyStatusBar::SetTexts(MainFrame *frame)
 	{
 		// Scale and units
 		double scale = pView->GetScale();
-		LinearUnits lu = proj.GetUnits();
+		LinearUnits lu = crs.GetUnits();
 		if (lu == LU_DEGREES)
 			str.Printf(_("1 Pixel = %.6lg "), 1.0/scale);
 		else

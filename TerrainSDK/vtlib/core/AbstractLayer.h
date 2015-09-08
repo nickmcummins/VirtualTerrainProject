@@ -79,7 +79,7 @@ public:
 	vtAbstractLayer();
 	~vtAbstractLayer();
 
-	bool Load(const vtProjection &proj, vtFeatureLoader *loader = NULL,
+	bool Load(const vtCRS &crs, vtFeatureLoader *loader = NULL,
 		bool progress_callback(int) = NULL);
 	void SetLayerName(const vtString &fname);
 	vtString GetLayerName();

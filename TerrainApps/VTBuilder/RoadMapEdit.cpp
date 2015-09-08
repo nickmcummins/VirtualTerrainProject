@@ -448,7 +448,7 @@ void RoadMapEdit::Draw(vtScaledView *pView, bool bNodes)
 
 	DPoint2 center;
 	DPoint2 ToMeters(1.0, 1.0);	// convert (estimate) width to meters
-	bool bGeo = (m_proj.IsGeographic() != 0);
+	bool bGeo = (m_crs.IsGeographic() != 0);
 
 	bool bShowWidth = vtRoadLayer::GetDrawWidth();
 	bool bShowDir = vtRoadLayer::GetShowDirection();

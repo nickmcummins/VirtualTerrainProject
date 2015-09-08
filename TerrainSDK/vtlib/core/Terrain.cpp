@@ -850,7 +850,7 @@ vtStructureLayer *vtTerrain::NewStructureLayer()
 
 	// these structures will use the heightfield and projection of this terrain
 	slay->SetTerrain(this);
-	slay->m_proj = m_proj;
+	slay->m_crs = m_crs;
 
 	m_Layers.push_back(slay);
 	return slay;
@@ -1040,7 +1040,7 @@ void vtTerrain::_CreateOtherCulture()
 	{
 		if (m_UtilityMap.ReadOSM(util_file))
 		{
-			m_UtilityMap.TransformTo(m_proj);
+			m_UtilityMap.TransformTo(m_crs);
 		}
 	}
 
@@ -1272,7 +1272,7 @@ bool vtTerrain::_CreateAbstractLayerFromParams(int index)
 
 	// Abstract geometry goes into the scale features group, so it will be
 	//  scaled up/down with the vertical exaggeration.
-	bool success = ab_layer->Load(GetProjection(), NULL, m_progress_callback);
+	bool success = ab_layer->Load(GetCRS(), NULL, m_progress_callback);
 	if (!success)
 	{
 		m_Layers.Remove(ab_layer);
@@ -1594,12 +1594,12 @@ void vtTerrain::_ComputeCenterLocation()
 	drect.GetCenter(m_CenterGeoLocation);
 
 	// must convert from whatever we CRS are, to Geographic
-	vtProjection Dest;
+	vtCRS Dest;
 	Dest.SetWellKnownGeogCS("WGS84");
 
 	// We won't fail on tricky Datum conversions, but we still might
 	//  conceivably fail if the GDAL/PROJ files aren't found.
-	ScopedOCTransform trans(CreateTransformIgnoringDatum(&m_proj, &Dest));
+	ScopedOCTransform trans(CreateTransformIgnoringDatum(&m_crs, &Dest));
 	if (trans)
 		trans->Transform(1, &m_CenterGeoLocation.x, &m_CenterGeoLocation.y);
 
@@ -1661,7 +1661,7 @@ bool vtTerrain::CreateStep2()
 		VTLOG1("Using supplied elevation grid.\n");
 		m_pElevGrid->SetupLocalCS(m_Params.GetValueFloat(STR_VERTICALEXAG));
 		m_pHeightField = m_pElevGrid.get();
-		m_proj = m_pElevGrid->GetProjection();
+		m_crs = m_pElevGrid->GetCRS();
 		m_bIsCreated = true;
 		return true;
 	}
@@ -1670,7 +1670,7 @@ bool vtTerrain::CreateStep2()
 	{
 		VTLOG1("Using supplied TIN.\n");
 		m_pHeightField = m_pTin;
-		m_proj = m_pTin->m_proj;
+		m_crs = m_pTin->m_crs;
 		m_bIsCreated = true;
 		return true;
 	}
@@ -1728,7 +1728,7 @@ bool vtTerrain::CreateStep2()
 		VTLOG("\tGrid load succeeded.\n");
 
 		// set global projection based on this terrain
-		m_proj = m_pElevGrid->GetProjection();
+		m_crs = m_pElevGrid->GetCRS();
 
 		const IPoint2 &gridsize = m_pElevGrid->GetDimensions();
 		VTLOG("\t\tSize: %d x %d.\n", gridsize.x, gridsize.y);
@@ -1769,7 +1769,7 @@ bool vtTerrain::CreateStep2()
 			}
 			VTLOG("\tTIN load succeeded.\n");
 
-			m_proj = m_pTin->m_proj;
+			m_crs = m_pTin->m_crs;
 			m_pHeightField = m_pTin;
 		}
 	}
@@ -1818,7 +1818,7 @@ bool vtTerrain::CreateStep2()
 		}
 		m_pTiledGeom->SetTexLODFactor(m_Params.GetValueFloat(STR_TEXURE_LOD_FACTOR));
 		m_pHeightField = m_pTiledGeom;
-		m_proj = m_pTiledGeom->m_proj;
+		m_crs = m_pTiledGeom->m_crs;
 
 		// The tiled geometry base texture will always use texture unit 0
 		m_TextureUnits.ReserveTextureUnit();
@@ -1833,10 +1833,10 @@ bool vtTerrain::CreateStep2()
 			return false;
 		}
 		m_pHeightField = m_pExternalHeightField;
-		m_proj = m_pExternalHeightField->GetProjection();
+		m_crs = m_pExternalHeightField->GetCRS();
 	}
 	char type[10], value[2048];
-	m_proj.GetTextDescription(type, value);
+	m_crs.GetTextDescription(type, value);
 	VTLOG(" Projection of the terrain: %s, '%s'\n", type, value);
 	DRECT ext = m_pHeightField->GetEarthExtents();
 	VTLOG(" Earth extents LRTB: %lf %lf %lf %lf\n", ext.left, ext.right, ext.top, ext.bottom);
@@ -2095,7 +2095,7 @@ void vtTerrain::CreateStep12()
 	}
 	VTLOG1("Setup location saver coordinate conversion.\n");
 	m_LocSaver.SetLocalCS(m_pHeightField->m_LocalCS);
-	m_LocSaver.SetProjection(m_proj);
+	m_LocSaver.SetCRS(m_crs);
 
 	// Read stored animpaths
 	for (uint i = 0; i < m_Params.m_AnimPaths.size(); i++)
@@ -2109,7 +2109,7 @@ void vtTerrain::CreateStep12()
 		VTLOG("Reading animpath: %s.\n", (const char *) path);
 		vtAnimPath *anim = new vtAnimPath;
 		// Ensure that anim knows the projection
-		if (!anim->SetProjection(GetProjection(), GetLocalCS()))
+		if (!anim->SetCRS(GetCRS(), GetLocalCS()))
 		{
 			// no projection, no functionality
 			delete anim;
@@ -2540,7 +2540,7 @@ vtVegLayer *vtTerrain::NewVegLayer()
 
 	// Apply properties from the terrain
 	vlay->SetSpeciesList(m_pSpeciesList);
-	vlay->SetProjection(m_proj);
+	vlay->SetCRS(m_crs);
 	vlay->SetHeightField(m_pHeightField);
 
 	m_Layers.push_back(vlay);
@@ -3003,12 +3003,12 @@ bool vtTerrain::CreateAbstractLayerVisuals(vtAbstractLayer *ab_layer)
 	if (have_extents)
 	{
 		center = ext.GetCenter();
-		const vtProjection &source = ab_layer->GetFeatureSet()->GetAtProjection();
+		const vtCRS &source = ab_layer->GetFeatureSet()->GetAtCRS();
 
 		// If we have two valid CRSs, and they are not the same, then we need a transform
-		if (source.GetRoot() && m_proj.GetRoot() && !source.IsSame(&m_proj))
+		if (source.GetRoot() && m_crs.GetRoot() && !source.IsSame(&m_crs))
 		{
-			ScopedOCTransform trans(CreateTransformIgnoringDatum(&source, &m_proj));
+			ScopedOCTransform trans(CreateTransformIgnoringDatum(&source, &m_crs));
 			if (trans)
 			{
 				if (trans->Transform(1, &center.x, &center.y) == 1)

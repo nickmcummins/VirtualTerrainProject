@@ -144,7 +144,7 @@ bool vtElevationGrid::LoadBTHeader(const char *szFileName, vtElevError *err)
 	if (external == 1)
 	{
 		// Read external projection (.prj) file
-		if (!m_proj.ReadProjFile(szFileName))
+		if (!m_crs.ReadProjFile(szFileName))
 		{
 			SetError(err, vtElevError::READ_CRS, "Couldn't read CRS from file '%s'", szFileName);
 			return false;
@@ -154,7 +154,7 @@ bool vtElevationGrid::LoadBTHeader(const char *szFileName, vtElevError *err)
 	{
 		// Internal specification: proj_type 0 = Geo, 1 = UTM
 		VTLOG(" (type %d, zone %d, datum %d)", proj_type, zone, datum);
-		m_proj.SetProjectionSimple(proj_type == 1, zone, datum);
+		m_crs.SetSimple(proj_type == 1, zone, datum);
 	}
 
 	ComputeCornersFromExtents();
@@ -303,12 +303,12 @@ bool vtElevationGrid::SaveToBT(const char *szFileName,
 {
 	int w = m_iSize.y;
 	int h = m_iSize.x;
-	short zone = (short) m_proj.GetUTMZone();
-	short datum = (short) m_proj.GetDatum();
+	short zone = (short) m_crs.GetUTMZone();
+	short datum = (short) m_crs.GetDatum();
 	short isfloat = (short) IsFloatMode();
 	short external = 1;		// always true: we always write an external .prj file
 
-	LinearUnits units = m_proj.GetUnits();
+	LinearUnits units = m_crs.GetUnits();
 	int hunits = (int) units;
 
 	// Latest header, version 1.2
@@ -454,7 +454,7 @@ bool vtElevationGrid::SaveToBT(const char *szFileName,
 			strcpy(prj_name + len - 6, ".prj"); // overwrite the .bt.gz
 		else
 			strcpy(prj_name + len - 3, ".prj"); // overwrite the .bt
-		m_proj.WriteProjFile(prj_name);
+		m_crs.WriteProjFile(prj_name);
 	}
 
 	return true;

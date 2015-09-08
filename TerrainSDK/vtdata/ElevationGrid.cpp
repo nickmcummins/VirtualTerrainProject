@@ -49,10 +49,10 @@ void vtElevationGrid::SetupMembers()
  * The grid will initially have no data in it (all values are INVALID_ELEVATION).
  */
 vtElevationGrid::vtElevationGrid(const DRECT &area, const IPoint2 &size,
-	bool bFloat, const vtProjection &proj)
+	bool bFloat, const vtCRS &crs)
 {
 	SetupMembers();
-	Create(area, size, bFloat, proj);
+	Create(area, size, bFloat, crs);
 }
 
 /**
@@ -112,7 +112,7 @@ bool vtElevationGrid::CopyHeaderFrom(const vtElevationGrid &rhs)
 	for (unsigned ii = 0; ii < sizeof( m_Corners ) / sizeof( *m_Corners ); ++ii)
 		m_Corners[ii] = rhs.m_Corners[ii];
 
-	m_proj = rhs.m_proj;
+	m_crs = rhs.m_crs;
 	m_strOriginalDEMName = rhs.m_strOriginalDEMName;
 
 	return AllocateGrid();
@@ -163,16 +163,16 @@ vtElevationGrid::~vtElevationGrid()
  * The grid will initially have no data in it (all values are INVALID_ELEVATION).
  */
 bool vtElevationGrid::Create(const DRECT &area, const IPoint2 &size,
-	bool bFloat, const vtProjection &proj, vtElevError *err)
+	bool bFloat, const vtCRS &crs, vtElevError *err)
 {
-	vtHeightFieldGrid3d::Initialize(proj.GetUnits(), area, INVALID_ELEVATION,
+	vtHeightFieldGrid3d::Initialize(crs.GetUnits(), area, INVALID_ELEVATION,
 		INVALID_ELEVATION, size.x, size.y);
 
 	m_bFloatMode = bFloat;
 
 	ComputeCornersFromExtents();
 
-	m_proj = proj;
+	m_crs = crs;
 	m_fVMeters = 1.0f;
 	m_fVerticalScale = 1.0f;
 
@@ -244,14 +244,13 @@ void vtElevationGrid::Invalidate()
  *
  * \return True if successful.
  */
-bool vtElevationGrid::ConvertProjection(vtElevationGrid *pOld,
-	const vtProjection &NewProj, float bUpgradeToFloat, bool progress_callback(int),
-	vtElevError *err)
+bool vtElevationGrid::ConvertCRS(vtElevationGrid *pOld, const vtCRS &NewCRS,
+	float bUpgradeToFloat, bool progress_callback(int), vtElevError *err)
 {
 	// Create conversion object
-	const vtProjection *pSource, *pDest;
-	pSource = &pOld->GetProjection();
-	pDest = &NewProj;
+	const vtCRS *pSource, *pDest;
+	pSource = &pOld->GetCRS();
+	pDest = &NewCRS;
 
 	ScopedOCTransform trans(CreateCoordTransform(pSource, pDest));
 	if (!trans)
@@ -336,7 +335,7 @@ bool vtElevationGrid::ConvertProjection(vtElevationGrid *pOld,
 
 	// Now we're ready to fill in the new elevationgrid.
 	// Some fields are simple to set:
-	m_proj = NewProj;
+	m_crs = NewCRS;
 	m_bFloatMode = pOld->m_bFloatMode;
 	m_strOriginalDEMName = pOld->GetDEMName();
 
@@ -345,7 +344,7 @@ bool vtElevationGrid::ConvertProjection(vtElevationGrid *pOld,
 		m_bFloatMode = true;
 
 	// Others are on the parent class:
-	vtHeightFieldGrid3d::Initialize(NewProj.GetUnits(), m_EarthExtents, INVALID_ELEVATION,
+	vtHeightFieldGrid3d::Initialize(NewCRS.GetUnits(), m_EarthExtents, INVALID_ELEVATION,
 		INVALID_ELEVATION, m_iSize.x, m_iSize.y);
 	if (!AllocateGrid(err))
 		return false;
@@ -391,16 +390,16 @@ bool vtElevationGrid::ConvertProjection(vtElevationGrid *pOld,
  * occurs when the only difference between the old and new projection
  * is choice of Datum.
  *
- * \param proj_new	The new projection to convert to.
+ * \param crs_new	The new projection to convert to.
  *
  * \return True if successful.
  */
-bool vtElevationGrid::ReprojectExtents(const vtProjection &proj_new)
+bool vtElevationGrid::ReprojectExtents(const vtCRS &crs_new)
 {
 	// Create conversion object
-	const vtProjection *pSource, *pDest;
-	pSource = &m_proj;
-	pDest = &proj_new;
+	const vtCRS *pSource, *pDest;
+	pSource = &m_crs;
+	pDest = &crs_new;
 
 	ScopedOCTransform trans(CreateCoordTransform(pSource, pDest));
 	if (!trans)
@@ -422,7 +421,7 @@ bool vtElevationGrid::ReprojectExtents(const vtProjection &proj_new)
 	}
 	ComputeExtentsFromCorners();
 
-	m_proj = proj_new;
+	m_crs = crs_new;
 
 	return true;
 }
@@ -777,7 +776,7 @@ bool vtElevationGrid::FillGapsSmooth(DRECT *area, bool progress_callback(int))
 		if (ymax > m_iSize.y) ymax = m_iSize.y;
 	}
 
-	vtElevationGrid delta(GetAreaExtents(), m_iSize, true, GetProjection());
+	vtElevationGrid delta(GetAreaExtents(), m_iSize, true, GetCRS());
 
 	// For speed, remember which lines already have no gaps, so we don't have
 	// to visit them again.
@@ -947,9 +946,9 @@ int vtElevationGrid::FillGapsByRegionGrowing(int radius, bool progress_callback(
 		return -1;
 
 	// allocate counting buffer
-	if (!cnt.Create(m_EarthExtents, m_iSize, false, m_proj))
+	if (!cnt.Create(m_EarthExtents, m_iSize, false, m_crs))
 		return -1;
-	if (!tmp.Create(m_EarthExtents, m_iSize, false, m_proj))
+	if (!tmp.Create(m_EarthExtents, m_iSize, false, m_crs))
 		return -1;
 
 	// calculate foot print size
@@ -1400,24 +1399,24 @@ float vtElevationGrid::GetFValueSafe(int i, int j) const
 	return GetFValue(i, j);
 }
 
-void vtElevationGrid::SetProjection(const vtProjection &proj)
+void vtElevationGrid::SetCRS(const vtCRS &crs)
 {
-	LinearUnits newunits = proj.GetUnits();
-	if (newunits != m_proj.GetUnits())
+	LinearUnits newunits = crs.GetUnits();
+	if (newunits != m_crs.GetUnits())
 	{
 		// change of units requires change in local coordinate system
 		// units change; all else remains same
 		vtHeightFieldGrid3d::Initialize(newunits, m_EarthExtents,
 			m_fMinHeight, m_fMaxHeight, m_iSize.x, m_iSize.y);
 	}
-	m_proj = proj;
+	m_crs = crs;
 }
 
 bool vtElevationGrid::GetCorners(DLine2 &line, bool bGeo) const
 {
 	int i;
 
-	if (!bGeo || m_proj.IsGeographic())
+	if (!bGeo || m_crs.IsGeographic())
 	{
 		// no need to convert
 		for (i = 0; i < 4; i++)
@@ -1426,14 +1425,14 @@ bool vtElevationGrid::GetCorners(DLine2 &line, bool bGeo) const
 	else
 	{
 		// must convert from whatever we are, to geo
-		vtProjection Dest;
+		vtCRS Dest;
 		Dest.SetWellKnownGeogCS("WGS84");
 
 		// safe (won't fail on tricky Datum conversions)
-		ScopedOCTransform trans(CreateTransformIgnoringDatum(&m_proj, &Dest));
+		ScopedOCTransform trans(CreateTransformIgnoringDatum(&m_crs, &Dest));
 
 		// unsafe, but potentially more accurate
-//		ScopedOCTransform trans(CreateCoordTransform(&m_proj, &Dest, true));
+//		ScopedOCTransform trans(CreateCoordTransform(&m_crs, &Dest, true));
 
 		if (!trans)
 		{
@@ -1479,7 +1478,7 @@ void vtElevationGrid::SetupLocalCS(float fVerticalExag)
 	}
 
 	// initialize parent class
-	Initialize(m_proj.GetUnits(), m_EarthExtents, m_fMinHeight, m_fMaxHeight,
+	Initialize(m_crs.GetUnits(), m_EarthExtents, m_fMinHeight, m_fMaxHeight,
 		m_iSize.x, m_iSize.y);
 
 	m_fVerticalScale = fVerticalExag;

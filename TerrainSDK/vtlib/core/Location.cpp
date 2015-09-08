@@ -193,12 +193,12 @@ bool vtLocationSaver::Read(const vtString &fname)
 	return true;
 }
 
-void vtLocationSaver::SetProjection(const vtProjection &proj)
+void vtLocationSaver::SetCRS(const vtCRS &crs)
 {
-	m_proj = proj;
+	m_crs = crs;
 
 	// convert from projected to global CS
-	vtProjection global_proj;
+	vtCRS global_proj;
 	OGRErr err = global_proj.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
 	if (err != OGRERR_NONE)
 	{
@@ -209,8 +209,8 @@ void vtLocationSaver::SetProjection(const vtProjection &proj)
 	delete m_pConvertToWGS;
 	delete m_pConvertFromWGS;
 
-	m_pConvertToWGS = CreateCoordTransform(&m_proj, &global_proj, true);
-	m_pConvertFromWGS = CreateCoordTransform(&global_proj, &m_proj, true);
+	m_pConvertToWGS = CreateCoordTransform(&m_crs, &global_proj, true);
+	m_pConvertFromWGS = CreateCoordTransform(&global_proj, &m_crs, true);
 }
 
 bool vtLocationSaver::StoreTo(uint num, const LocNameString &name)

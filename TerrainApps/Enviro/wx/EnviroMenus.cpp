@@ -1208,8 +1208,8 @@ void EnviroFrame::OnVIAPlot(wxCommandEvent& event)
 	Transform[3] = EarthExtents.top;
 	Transform[5] = -fYSampleInterval;
 	pDataset->SetGeoTransform(Transform);
-	g_App.GetCurrentTerrain()->GetProjection().exportToWkt(&pWKT);
-	pDataset->SetProjection(pWKT);
+	g_App.GetCurrentTerrain()->GetCRS().exportToWkt(&pWKT);
+	pDataset->SetCRS(pWKT);
 	CPLFree(pWKT);
 	GDALRasterBand *pRasterBand = pDataset->GetRasterBand(1);
 	if (NULL == pRasterBand)
@@ -1742,11 +1742,11 @@ void EnviroFrame::OnTerrainWriteElevation(wxCommandEvent& event)
 	// Get the properties of the dynamic terrain, make an elevation grid like it
 	vtDynTerrainGeom *dtg = pTerr->GetDynTerrain();
 
-	const vtProjection &proj = pTerr->GetProjection();
+	const vtCRS &crs = pTerr->GetCRS();
 	const IPoint2 &size = dtg->GetDimensions();
 	const  DRECT area = dtg->GetEarthExtents();
 	bool bFloat = true;
-	vtElevationGrid grid(area, size, bFloat, proj);
+	vtElevationGrid grid(area, size, bFloat, crs);
 
 	// Copy the data to the (temporary) elevation grid
 	for (int i = 0; i < size.x; i++)

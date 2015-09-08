@@ -20,6 +20,7 @@
 #include "vtdata/ElevationGrid.h"
 #include "vtdata/FileFilters.h"
 #include "vtdata/FilePath.h"
+#include "vtdata/GDALWrapper.h"
 #include "vtdata/LULC.h"
 #include "vtdata/Unarchive.h"
 #include "vtdata/vtLog.h"
@@ -601,7 +602,7 @@ vtLayer *Builder::ImportLayerFromFile(LayerType ltype, const wxString &strFileNa
 				pRaw->SetLayerFilename(strFileName);
 				pRaw->SetFeatureSet(pSet);
 				// Adopt existing CRS
-				pRaw->SetProjection(m_proj);
+				pRaw->SetCRS(m_crs);
 				pLayer = pRaw;
 			}
 		}
@@ -655,7 +656,7 @@ vtLayer *Builder::ImportLayerFromFile(LayerType ltype, const wxString &strFileNa
 	if (bIsDB && pLayer)
 	{
 		// Adopt existing CRS
-		pLayer->SetProjection(m_proj);
+		pLayer->SetCRS(m_crs);
 	}
 
 	CloseProgressDialog();
@@ -891,8 +892,8 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 	vtLayerPtr pLayer = vtLayer::CreateNewLayer(ltype);
 
 	// Does SHP already have a projection?
-	vtProjection proj;
-	if (proj.ReadProjFile(strFileName.mb_str(wxConvUTF8)))
+	vtCRS crs;
+	if (crs.ReadProjFile(strFileName.mb_str(wxConvUTF8)))
 	{
 		// OK, we'll use it
 	}
@@ -900,18 +901,18 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 	{
 		// ask user for a projection
 		ProjectionDlg dlg(NULL, -1, _("Please indicate projection"));
-		dlg.SetProjection(m_proj);
+		dlg.SetCRS(m_crs);
 
 		if (dlg.ShowModal() == wxID_CANCEL)
 			return NULL;
-		dlg.GetProjection(proj);
+		dlg.GetCRS(crs);
 	}
 
 	// read SHP data into the layer
 	if (ltype == LT_ROAD)
 	{
 		vtRoadLayer *pRL = (vtRoadLayer *)pLayer;
-		pRL->AddElementsFromSHP(strFileName, proj, progress_callback);
+		pRL->AddElementsFromSHP(strFileName, crs, progress_callback);
 		pRL->RemoveUnusedNodes();
 	}
 
@@ -931,7 +932,7 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 			dlg.SetShapefileName(strFileName);
 			if (dlg.ShowModal() == wxID_CANCEL)
 				return NULL;
-			success = pVL->AddElementsFromSHP_Polys(strFileName, proj,
+			success = pVL->AddElementsFromSHP_Polys(strFileName, crs,
 				dlg.m_fieldindex, dlg.m_datatype);
 			if (!success)
 				return NULL;
@@ -943,7 +944,7 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 			dlg.SetVegLayer(pVL);
 			if (dlg.ShowModal() == wxID_CANCEL)
 				return NULL;
-			success = pVL->AddElementsFromSHP_Points(strFileName, proj, dlg.m_options);
+			success = pVL->AddElementsFromSHP_Points(strFileName, crs, dlg.m_options);
 			if (!success)
 				return NULL;
 		}
@@ -952,13 +953,13 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 	if (ltype == LT_WATER)
 	{
 		vtWaterLayer *pWL = (vtWaterLayer *)pLayer;
-		pWL->AddElementsFromSHP(strFileName, proj);
+		pWL->AddElementsFromSHP(strFileName, crs);
 	}
 
 	if (ltype == LT_STRUCTURE)
 	{
 		vtStructureLayer *pSL = (vtStructureLayer *)pLayer;
-		success = pSL->AddElementsFromSHP(strFileName, proj, m_area);
+		success = pSL->AddElementsFromSHP(strFileName, crs, m_area);
 		if (!success)
 			return NULL;
 	}
@@ -967,7 +968,7 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 	{
 		pLayer->SetLayerFilename(strFileName);
 		if (pLayer->OnLoad())
-			pLayer->SetProjection(proj);
+			pLayer->SetCRS(crs);
 		else
 		{
 			delete pLayer;
@@ -996,8 +997,8 @@ vtLayerPtr Builder::ImportFromDXF(const wxString &strFileName, LayerType ltype)
 			return NULL;
 
 		// We should ask for a CRS
-		vtProjection &Proj = pSet->GetAtProjection();
-		if (!g_bld->ConfirmValidCRS(&Proj))
+		vtCRS &Crs = pSet->GetAtCRS();
+		if (!g_bld->ConfirmValidCRS(&Crs))
 		{
 			delete pSet;
 			return NULL;
@@ -1105,7 +1106,7 @@ void Builder::ImportFromMapSource(const char *fname)
 	char buf[200];
 	bool bUTM = false;
 	bool bGotSRS = false;
-	vtProjection proj;
+	vtCRS crs;
 
 	if (fgets(buf, 200, fp) == NULL)
 		return;
@@ -1149,10 +1150,10 @@ void Builder::ImportFromMapSource(const char *fname)
 
 				if (!bGotSRS)
 				{
-					proj.SetWellKnownGeogCS("WGS84");
+					crs.SetWellKnownGeogCS("WGS84");
 					if (bUTM)
-						proj.SetUTMZone(zone);
-					pRL->SetProjection(proj);
+						crs.SetUTMZone(zone);
+					pRL->SetCRS(crs);
 					bGotSRS = true;
 				}
 			}
@@ -1173,8 +1174,8 @@ void Builder::ImportFromMapSource(const char *fname)
 
 				if (!bGotSRS)
 				{
-					proj.SetWellKnownGeogCS("WGS84");
-					pRL->SetProjection(proj);
+					crs.SetWellKnownGeogCS("WGS84");
+					pRL->SetCRS(crs);
 					bGotSRS = true;
 				}
 			}
@@ -1194,8 +1195,8 @@ void Builder::ImportFromMapSource(const char *fname)
 		choices[i] += _T(" (");
 		if (bUTM)
 		{
-			layers[i]->GetProjection(proj);
-			str.Printf(_T("zone %d, "), proj.GetUTMZone());
+			layers[i]->GetCRS(crs);
+			str.Printf(_T("zone %d, "), crs.GetUTMZone());
 			choices[i] += str;
 		}
 		str.Printf(_T("points %d"), layers[i]->GetFeatureSet()->NumEntities());
@@ -1317,7 +1318,7 @@ vtFeatureSetPoint2D *Builder::ImportPointsFromDBF(const char *fname)
 	ImportPointDlg dlg(m_pParentWindow, -1, _("Point Data Import"));
 
 	// default to the current CRS
-	dlg.SetCRS(m_proj);
+	dlg.SetCRS(m_crs);
 
 	// Fill the DBF field names into the "Use Field" controls
 	int *pnWidth = 0, *pnDecimals = 0;
@@ -1356,7 +1357,7 @@ vtFeatureSetPoint2D *Builder::ImportPointsFromDBF(const char *fname)
 
 	// Now import
 	vtFeatureSetPoint2D *pSet = new vtFeatureSetPoint2D;
-	pSet->SetProjection(dlg.m_proj);
+	pSet->SetCRS(dlg.m_crs);
 
 	int iRecords = DBFGetRecordCount(db);
 	for (i = 0; i < iRecords; i++)
@@ -1446,7 +1447,7 @@ vtFeatureSet *Builder::ImportPointsFromCSV(const char *fname)
 	dlg.m_bElevation = false;
 
 	// default to the current CRS
-	dlg.SetCRS(m_proj);
+	dlg.SetCRS(m_crs);
 
 	// Fill the field names into the "Use Field" controls
 	for (int i = 0; i < iFields; i++)
@@ -1479,7 +1480,7 @@ vtFeatureSet *Builder::ImportPointsFromCSV(const char *fname)
 	if (dlg.m_bElevation)
 	{
 		vtFeatureSetPoint3D *pSet = new vtFeatureSetPoint3D;
-		pSet->SetProjection(dlg.m_proj);
+		pSet->SetCRS(dlg.m_crs);
 
 		if (dlg.m_bImportField)
 		{
@@ -1508,7 +1509,7 @@ vtFeatureSet *Builder::ImportPointsFromCSV(const char *fname)
 	else
 	{
 		vtFeatureSetPoint2D *pSet = new vtFeatureSetPoint2D;
-		pSet->SetProjection(dlg.m_proj);
+		pSet->SetCRS(dlg.m_crs);
 
 		while (ReadLine(buf, 4096, fp, bHaveCR, bHaveLF))
 		{
@@ -1603,7 +1604,7 @@ vtLayerPtr Builder::ImportRawFromOGR(const wxString &strFileName)
 
 vtLayerPtr Builder::ImportVectorsWithOGR(const wxString &strFileName, LayerType ltype)
 {
-	vtProjection Projection;
+	vtCRS crs;
 
 	g_GDALWrapper.RequestOGRFormats();
 
@@ -1666,20 +1667,20 @@ vtLayerPtr Builder::ImportVectorsWithOGR(const wxString &strFileName, LayerType 
 			ImportDialog.m_opt.pHeightField = NULL;
 		pSL->AddElementsFromOGR(datasource, ImportDialog.m_opt, progress_callback);
 
-		pSL->GetProjection(Projection);
-		if (OGRERR_NONE != Projection.Validate())
+		pSL->GetCRS(crs);
+		if (OGRERR_NONE != crs.Validate())
 		{
 			// Get a projection
 			ProjectionDlg dlg(g_bld->m_pParentWindow, -1, _("Please indicate projection"));
-			dlg.SetProjection(m_proj);
+			dlg.SetCRS(m_crs);
 
 			if (dlg.ShowModal() == wxID_CANCEL)
 			{
 				delete pSL;
 				return NULL;
 			}
-			dlg.GetProjection(Projection);
-			pSL->SetProjection(Projection);
+			dlg.GetCRS(crs);
+			pSL->SetCRS(crs);
 		}
 	}
 
@@ -1765,10 +1766,10 @@ int Builder::ImportDataFromTIGER(const wxString &strDirName)
 		OGRSpatialReference *pSpatialRef = pOGRLayer->GetSpatialRef();
 		if (pSpatialRef)
 		{
-			vtProjection proj;
+			vtCRS crs;
 			proj.SetSpatialReference(pSpatialRef);
-			pWL->SetProjection(proj);
-			pRL->SetProjection(proj);
+			pWL->SetCRS(proj);
+			pRL->SetCRS(proj);
 		}
 
 		// Progress Dialog
@@ -1941,10 +1942,10 @@ void Builder::ImportDataFromNTF(const wxString &strFileName, LayerArray &layers)
 			pSpatialRef = pOGRLayer->GetSpatialRef();
 			if (pSpatialRef)
 			{
-				vtProjection proj;
-				proj.SetSpatialReference(pSpatialRef);
-				pRL->SetProjection(proj);
-				pSL->SetProjection(proj);
+				vtCRS crs;
+				crs.SetSpatialReference(pSpatialRef);
+				pRL->SetCRS(crs);
+				pSL->SetCRS(crs);
 			}
 		}
 #if 0
@@ -2099,9 +2100,9 @@ void Builder::ImportDataFromS57(const wxString &strDirName)
 		OGRSpatialReference *pSpatialRef = pOGRLayer->GetSpatialRef();
 		if (pSpatialRef)
 		{
-			vtProjection proj;
-			proj.SetSpatialReference(pSpatialRef);
-			pWL->SetProjection(proj);
+			vtCRS crs;
+			crs.SetSpatialReference(pSpatialRef);
+			pWL->SetCRS(crs);
 		}
 
 		// Progress Dialog
@@ -2163,9 +2164,9 @@ int Builder::ImportDataFromSCC(const char *filename)
 	vtString shortname = StartOfFilename(filename);
 	RemoveFileExtensions(shortname);
 
-	vtProjection proj;
-	proj.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
-	proj.SetUTM(1);
+	vtCRS crs;
+	crs.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
+	crs.SetUTM(1);
 
 	// create the new layers
 	vtElevLayer *pEL = new vtElevLayer;
@@ -2175,13 +2176,13 @@ int Builder::ImportDataFromSCC(const char *filename)
 	vtStructureLayer *pSL = new vtStructureLayer;
 	pSL->SetLayerFilename(wxString(shortname + "_structures", wxConvUTF8));
 	pSL->SetModified(true);
-	pSL->SetProjection(proj);
+	pSL->SetCRS(crs);
 
 	vtVegLayer *pVL = new vtVegLayer;
 	pVL->SetModified(true);
 	pVL->SetVegType(VLT_Instances);
 	pVL->SetLayerFilename(wxString(shortname + "_vegetation", wxConvUTF8));
-	pVL->SetProjection(proj);
+	pVL->SetCRS(crs);
 	vtPlantInstanceArray *pia = pVL->GetPIA();
 	pia->SetSpeciesList(&m_SpeciesList);
 	int id = m_SpeciesList.GetSpeciesIdByCommonName("Ponderosa Pine");
@@ -2364,7 +2365,7 @@ int Builder::ImportDataFromSCC(const char *filename)
 	tin->ComputeExtents();
 	tin->CleanupClockwisdom();
 	pEL->SetTin(tin);
-	pEL->SetProjection(proj);
+	pEL->SetCRS(crs);
 
 	int layer_count = 0;
 	bool success;
@@ -2463,7 +2464,7 @@ bool Builder::ImportDataFromDXF(const char *filename)
 		pRL->SetLayerFilename(_T("points.shp"));
 		pRL->SetModified(true);
 		// Assume existing projection
-		pRL->SetProjection(m_proj);
+		pRL->SetCRS(m_crs);
 		if (!AddLayerWithCheck(pRL, true))
 			delete pRL;
 	}
@@ -2477,7 +2478,7 @@ bool Builder::ImportDataFromDXF(const char *filename)
 		pRL->SetLayerFilename(_T("polylines.shp"));
 		pRL->SetModified(true);
 		// Assume existing projection
-		pRL->SetProjection(m_proj);
+		pRL->SetCRS(m_crs);
 		if (!AddLayerWithCheck(pRL, true))
 			delete pRL;
 	}

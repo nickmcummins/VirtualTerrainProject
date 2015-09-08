@@ -43,7 +43,7 @@ public:
 	wxTextCtrl* GetMapDist()  { return (wxTextCtrl*) FindWindow( ID_MAP_DIST ); }
 	wxTextCtrl* GetGeodDist()  { return (wxTextCtrl*) FindWindow( ID_GEOD_DIST ); }
 
-	void SetProjection(const vtProjection &proj);
+	void SetCRS(const vtCRS &crs);
 	void SetPoints(const DPoint2 &p1, const DPoint2 &p2, bool bUpdate);
 	void SetPath(const DLine2 &path, bool bUpdate);
 	void GetPoints(DPoint2 &p1, DPoint2 &p2);
@@ -58,7 +58,7 @@ public:
 
 private:
 	// WDR: member variable declarations for DistanceDlg
-	vtProjection	m_proj;
+	vtCRS	m_crs;
 	int	 m_iUnits1;
 	int	 m_iUnits2;
 	int	 m_iUnits3;

@@ -65,7 +65,7 @@ bool vtStructureLayer::GetExtent(DRECT &rect)
 
 	// expand by 10 meters (converted to appropriate units)
 	DPoint2 offset(10, 10);
-	if (m_proj.IsGeographic())
+	if (m_crs.IsGeographic())
 	{
 		DPoint2 center;
 		rect.GetCenter(center);
@@ -75,7 +75,7 @@ bool vtStructureLayer::GetExtent(DRECT &rect)
 	}
 	else
 	{
-		double fMetersPerUnit = GetMetersPerUnit(m_proj.GetUnits());
+		double fMetersPerUnit = GetMetersPerUnit(m_crs.GetUnits());
 		offset.x /= fMetersPerUnit;
 		offset.y /= fMetersPerUnit;
 	}
@@ -296,29 +296,29 @@ void vtStructureLayer::CleanFootprints(double epsilon, int &degenerate, int &ove
 	}
 }
 
-void vtStructureLayer::GetProjection(vtProjection &proj)
+void vtStructureLayer::GetCRS(vtCRS &crs)
 {
-	proj = m_proj;
+	crs = m_crs;
 }
 
-void vtStructureLayer::SetProjection(const vtProjection &proj)
+void vtStructureLayer::SetCRS(const vtCRS &crs)
 {
-	if (m_proj == proj)
+	if (m_crs == crs)
 		return;
 
-	m_proj = proj;
+	m_crs = crs;
 	SetModified(true);
 }
 
-bool vtStructureLayer::TransformCoords(vtProjection &proj)
+bool vtStructureLayer::TransformCoords(vtCRS &crs)
 {
-	if (proj == m_proj)
+	if (crs == m_crs)
 		return true;
 
 	// Create conversion object
-	vtProjection Source;
-	GetProjection(Source);
-	ScopedOCTransform trans(CreateCoordTransform(&Source, &proj));
+	vtCRS Source;
+	GetCRS(Source);
+	ScopedOCTransform trans(CreateCoordTransform(&Source, &crs));
 	if (!trans)
 		return false;		// inconvertible projections
 
@@ -351,7 +351,7 @@ bool vtStructureLayer::TransformCoords(vtProjection &proj)
 	}
 
 	// set the projection
-	m_proj = proj;
+	m_crs = crs;
 	SetModified(true);
 
 	return true;
@@ -999,7 +999,7 @@ void vtStructureLayer::SetEditedEdge(vtBuilding *bld, int lev, int edge)
 // Import methods
 
 bool vtStructureLayer::AddElementsFromSHP(const wxString &filename,
-										  const vtProjection &proj, DRECT rect)
+										  const vtCRS &crs, DRECT rect)
 {
 	ImportStructDlg dlg(NULL, -1, _("Import Structures"));
 
@@ -1013,14 +1013,13 @@ bool vtStructureLayer::AddElementsFromSHP(const wxString &filename,
 	if (!success)
 		return false;
 
-	m_proj = proj;	// Set projection
+	m_crs = crs;
 	return true;
 }
 
 void vtStructureLayer::AddElementsFromDLG(vtDLGFile *pDlg)
 {
-	// set projection
-	m_proj = pDlg->GetProjection();
+	m_crs = pDlg->GetCRS();
 
 /*	TODO: similar code to import from SDTS-DLG
 	NEEDED: an actual sample file containing building data in this format.
