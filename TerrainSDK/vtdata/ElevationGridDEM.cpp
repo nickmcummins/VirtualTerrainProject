@@ -249,7 +249,7 @@ bool vtElevationGrid::LoadFromDEM(const char *szFileName,
 		VTLOG(" (%lf, %lf)", corners[i].x, corners[i].y);
 	VTLOG("\n");
 
-	// Set up the projection and corners
+	// Set up the CRS and corners
 	bool bGeographic = (iCoordSystem == 0);
 	if (bGeographic)
 	{

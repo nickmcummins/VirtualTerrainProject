@@ -27,7 +27,7 @@ MyStatusBar::MyStatusBar(wxWindow *parent) : wxStatusBar(parent, -1)
 	static const int widths[Field_Max] =
 	{
 		-1,		// main message area
-		46,		// Geo or short projection identifier
+		46,		// Geo, or short CRS identifier
 		65,		// Zone
 		65,		// Datum
 		200,	// Units

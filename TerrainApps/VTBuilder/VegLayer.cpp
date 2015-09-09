@@ -211,12 +211,12 @@ void vtVegLayer::AddElementsFromLULC(vtLULCFile *pLULC)
 
 	SetVegType(VLT_Density);
 
-	//set projections
+	// Set CRS.
 	vtCRS crs_new;
 	crs_new.SetSimple(0, -1, EPSG_DATUM_WGS84);
 	SetCRS(crs_new);
 
-	// figure out the number of polygons in file
+	// Figure out the number of polygons in file.
 	uint size = 0;
 	for (uint sec = 0; sec < pLULC->NumSections(); sec++)
 	{
@@ -224,11 +224,11 @@ void vtVegLayer::AddElementsFromLULC(vtLULCFile *pLULC)
 		size = size + section->m_iNumPolys;
 	}
 
-	// Create density field
+	// Create density field.
 	m_field_density = m_pSet->AddField("Density", FT_Float);
 	m_pSet->SetNumEntities(size);
 
-	// get each poly from LULC file
+	// Get each poly from LULC file.
 	uint i, s, p, count = 0;
 	float density=0;
 	for (s = 0; s < pLULC->NumSections(); s++)
@@ -465,13 +465,13 @@ bool vtVegLayer::AddElementsFromSHP_Points(const wxString &filename,
 		}
 	}
 
-	// Set projection
+	// Set CRS.
 	SetCRS(crs);
 
-	// Initialize arrays
+	// Initialize arrays.
 	m_pSet->Reserve(nElem);
 
-	// Read Points from SHP and intepret fields
+	// Read Points from SHP and intepret fields.
 	SHPObject *psShape;
 	const char *str;
 	int biotype;

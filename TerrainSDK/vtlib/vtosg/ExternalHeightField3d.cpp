@@ -149,14 +149,18 @@ bool vtExternalHeightField3d::Initialize(const char *external_data)
 	Local.x() = 1;
 	Local.y() = 1;
 	m_pLayer->getLocator()->convertLocalToModel(Local, ModelTopRight);
-	// This OSG Model coordinate system can be either projected, geographic (lat/long), or geocentric (geo xyz).
+
+	// This OSG Model coordinate system can be either projected, geographic
+	// (lat/long), or geocentric (geo xyz).
 	// I do not handle geocentric at the moment(see above)
-	// So I treat projected and geographic as basically the same as VTP Earth coordinates but Y up
+	// So I treat projected and geographic as basically the same as VTP Earth
+	// coordinates but Y up
 	vtHeightField3d::Initialize(m_Projection.GetUnits(), DRECT(ModelBottomLeft.x(), ModelTopRight.y(), ModelTopRight.x(), ModelBottomLeft.y()), bb.zMin(), bb.zMax());
 
 	// Finished initalising the heightfield.
-	// Computer a matrix to take OSG model coordinates - Left Handed Z up origin the origin of the coordinate system
-	// into VTP world - Left Handed Y up origin always at the bottom left of the terrain extents.
+	// Computer a matrix to take OSG model coordinates - Left Handed Z up
+	// origin the origin of the coordinate system into VTP world - Left Handed
+	// Y up origin always at the bottom left of the terrain extents.
 	// So...
 	// Translate to origin
 	m_TransfromOSGModel2VTPWorld.set(osg::Matrix::translate(osg::Vec3(-ModelBottomLeft.x(), -ModelBottomLeft.y(), 0)));

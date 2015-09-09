@@ -269,7 +269,7 @@ vtAnimPath *LocationDlg::CreateAnimPath()
 {
 	vtAnimPath *anim = new vtAnimPath;
 
-	// Ensure that anim knows the projection
+	// Ensure that anim knows the CRS.
 	anim->SetCRS(m_pSaver->GetAtCRS(), m_pSaver->GetLocalCS());
 
 	return anim;

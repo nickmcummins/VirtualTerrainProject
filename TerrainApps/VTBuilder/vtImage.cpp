@@ -471,7 +471,7 @@ bool vtImage::ConvertCRS(vtImage *pOld, vtCRS &NewCRS,
 	ScopedOCTransform trans(CreateCoordTransform(pSource, pDest));
 	if (!trans)
 	{
-		// inconvertible projections
+		// Inconvertible coordinate systems.
 		return false;
 	}
 
@@ -492,7 +492,7 @@ bool vtImage::ConvertCRS(vtImage *pOld, vtCRS &NewCRS,
 		success = trans->Transform(1, &Corners[i].x, &Corners[i].y);
 		if (success == 0)
 		{
-			// inconvertible projections
+			// Inconvertible coordinate systems.
 			delete trans;
 			return false;
 		}
@@ -555,7 +555,7 @@ bool vtImage::ConvertCRS(vtImage *pOld, vtCRS &NewCRS,
 	ScopedOCTransform trans_back(CreateCoordTransform(pDest, pSource));
 	if (!trans_back)
 	{
-		// inconvertible projections
+		// Inconvertible coordinate systems.
 		// "Couldn't convert between coordinate systems.";
 		return false;
 	}
@@ -629,16 +629,14 @@ DPoint2 vtImage::GetSpacing(int bitmap) const
 }
 
 /**
- * Reprojects an image by converting just the extents to a new
- * projection.
+ * Reprojects an image by converting just the extents to a new CRS.
  *
- * This is much faster than creating a new grid and reprojecting every
- * heixel, but it only produces correct results when the difference
- * between the projections is only a horizontal shift.  For example, this
- * occurs when the only difference between the old and new projection
- * is choice of Datum.
+ * This is much faster than creating a new grid and reprojecting every heixel,
+ * but it only produces correct results when the difference between the CRSes
+ * is only a horizontal shift.  For example, this occurs when the only
+ * difference between the old and new CRS is choice of Datum.
  *
- * \param crs_new	The new projection to convert to.
+ * \param crs_new	The new CRS to convert to.
  *
  * \return True if successful.
  */
@@ -647,14 +645,14 @@ bool vtImage::ReprojectExtents(const vtCRS &crs_new)
 	// Create conversion object
 	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &crs_new));
 	if (!trans)
-		return false;	// inconvertible projections
+		return false;	// Inconvertible coordinate systems.
 
 	int success = 0;
 	success += trans->Transform(1, &m_Extents.left, &m_Extents.bottom);
 	success += trans->Transform(1, &m_Extents.right, &m_Extents.top);
 
 	if (success != 2)
-		return false;	// inconvertible projections
+		return false;	// Inconvertible coordinate systems.
 
 	m_crs = crs_new;
 	return true;
@@ -1033,7 +1031,7 @@ bool vtImage::ReadPPM(const char *fname, bool progress_callback(int))
 	}
 	else
 	{
-		// Set the projection (actually we don't know it)
+		// Set the CRS (actually we don't know it)
 		m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 		ext.left = 0;

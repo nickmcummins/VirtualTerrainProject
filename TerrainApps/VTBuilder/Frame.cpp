@@ -929,13 +929,13 @@ bool MainFrame::SaveProject(const wxString &strPathName) const
 	// Avoid trouble with '.' and ',' in Europe
 	ScopedLocale normal_numbers(LC_NUMERIC, "C");
 
-	// write project file
+	// Write project file.
 	vtString fname = (const char *) strPathName.mb_str(wxConvUTF8);
 	FILE *fp = vtFileOpen(fname, "wb");
 	if (!fp)
 		return false;
 
-	// write projection info
+	// Write CRS info.
 	char *wkt;
 	m_crs.exportToWkt(&wkt);
 	fprintf(fp, "Projection %s\n", wkt);
@@ -951,7 +951,7 @@ bool MainFrame::SaveProject(const wxString &strPathName) const
 		fprintf(fp, "BioTypes %s\n", (const char *) m_strBiotypesFilename);
 	}
 
-	// write list of layers
+	// Write list of layers.
 	int iLayers = m_Layers.size();
 	fprintf(fp, "layers: %d\n", iLayers);
 
@@ -976,17 +976,17 @@ bool MainFrame::SaveProject(const wxString &strPathName) const
 		fprintf(fp, "%s\n", (const char *) fname.mb_str(wxConvUTF8));
 	}
 
-	// write area tool
+	// Write area tool.
 	fprintf(fp, "area %lf %lf %lf %lf\n", m_area.left, m_area.top,
 		m_area.right, m_area.bottom);
 
-	// write view location
+	// Write view location.
 	double	scale;
 	DPoint2 offset;
 	m_pView->GetViewParams(scale, offset);
 	fprintf(fp, "view_params %lf %lf %lf\n", scale, offset.x, offset.y);
 
-	// done
+	// Done.
 	fclose(fp);
 
 	return true;

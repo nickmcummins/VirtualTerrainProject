@@ -675,13 +675,13 @@ bool vtDIB::WritePNG(const char *fname)
 }
 
 /**
- * Write a TIFF file.  If extents and projection are support, a GeoTIFF file
+ * Write a TIFF file.  If CRS and projection are provided, a GeoTIFF file
  * will be written.
  *
  * \param fname		The output filename.
  * \param area		The extents if the image.  Can be NULL if the image is
  *		not georeferenced.
- * \param proj		The CRS if the image.  Can be NULL if the image is
+ * \param crs		The CRS if the image.  Can be NULL if the image is
  *		not georeferenced.
  * \param progress_callback	If supplied, this will be called back with progress
  *		indication in the range of 1 to 100.
@@ -689,7 +689,7 @@ bool vtDIB::WritePNG(const char *fname)
  * \return True if successful.
  */
 bool vtDIB::WriteTIF(const char *fname, const DRECT *area,
-					 const vtCRS *proj, bool progress_callback(int))
+					 const vtCRS *crs, bool progress_callback(int))
 {
 	g_GDALWrapper.RequestGDALFormats();
 
@@ -723,10 +723,10 @@ bool vtDIB::WriteTIF(const char *fname, const DRECT *area,
 									area->top, 0, -spacing.y };
 		pDataset->SetGeoTransform(adfGeoTransform);
 	}
-	if (proj != NULL)
+	if (crs != NULL)
 	{
 		char *pszSRS_WKT = NULL;
-		proj->exportToWkt( &pszSRS_WKT );
+		crs->exportToWkt( &pszSRS_WKT );
 		pDataset->SetProjection(pszSRS_WKT);
 		CPLFree( pszSRS_WKT );
 	}

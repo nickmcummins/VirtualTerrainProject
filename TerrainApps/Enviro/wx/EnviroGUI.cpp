@@ -450,16 +450,16 @@ void vtJoystickEngine::Eval()
 
 vtAbstractLayer *CreateNewAbstractPointLayer(vtTerrain *pTerr, bool bAskStyle)
 {
-	// make a new abstract layer (points)
+	// Make a new abstract layer (points)
 	vtFeatureSetPoint2D *pSet = new vtFeatureSetPoint2D;
 	pSet->SetFilename("Untitled.shp");
 	pSet->AddField("Label", FT_String);
 	pSet->AddField("Url", FT_String);
 
-	// Inherit projection
+	// Inherit CRS.
 	pSet->SetCRS(pTerr->GetCRS());
 
-	// Ask style for the new point layer
+	// Ask style for the new point layer.
 	vtTagArray props;
 	props.SetValueBool("ObjectGeometry", false, true);
 	props.SetValueBool("Labels", true, true);
@@ -486,7 +486,7 @@ vtAbstractLayer *CreateNewAbstractPointLayer(vtTerrain *pTerr, bool bAskStyle)
 	ab_layer->SetFeatureSet(pSet);
 	ab_layer->AddProps(props);
 
-	// add the new layer to the terrain
+	// Add the new layer to the terrain.
 	pTerr->GetLayers().push_back(ab_layer);
 	pTerr->SetActiveLayer(ab_layer);
 

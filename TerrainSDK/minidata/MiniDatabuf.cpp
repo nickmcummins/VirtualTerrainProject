@@ -434,7 +434,7 @@ bool WriteTilesetHeader(const char *filename, int cols, int rows, int lod0size,
 		}
 	}
 
-	// create a transformation that will map from the current projection to Lat/Lon WGS84
+	// Create a transformation that will map from the current CRS to Lat/Lon WGS84.
 	vtCRS crs_llwgs84;
 	crs_llwgs84.SetWellKnownGeogCS("WGS84");
 	OCTransform *LLWGS84transform = CreateCoordTransform(&crs, &crs_llwgs84);

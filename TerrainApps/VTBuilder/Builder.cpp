@@ -1327,7 +1327,7 @@ void Builder::SetCRS(const vtCRS &crs)
 {
 	char type[7], value[4000];
 	crs.GetTextDescription(type, value);
-	VTLOG("Setting main projection to: %s, %s\n", type, value);
+	VTLOG("Setting main CRS to: %s, %s\n", type, value);
 
 	m_crs = crs;
 }
@@ -1632,7 +1632,7 @@ void Builder::GenerateVegetationPhase2(const char *vf_file, DRECT area,
 	vtBioType *bio;
 	vtPlantSpecies *ps;
 
-	// inherit projection from the main frame
+	// inherit CRS from the main frame
 	vtCRS crs;
 	GetCRS(crs);
 	pia.SetCRS(crs);
@@ -1817,11 +1817,11 @@ void Builder::ReadDataPath()
 }
 
 
-bool Builder::ConfirmValidCRS(vtCRS *pProj)
+bool Builder::ConfirmValidCRS(vtCRS *pCRS)
 {
-	if (!pProj->GetRoot())
+	if (!pCRS->GetRoot())
 	{
-		// No projection.
+		// No CRS at all.
 		int res;
 		if (g_Options.GetValueBool(TAG_USE_CURRENT_CRS))
 			res = wxNO;		// Don't ask user, just use current CRS
@@ -1837,10 +1837,10 @@ bool Builder::ConfirmValidCRS(vtCRS *pProj)
 
 			if (dlg.ShowModal() == wxID_CANCEL)
 				return false;
-			dlg.GetCRS(*pProj);
+			dlg.GetCRS(*pCRS);
 		}
 		else if (res == wxNO)
-			*pProj = m_crs;
+			*pCRS = m_crs;
 		else if (res == wxCANCEL)
 			return false;
 	}

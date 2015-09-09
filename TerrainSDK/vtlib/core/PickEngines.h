@@ -11,7 +11,7 @@
  Used to cast a ray from the camera to the ground, and make that point
  available to code which needs to know it.
  */
-class TerrainPicker : public vtLastMouse
+class TerrainPicker : public vtMouseStateEngine
 {
 public:
 	TerrainPicker();
@@ -40,7 +40,7 @@ class vtIcoGlobe;
  Used to cast a ray from the camera to the globe, and make that point
  available to code which needs to know it.
  */
-class GlobePicker : public vtLastMouse
+class GlobePicker : public vtMouseStateEngine
 {
 public:
 	GlobePicker();

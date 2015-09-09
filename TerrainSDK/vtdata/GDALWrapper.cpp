@@ -58,8 +58,8 @@ GDALWrapper::~GDALWrapper()
 	}
 
 	// Call OSRCleanup just in case, because any usage of OGR (e.g.
-	// projections) might have caused stuff to be loaded that's not unloaded
-	// unless OSRCleanup is called, which is only done in the GeoTIFF driver
+	// might have caused stuff to be loaded that's not unloaded unless
+	// OSRCleanup is called, which is only done in the GeoTIFF driver
 	// unregistering.  So this handles the situation where we've use OGR
 	// but not GDAL.
 	OSRCleanup();

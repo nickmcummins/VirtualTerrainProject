@@ -172,7 +172,7 @@ bool vtDLGFile::Read(const char *fname, bool progress_callback(int))
 			iDatum = EPSG_DATUM_OLD_HAWAIIAN;
 	}
 
-	// We now know enough to set the projection.
+	// We now know enough to set the CRS.
 	m_crs.SetSimple(true, iUTMZone, iDatum);
 
 	// record 15 - category name, attribute format code, number of nodes...

@@ -31,7 +31,7 @@
  *
  *  Mouse position is considered relative to the center of the window.
  */
-class vtFlyer : public vtLastMouse
+class vtFlyer : public vtMouseStateEngine
 {
 public:
 	vtFlyer(float fSpeed = 1.0f, bool bAllowRoll = false);
@@ -142,7 +142,7 @@ class vtTin3d;
  * This engine has the ability to do usefully constrained navigation over
  * a (generally sparse) TIN terrain.
  */
-class vtTinFlyer : public vtLastMouse
+class vtTinFlyer : public vtMouseStateEngine
 {
 public:
 	vtTinFlyer(float fSpeed);
@@ -284,7 +284,7 @@ protected:
 	- Middle button: Rotate.
 	- Middle button with shift key: Zoom.
  */
-class vtTrackball : public vtLastMouse
+class vtTrackball : public vtMouseStateEngine
 {
 public:
 	vtTrackball(float fRadius);

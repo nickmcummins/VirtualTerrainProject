@@ -1409,7 +1409,7 @@ bool vtStructureArray::WriteXML(const char* filename, bool bGZip) const
 	gfprintf(out, "\t</gml:boundedBy>\n");
 	gfprintf(out, "\n");
 
-	// Write projection
+	// Write CRS
 	char *wkt;
 	OGRErr err = m_crs.exportToWkt(&wkt);
 	if (err != OGRERR_NONE)

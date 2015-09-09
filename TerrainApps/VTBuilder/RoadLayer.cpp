@@ -177,7 +177,7 @@ bool vtRoadLayer::TransformCoords(vtCRS &crs_new)
 
 	ScopedOCTransform trans(CreateCoordTransform(&Source, &crs_new));
 	if (!trans)
-		return false;		// inconvertible projections
+		return false;		// inconvertible coordinate systems
 
 	LinkEdit *l;
 	NodeEdit *n;
@@ -190,7 +190,7 @@ bool vtRoadLayer::TransformCoords(vtCRS &crs_new)
 	for (n = GetFirstNode(); n; n=n->GetNext())
 		trans->Transform(1, &(n->Pos().x), &(n->Pos().y));
 
-	// set the vtRoadMap projection
+	// set the vtRoadMap CRS
 	m_crs = crs_new;
 	SetModified(true);
 
@@ -551,7 +551,7 @@ bool vtRoadLayer::SelectArea(const DRECT &box, bool nodemode, bool crossSelect)
 
 void vtRoadLayer::DoClean(double epsilon)
 {
-	// check projection
+	// Check CRS.
 	vtCRS crs;
 	GetCRS(crs);
 	bool bDegrees = (crs.IsGeographic() != 0);

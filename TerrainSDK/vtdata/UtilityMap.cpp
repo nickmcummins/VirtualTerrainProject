@@ -406,7 +406,7 @@ bool vtUtilityMap::TransformTo(vtCRS &crs)
 		trans->Transform(1, &pole->m_p.x, &pole->m_p.y);
 	}
 
-	// Adopt new projection
+	// Adopt new CRS
 	m_crs = crs;
 
 	return true;

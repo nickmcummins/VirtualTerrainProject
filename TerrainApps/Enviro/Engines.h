@@ -16,7 +16,7 @@ class TerrainPicker;
 
 ///////////////////////////////////////////////////
 
-class FlatFlyer : public vtLastMouse
+class FlatFlyer : public vtMouseStateEngine
 {
 public:
 	FlatFlyer();

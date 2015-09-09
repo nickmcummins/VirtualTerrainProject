@@ -44,7 +44,7 @@ void vtElevationGrid::SetupMembers()
  * \param area the coordinate extents of the grid (rectangular area)
  * \param size Number of columns and rows in the grid
  * \param bFloat data size: \c true to use floating-point, \c false for shorts.
- * \param proj the geographical projection to use.
+ * \param crs the coordinate system to use.
  *
  * The grid will initially have no data in it (all values are INVALID_ELEVATION).
  */
@@ -157,7 +157,7 @@ vtElevationGrid::~vtElevationGrid()
  * \param area the coordinate extents of the grid (rectangular area)
  * \param size Number of columns and rows in the grid.
  * \param bFloat data size: \c true to use floating-point, \c false for shorts.
- * \param proj the geographical projection to use.
+ * \param crs the coordinate system to use.
  * \param err If supplied, will be set to a description of any error that occurs.
  *
  * The grid will initially have no data in it (all values are INVALID_ELEVATION).
@@ -232,10 +232,10 @@ void vtElevationGrid::Invalidate()
 
 /**
  * Initializes an elevation grid by converting the contents of an another
- * grid to a new projection.
+ * grid to a new coordinate system.
  *
  * \param pOld		An existing elevation grid to convert from.
- * \param NewProj	The new projection to convert to.
+ * \param NewCRS	The new CRS to convert to.
  * \param bUpgradeToFloat	If true, the resulting grid will always use
  *		floating-point values.  Otherwise, it matches the input grid.
  * \param progress_callback If supplied, this function will be called back
@@ -255,7 +255,7 @@ bool vtElevationGrid::ConvertCRS(vtElevationGrid *pOld, const vtCRS &NewCRS,
 	ScopedOCTransform trans(CreateCoordTransform(pSource, pDest));
 	if (!trans)
 	{
-		// inconvertible projections
+		// inconvertible coordinate systems
 		SetError(err, vtElevError::CONVERT_CRS, "Couldn't convert between coordinate systems.");
 		return false;
 	}
@@ -269,7 +269,7 @@ bool vtElevationGrid::ConvertCRS(vtElevationGrid *pOld, const vtCRS &NewCRS,
 		success = trans->Transform(1, &point.x, &point.y);
 		if (success == 0)
 		{
-			// inconvertible projections
+			// inconvertible coordinate systems
 			delete trans;
 			SetError(err, vtElevError::CONVERT_CRS, "Couldn't convert between coordinate systems.");
 			return false;
@@ -354,7 +354,7 @@ bool vtElevationGrid::ConvertCRS(vtElevationGrid *pOld, const vtCRS &NewCRS,
 	ScopedOCTransform trans_back(CreateCoordTransform(pDest, pSource));
 	if (!trans_back)
 	{
-		// inconvertible projections
+		// inconvertible coordinate systems
 		SetError(err, vtElevError::CONVERT_CRS, "Couldn't convert between coordinate systems.");
 		return false;
 	}
@@ -382,15 +382,15 @@ bool vtElevationGrid::ConvertCRS(vtElevationGrid *pOld, const vtCRS &NewCRS,
 
 /**
  * Reprojects an elevation grid by converting just the extents to a new
- * projection.
+ * coordinate system.
  *
- * This is much faster than creating a new grid and reprojecting every
- * heixel, but it only produces correct results when the difference
- * between the projections is only a horizontal shift.  For example, this
- * occurs when the only difference between the old and new projection
+ * This is much faster than creating a new grid and reprojecting every heixel,
+ * but it only produces correct results when the difference between the
+ * coordinate systems is only a horizontal shift.  For example, this
+ * occurs when the only difference between the old and new CRS
  * is choice of Datum.
  *
- * \param crs_new	The new projection to convert to.
+ * \param crs_new	The new CRS to convert to.
  *
  * \return True if successful.
  */
@@ -404,7 +404,7 @@ bool vtElevationGrid::ReprojectExtents(const vtCRS &crs_new)
 	ScopedOCTransform trans(CreateCoordTransform(pSource, pDest));
 	if (!trans)
 	{
-		// inconvertible projections
+		// inconvertible coordinate systems
 		return false;
 	}
 	for (int i = 0; i < 4; i++)
@@ -413,7 +413,7 @@ bool vtElevationGrid::ReprojectExtents(const vtCRS &crs_new)
 		int success = trans->Transform(1, &point.x, &point.y);
 		if (success == 0)
 		{
-			// inconvertible projections
+			// inconvertible coordinate systems
 			delete trans;
 			return false;
 		}

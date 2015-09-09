@@ -848,7 +848,7 @@ vtStructureLayer *vtTerrain::NewStructureLayer()
 {
 	vtStructureLayer *slay = new vtStructureLayer;
 
-	// these structures will use the heightfield and projection of this terrain
+	// These structures will use the heightfield and CRS of this terrain
 	slay->SetTerrain(this);
 	slay->m_crs = m_crs;
 
@@ -1727,7 +1727,7 @@ bool vtTerrain::CreateStep2()
 		}
 		VTLOG("\tGrid load succeeded.\n");
 
-		// set global projection based on this terrain
+		// Set global CRS based on this terrain.
 		m_crs = m_pElevGrid->GetCRS();
 
 		const IPoint2 &gridsize = m_pElevGrid->GetDimensions();
@@ -2108,10 +2108,11 @@ void vtTerrain::CreateStep12()
 
 		VTLOG("Reading animpath: %s.\n", (const char *) path);
 		vtAnimPath *anim = new vtAnimPath;
-		// Ensure that anim knows the projection
+
+		// Ensure that anim knows the CRS
 		if (!anim->SetCRS(GetCRS(), GetLocalCS()))
 		{
-			// no projection, no functionality
+			// no CRS, no functionality
 			delete anim;
 			continue;
 		}

@@ -57,7 +57,7 @@ public:
 	bool WriteJPEG(const char *fname, int quality, bool progress_callback(int) = NULL);
 	bool WritePNG(const char *fname);
 	bool WriteTIF(const char *fname, const DRECT *area = NULL,
-		const vtCRS *proj = NULL, bool progress_callback(int) = NULL);
+		const vtCRS *crs = NULL, bool progress_callback(int) = NULL);
 
 	uint GetPixel24(int x, int y) const;
 	void GetPixel24(int x, int y, RGBi &rgb) const;

@@ -26,7 +26,7 @@ void FlatFlyer::OnMouse(vtMouseEvent &event)
 {
 	int previous = m_buttons;
 
-	vtLastMouse::OnMouse(event);
+	vtMouseStateEngine::OnMouse(event);
 
 	//  Left button down
 	bool bLeft = (m_buttons & VT_LEFT) != 0;
@@ -108,7 +108,7 @@ void GrabFlyer::OnMouse(vtMouseEvent &event)
 
 	int previous = m_buttons;
 
-	vtLastMouse::OnMouse(event);
+	vtMouseStateEngine::OnMouse(event);
 
 	//  Left button down
 	bool bLeft = (m_buttons & VT_LEFT) != 0;

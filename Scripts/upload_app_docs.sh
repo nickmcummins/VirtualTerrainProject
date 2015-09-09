@@ -2,7 +2,7 @@
 
 TERRAINAPPS=/cygdrive/c/VTP/TerrainApps
 
-lftp -c "open sftp://vterrain@vterrain.org; \
+lftp -c "open sftp://vterrain@cyclone.he.net; \
 		 cd public_html/Doc; \
 		 lcd $TERRAINAPPS; \
 		 mirror -R --verbose --continue --no-perms --exclude .svn BExtractor/Docs BExtractor; \

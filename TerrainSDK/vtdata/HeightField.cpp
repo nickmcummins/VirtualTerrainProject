@@ -61,7 +61,7 @@ int vtHeightField3d::PointIsAboveTerrain(const FPoint3 &p) const
 
 
 /**
- * Converts a earth coordinate (project or geographic) to a world coordinate
+ * Converts a earth coordinate (projected or geographic) to a world coordinate
  * on the surface of the heightfield.
  *
  * \return true if successful, false if there was no elevation at that point.

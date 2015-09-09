@@ -17,7 +17,7 @@
 //
 // Terrain picking ability
 //
-TerrainPicker::TerrainPicker() : vtLastMouse()
+TerrainPicker::TerrainPicker() : vtMouseStateEngine()
 {
 	m_pHeightField = NULL;
 	m_bOnTerrain = false;
@@ -25,7 +25,7 @@ TerrainPicker::TerrainPicker() : vtLastMouse()
 
 void TerrainPicker::OnMouse(vtMouseEvent &event)
 {
-	vtLastMouse::OnMouse(event);
+	vtMouseStateEngine::OnMouse(event);
 
 	FindGroundPoint();
 }
@@ -81,7 +81,7 @@ bool TerrainPicker::GetCurrentEarthPos(DPoint3 &p)
 //
 // Globe picking ability
 //
-GlobePicker::GlobePicker() : vtLastMouse()
+GlobePicker::GlobePicker() : vtMouseStateEngine()
 {
 	m_fRadius = 1.0;
 	m_bOnTerrain = false;

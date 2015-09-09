@@ -128,7 +128,7 @@ void RoadMapEdit::AddElementsFromDLG(vtDLGFile *pDlg)
 	SurfaceType stype;
 	DPoint2 buffer[BUFFER_SIZE];
 
-	// set projection
+	// set CRS
 	m_crs = pDlg->GetCRS();
 
 	// expand extents to include the new DLG
@@ -457,7 +457,7 @@ void RoadMapEdit::AddElementsFromSHP(const wxString &filename, const vtCRS &crs,
 		}
 	}
 
-	// set projection
+	// set CRS
 	m_crs = crs;
 
 	NodeEdit *pN1, *pN2;

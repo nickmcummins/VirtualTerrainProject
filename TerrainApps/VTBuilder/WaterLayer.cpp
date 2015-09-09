@@ -47,15 +47,15 @@ bool vtWaterLayer::TransformCoords(vtCRS &crs_new)
 	// Create conversion object
 	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &crs_new));
 	if (!trans)
-		return false;		// inconvertible projections
+		return false;		// Inconvertible coordinate systems.
 
-	int i, c, size, num_lines = (int)m_Lines.size();
+	const size_t num_lines = m_Lines.size();
 
 	DPoint2 p;
-	for (i = 0; i < num_lines; i++)
+	for (size_t i = 0; i < num_lines; i++)
 	{
-		size = m_Lines[i].GetSize();
-		for (c = 0; c < size; c++)
+		const int size = m_Lines[i].GetSize();
+		for (int c = 0; c < size; c++)
 		{
 			p = m_Lines[i].GetAt(c);
 			trans->Transform(1, &p.x, &p.y);
@@ -161,7 +161,7 @@ void vtWaterLayer::PaintDibWithWater(vtDIB *dib)
 
 void vtWaterLayer::AddElementsFromDLG(vtDLGFile *pDlg)
 {
-	// set projection
+	// Set CRS.
 	m_crs = pDlg->GetCRS();
 
 	m_Lines.resize(pDlg->m_iLines);
@@ -225,7 +225,7 @@ void vtWaterLayer::AddElementsFromSHP(const wxString &filename,
 	if (nShapeType != SHPT_ARC && nShapeType != SHPT_POLYGON)
 		return;
 
-	m_crs = crs;	// Set projection
+	m_crs = crs;	// Set CRS.
 
 	// Initialize arrays
 	m_Lines.resize(nElem);
@@ -286,7 +286,7 @@ void vtWaterLayer::AddElementsFromOGR(GDALDataset *pDatasource,
 		// Lines (streams, shoreline)
 		if (!strcmp(layer_name, "LE01"))
 		{
-			// Get the projection (SpatialReference) from this layer
+			// Get the CRS (SpatialReference) from this layer
 			OGRSpatialReference *pSpatialRef = pLayer->GetSpatialRef();
 			if (pSpatialRef)
 				m_crs.SetSpatialReference(pSpatialRef);

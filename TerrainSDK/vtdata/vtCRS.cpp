@@ -53,7 +53,7 @@ vtCRS::~vtCRS()
  */
 vtCRS &vtCRS::operator=(const vtCRS &ref)
 {
-	// copy projection
+	// copy CRS
 	if (ref.GetRoot() != NULL)
 	{
 		const OGRSpatialReference &ref_as_osr = ref;
@@ -209,8 +209,8 @@ int vtCRS::GetDatum() const
 }
 
 /**
- * Return the kind of horizontal units used by the projection.  This is
- * also called "linear units."
+ * Return the kind of horizontal units used by the CRS.  This is also called
+ * "linear units."
  *
  * \return
 	- LU_DEGREES - Arc Degrees
@@ -247,7 +247,7 @@ LinearUnits vtCRS::GetUnits() const
 
 
 /**
- * Set the projection by copying from a OGRSpatialReference.
+ * Set the CRS by copying from a OGRSpatialReference.
  */
 void vtCRS::SetSpatialReference(OGRSpatialReference *pRef)
 {
@@ -255,7 +255,7 @@ void vtCRS::SetSpatialReference(OGRSpatialReference *pRef)
 }
 
 /**
- * Return a string describing the type of projection.
+ * Return a string describing the type of coordinate system.
  *
  * \par Example:
  *	"Geographic", "Transverse_Mercator", "Albers_Conic_Equal_Area"
@@ -273,7 +273,7 @@ const char *vtCRS::GetName() const
 }
 
 /**
- * Return a very short string describing the type of projection.
+ * Return a very short string describing the type of coordinate system.
  * \par
  * Example values are "Geo", "UTM", "TM", "Albers", "LCC", etc.
  * or "Unknown" if it is unknown.
@@ -325,8 +325,8 @@ const char *vtCRS::GetNameShort() const
 
 
 /**
- * Set the projection to a fresh, new geographical coordinate system
- * based on the indicated Datum.
+ * Set the CRS to a fresh, new geographical coordinate system based on the
+ * indicated Datum.
  */
 OGRErr vtCRS::SetGeogCSFromDatum(int iDatum)
 {
@@ -404,7 +404,7 @@ OGRErr vtCRS::SetGeogCSFromDatum(int iDatum)
 
 
 /**
- * Convenient way to set a simple projection.
+ * Convenient way to set a simple coordinate system.
  *
  * \param bUTM true for UTM, false for Geographic.
  * \param iUTMZone If UTM, this is the zone: 1 through 60 in the northern
@@ -425,9 +425,9 @@ bool vtCRS::SetSimple(bool bUTM, int iUTMZone, int iDatum)
 }
 
 /**
- * Get the projection as a text description.  If the projection is Geographic
+ * Get the coordinate system as a text description.  If the CRS is Geographic
  * or UTM, then a "simple" type string will be returned.  For all other
- * projection types, a WKT string is returned.
+ * CRS types, a WKT string is returned.
  *
  * \param type A string buffer to contain the type of description.
  * This buffer should be at least 7 characters long to contain either the
@@ -469,7 +469,7 @@ bool vtCRS::GetTextDescription(char *type, char *value) const
 }
 
 /**
- * Set the projection using a text description.
+ * Set the coordinate system using a text description.
  *
  * \param type The type of description, either "simple" for short simple
  * string, or "wkt" for a full-length WKT (Well-Known Text) description.
@@ -482,7 +482,7 @@ bool vtCRS::GetTextDescription(char *type, char *value) const
  *
  * \par Example:
 	\code
-	proj.SetTextDescription("simple", "utm, datum WGS_84, zone 11");
+	crs.SetTextDescription("simple", "utm, datum WGS_84, zone 11");
 	\endcode
  */
 bool vtCRS::SetTextDescription(const char *type, const char *value)
@@ -544,7 +544,7 @@ FILE *OpenCorrespondingPrjFile(vtString &filename, const char *mode)
 }
 
 /**
- * Read the projection from a .prj file.
+ * Read the CRS from a .prj file.
  *
  * If the filename does not have the file extension ".prj", this
  * method will look for a file which has the same name with a
@@ -584,7 +584,7 @@ bool vtCRS::ReadProjFile(const char *filename)
 
 
 /**
- * Write the projection to a .prj file.
+ * Write the CRS to a .prj file.
  *
  * \return true if successful.
  */
@@ -666,7 +666,7 @@ void vtCRS::LogDescription() const
 }
 
 /**
- * Try to determine the EPSG code that corresponds to the current projection.
+ * Try to determine the EPSG code that corresponds to the current CRS.
  * This important capability is mysteriously absent from the underlying
  * libraries (OGR, PROJ.4) so it is implemented here.
  *
@@ -704,8 +704,8 @@ int vtCRS::GuessEPSGCode() const
 
 
 /**
- * Given a non-geographic projection, produce a geographic projection which
- * has the same datum/ellipsoid values.
+ * Given a non-geographic CRS, produce a geographic CRS which has the same
+ * datum/ellipsoid values.
  */
 void CreateSimilarGeographicCRS(const vtCRS &source,
 	vtCRS &geo)
@@ -949,7 +949,7 @@ double EstimateDegreesToMeters(double latitude)
 }
 
 /**
- * Create a conversion between projections, making the assumption that
+ * Create a conversion between coordinate systems, making the assumption that
  * the Datum of the target is the same as the Datum of the source.
  */
 OCTransform *CreateTransformIgnoringDatum(const vtCRS *pSource, vtCRS *pTarget)
@@ -980,12 +980,12 @@ OCTransform *CreateTransformIgnoringDatum(const vtCRS *pSource, vtCRS *pTarget)
 }
 
 /**
- * Support for converting to and from the Dymaxion projection is
- * implemented by overriding _and_ containing an OCT object.
+ * Support for converting to and from the Dymaxion projection is implemented
+ * by overriding _and_ containing an OCT object.
  *
  * The contained OCT transforms to/from WGS84 Geographic coords.
- * The subclassing is used to implement the Transform() method
- * which does the additional Dymaxion conversion.
+ * The subclassing is used to implement the Transform() method which does
+ * the additional Dymaxion conversion.
  */
 class DymaxOCT : public OCTransform
 {
@@ -1053,8 +1053,7 @@ int DymaxOCT::TransformEx(int nCount, double *x, double *y, double *z, int *pabS
 }
 
 // display debugging information to the log
-void LogConvertingProjections(const vtCRS *pSource,
-							  const vtCRS *pTarget)
+void LogConvertingCRSs(const vtCRS *pSource, const vtCRS *pTarget)
 {
 #if 0
 	char *wkt1, *wkt2;
@@ -1065,13 +1064,13 @@ void LogConvertingProjections(const vtCRS *pSource,
 	OGRFree(wkt1);
 	OGRFree(wkt2);
 #else
-	char *proj1, *proj2;
-	OGRErr err = pSource->exportToProj4(&proj1);
-	err = pTarget->exportToProj4(&proj2);
-	VTLOG(" Converting from: %s\n", proj1);
-	VTLOG("   Converting to: %s\n", proj2);
-	OGRFree(proj1);
-	OGRFree(proj2);
+	char *crs1, *crs2;
+	OGRErr err = pSource->exportToProj4(&crs1);
+	err = pTarget->exportToProj4(&crs2);
+	VTLOG(" Converting from: %s\n", crs1);
+	VTLOG("   Converting to: %s\n", crs2);
+	OGRFree(crs1);
+	OGRFree(crs2);
 #endif
 }
 
@@ -1082,15 +1081,15 @@ void LogConvertingProjections(const vtCRS *pSource,
  * has a handy logging option, and can deal with any additional projections
  * that vtCRS adds to OGRSpatialReference.
  */
-OCTransform *CreateCoordTransform(const vtCRS *pSource,
-						  const vtCRS *pTarget, bool bLog)
+OCTransform *CreateCoordTransform(const vtCRS *pSource, const vtCRS *pTarget,
+	bool bLog)
 {
 	// It appears that even lightweight tasks like setting up a CRS Transform
 	//  somehow runs into trouble with the Locale ./, issue.
 	ScopedLocale normal_numbers(LC_NUMERIC, "C");
 
 	if (bLog)
-		LogConvertingProjections(pSource, pTarget);
+		LogConvertingCRSs(pSource, pTarget);
 
 	OCTransform *result = OGRCreateCoordinateTransformation((OGRSpatialReference *)pSource,
 		(OGRSpatialReference *)pTarget);
@@ -1101,7 +1100,7 @@ OCTransform *CreateCoordTransform(const vtCRS *pSource,
 	{
 		// Even if the caller didn't ask for logging, log failures.
 		VTLOG("Could not convert:\n");
-		LogConvertingProjections(pSource, pTarget);
+		LogConvertingCRSs(pSource, pTarget);
 	}
 
 	if (!pSource->IsDymaxion() && pTarget->IsDymaxion())

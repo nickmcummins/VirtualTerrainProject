@@ -1452,27 +1452,26 @@ void MainFrame::OnUpdateAreaSampleImage(wxUpdateUIEvent& event)
 
 void MainFrame::OnLayerConvertCRS(wxCommandEvent &event)
 {
-	// ask for what projection to convert to
-	ProjectionDlg dlg(NULL, 200, _("Convert to what projection?"));
+	// Ask for what CRS to convert to
+	ProjectionDlg dlg(NULL, 200, _("Convert to what coordinate system?"));
 	dlg.SetCRS(m_crs);
 
-	// might switch to utm, help provide a good guess for UTM zone
-	DPoint2 pos = EstimateGeoDataCenter();
-	dlg.SetGeoRefPoint(pos);
+	// They might switch to UTM, so help provide a good guess for UTM zone.
+	dlg.SetGeoRefPoint(EstimateGeoDataCenter());
 
 	if (dlg.ShowModal() == wxID_CANCEL)
 		return;
 	vtCRS crs;
 	dlg.GetCRS(crs);
 
-	// count through the layer array, converting
+	// Count through the layer array, converting.
 	int layers = m_Layers.size();
 	int succeeded = 0;
 	for (int i = 0; i < layers; i++)
 	{
 		vtLayer *lp = m_Layers[i];
 
-		OpenProgressDialog(_("Reprojecting"), _T(""), false, this);
+		OpenProgressDialog(_("Converting"), _T(""), false, this);
 		bool success = lp->TransformCoords(crs);
 		CloseProgressDialog();
 
@@ -1498,22 +1497,21 @@ void MainFrame::OnLayerConvertCRS(wxCommandEvent &event)
 
 void MainFrame::OnLayerSetCRS(wxCommandEvent &event)
 {
-	// Allow the user to directly specify the projection for all loaded
-	// layers (override it, without reprojecting the layer's data)
-	// ask for what projection to convert to
-	ProjectionDlg dlg(NULL, -1, _("Set to what projection?"));
+	// Allow the user to directly specify the CRS for all loaded layers
+	// (override it, without reprojecting the layer's data)
+	// Ask for what projection to set.
+	ProjectionDlg dlg(NULL, -1, _("Set to what coordinate system?"));
 	dlg.SetCRS(m_crs);
 
-	// might switch to utm, help provide a good guess for UTM zone
-	DPoint2 pos = EstimateGeoDataCenter();
-	dlg.SetGeoRefPoint(pos);
+	// They might switch to UTM, so help provide a good guess for UTM zone.
+	dlg.SetGeoRefPoint(EstimateGeoDataCenter());
 
 	if (dlg.ShowModal() == wxID_CANCEL)
 		return;
 	vtCRS crs;
 	dlg.GetCRS(crs);
 
-	// count through the layer array, converting
+	// Count through the layer array, setting.
 	int layers = m_Layers.size();
 	for (int i = 0; i < layers; i++)
 		m_Layers[i]->SetCRS(crs);
@@ -1535,7 +1533,7 @@ void MainFrame::OnLayerCombine(wxCommandEvent &event)
 
 	int layers_merged = 0;
 
-	// count down through the layer array, flattening
+	// Count down through the layer array, flattening.
 	int layers = m_Layers.size();
 	for (int i = layers-1; i >= 0; i--)
 	{

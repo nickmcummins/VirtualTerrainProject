@@ -16,7 +16,7 @@
 //
 // vtFlyer: basic class, moves target based on mouse position
 //
-vtFlyer::vtFlyer(float fSpeed, bool bAllowRoll) : vtLastMouse()
+vtFlyer::vtFlyer(float fSpeed, bool bAllowRoll) : vtMouseStateEngine()
 {
 	m_fSpeed = fSpeed;
 	m_bAlwaysMove = false;
@@ -54,7 +54,7 @@ void vtFlyer::OnMouse(vtMouseEvent &event)
 		if (m_bDOF[DOF_Z])
 			pTarget->TranslateLocal(FPoint3(0.0f, 0.0f, trans));
 	}
-	vtLastMouse::OnMouse(event);	// Pass up to parent
+	vtMouseStateEngine::OnMouse(event);	// Pass up to parent
 }
 
 void vtFlyer::Eval()
@@ -346,7 +346,7 @@ void vtPanoFlyer::Eval()
 // vtTinFlyer
 //
 
-vtTinFlyer::vtTinFlyer(float fSpeed) : vtLastMouse()
+vtTinFlyer::vtTinFlyer(float fSpeed) : vtMouseStateEngine()
 {
 	m_pTin = NULL;
 	m_fSpeed = fSpeed;
@@ -466,7 +466,7 @@ void VFlyer::OnMouse(vtMouseEvent &event)
 		if (m_bDOF[DOF_Z])
 			m_Velocity.z += trans;
 	}
-	vtLastMouse::OnMouse(event);	// Pass up to parent
+	vtMouseStateEngine::OnMouse(event);	// Pass up to parent
 }
 
 void VFlyer::Eval()
@@ -937,7 +937,7 @@ void vtTrackball::_ApplyLimits()
 
 void vtTrackball::OnMouse(vtMouseEvent &event)
 {
-	vtLastMouse::OnMouse(event);
+	vtMouseStateEngine::OnMouse(event);
 
 	if (!m_bRotate && _IsRotate())
 	{

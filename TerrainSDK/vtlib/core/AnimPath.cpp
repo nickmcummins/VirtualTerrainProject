@@ -70,17 +70,17 @@ bool vtAnimPath::SetCRS(const vtCRS &crs, const LocalCS &conv)
 	m_crs = crs;
 	m_conv = conv;
 
-	// convert from projected to global CS
-	vtCRS global_proj;
-	OGRErr err = global_proj.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
+	// Prepare to convert from local to global CRS
+	vtCRS global_crs;
+	OGRErr err = global_crs.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
 	if (err != OGRERR_NONE)
 		return false;
 
 	delete m_pConvertToWGS;
 	delete m_pConvertFromWGS;
 
-	m_pConvertToWGS = CreateCoordTransform(&m_crs, &global_proj, true);
-	m_pConvertFromWGS = CreateCoordTransform(&global_proj, &m_crs, true);
+	m_pConvertToWGS = CreateCoordTransform(&m_crs, &global_crs, true);
+	m_pConvertFromWGS = CreateCoordTransform(&global_crs, &m_crs, true);
 
 	return true;
 }

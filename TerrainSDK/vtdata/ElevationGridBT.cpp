@@ -140,10 +140,10 @@ bool vtElevationGrid::LoadBTHeader(const char *szFileName, vtElevError *err)
 
 	VTLOG(", float %d, CRS external %d", m_bFloatMode, external);
 
-	// Set up projection
+	// Set up CRS.
 	if (external == 1)
 	{
-		// Read external projection (.prj) file
+		// Read external projection (.prj) file.
 		if (!m_crs.ReadProjFile(szFileName))
 		{
 			SetError(err, vtElevError::READ_CRS, "Couldn't read CRS from file '%s'", szFileName);

@@ -263,7 +263,7 @@ public:
 	void SetEavesFelkel(float fLength);
 	void CopyStyleFrom(const vtBuilding * const pSource, bool bDoHeight);
 
-	void SetCRS(vtCRS *proj) { m_pCRS = proj; }
+	void SetCRS(vtCRS *crs) { m_pCRS = crs; }
 
 protected:
 	// information about each story

@@ -972,10 +972,10 @@ void Enviro::FlyInStage1()
 		DPoint3 earth_geo(m_FlyInCenter.x, m_FlyInCenter.y,
 			m_fTransitionHeight);
 
-		const vtCRS &tproj = m_pTargetTerrain->GetCRS();
-		vtCRS gproj;
-		CreateSimilarGeographicCRS(tproj, gproj);
-		ScopedOCTransform trans(CreateCoordTransform(&gproj, &tproj));
+		const vtCRS &tcrs = m_pTargetTerrain->GetCRS();
+		vtCRS gcrs;
+		CreateSimilarGeographicCRS(tcrs, gcrs);
+		ScopedOCTransform trans(CreateCoordTransform(&gcrs, &tcrs));
 		DPoint3 earth_local = earth_geo;
 		trans->Transform(1, &earth_local.x, &earth_local.y);
 

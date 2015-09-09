@@ -2,7 +2,7 @@
 
 TERRAINSDK=/cygdrive/c/VTP/TerrainSDK
 
-lftp -c "open sftp://vterrain@vterrain.org; \
+lftp -c "open sftp://vterrain@cyclone.he.net; \
 		 cd public_html/Doc; \
 		 lcd $TERRAINSDK/Doc; \
 		 mirror -R --verbose --continue --no-perms vtdata vtdata; \

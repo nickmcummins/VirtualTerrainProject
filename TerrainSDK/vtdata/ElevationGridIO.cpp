@@ -1014,7 +1014,7 @@ bool vtElevationGrid::LoadFromDSAA(const char* szFileName, bool progress_callbac
 	if (fscanf(fp, "%lf%lf\n", &ylo, &yhi) != 2) return false;
 	if (fscanf(fp, "%lf%lf\n", &zlo, &zhi) != 2) return false;
 
-	// Set the projection (actually we don't know it)
+	// Set the CRS (actually we don't know it)
 	m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 	// set the corresponding vtElevationGrid info
@@ -1157,8 +1157,8 @@ bool vtElevationGrid::LoadFromGRD(const char *szFileName,
 		fclose(fp);
 		return false;
 	}
-	// Set the projection.  GRD doesn't tell us projection, so we simply
-	//  default to UTM zone 1.
+	// Set the CRS.  GRD doesn't tell us projection, so we simply default
+	//  to UTM zone 1, so that we have something meters-based.
 	m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 	// set the corresponding vtElevationGrid info
@@ -1366,7 +1366,7 @@ bool vtElevationGrid::LoadFromPGM(const char *szFileName, bool progress_callback
 	}
 	else
 	{
-		// Set the projection (actually we don't know it)
+		// Set the CRS (actually we don't know it)
 		m_crs.SetSimple(true, 1, EPSG_DATUM_WGS84);
 
 		ext.left = 0;
@@ -1646,13 +1646,13 @@ bool vtElevationGrid::LoadWithGDAL(const char *szFileName,
 	m_iSize.x = poDataset->GetRasterXSize();
 	m_iSize.y = poDataset->GetRasterYSize();
 
-	// Get the projection information
+	// Get the projection information.
 	const char *str1 = poDataset->GetProjectionRef();
 	char *str2 = (char *) str1;
 	OGRErr ogr_err = m_crs.importFromWkt(&str2);
 	if (ogr_err != OGRERR_NONE)
 	{
-		// No projection info; just assume that it's geographic
+		// No projection info.
 		m_crs.Clear();
 	}
 
@@ -1987,8 +1987,7 @@ bool vtElevationGrid::LoadFromNTF5(const char *szFileName,
 /**
  * Loads from a RAW file (a naked array of elevation values).
  * The file will not contain any information about at all about data size,
- * data type, or projection, so this information must be passed in as
- * arguments.
+ * data type, or CRS, so this information must be passed in as arguments.
  *
  * \param szFileName	The file name to read from.
  * \param width			The width of the expected array.
@@ -2007,8 +2006,8 @@ bool vtElevationGrid::LoadFromNTF5(const char *szFileName,
  * \returns \c true if the file was successfully opened and read.
  */
 bool vtElevationGrid::LoadFromRAW(const char *szFileName, int width, int height,
-								int bytes_per_element, float vertical_units,
-								bool bBigEndian, bool progress_callback(int))
+								  int bytes_per_element, float vertical_units,
+								  bool bBigEndian, bool progress_callback(int))
 {
 	// Free buffers to prepare to receive new data
 	FreeData();
@@ -2169,7 +2168,7 @@ bool vtElevationGrid::LoadFromMicroDEM(const char *szFileName, bool progress_cal
 	// Read data
 	fseek(fp, offset_to_data, SEEK_SET);
 
-	// Set the projection
+	// Set the CRS
 	switch (digitize_datum)
 	{
 	case 0: //WGS72

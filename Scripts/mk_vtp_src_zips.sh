@@ -3,7 +3,7 @@
 if [ $# -lt 1 ] ; then
   echo "Usage: mk_vtp_src_zips.sh date"
   echo
-  echo "Example for October 29 2009: mk_vtp_src_zips.sh 091029"
+  echo "Example for October 29 2015: mk_vtp_src_zips.sh 151029"
   exit
 fi
 

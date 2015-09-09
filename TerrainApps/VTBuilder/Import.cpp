@@ -888,10 +888,10 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 			return NULL;
 	}
 
-	// create the new layer
+	// Create the new layer
 	vtLayerPtr pLayer = vtLayer::CreateNewLayer(ltype);
 
-	// Does SHP already have a projection?
+	// Does SHP already have a CRS?
 	vtCRS crs;
 	if (crs.ReadProjFile(strFileName.mb_str(wxConvUTF8)))
 	{
@@ -899,8 +899,8 @@ vtLayerPtr Builder::ImportFromSHP(const wxString &strFileName, LayerType ltype)
 	}
 	else
 	{
-		// ask user for a projection
-		ProjectionDlg dlg(NULL, -1, _("Please indicate projection"));
+		// Ask user for a CRS
+		ProjectionDlg dlg(NULL, -1, _("Please indicate coordinate system"));
 		dlg.SetCRS(m_crs);
 
 		if (dlg.ShowModal() == wxID_CANCEL)
@@ -1670,8 +1670,8 @@ vtLayerPtr Builder::ImportVectorsWithOGR(const wxString &strFileName, LayerType 
 		pSL->GetCRS(crs);
 		if (OGRERR_NONE != crs.Validate())
 		{
-			// Get a projection
-			ProjectionDlg dlg(g_bld->m_pParentWindow, -1, _("Please indicate projection"));
+			// Get a CRS
+			ProjectionDlg dlg(g_bld->m_pParentWindow, -1, _("Please indicate coodinate system"));
 			dlg.SetCRS(m_crs);
 
 			if (dlg.ShowModal() == wxID_CANCEL)
@@ -1767,9 +1767,9 @@ int Builder::ImportDataFromTIGER(const wxString &strDirName)
 		if (pSpatialRef)
 		{
 			vtCRS crs;
-			proj.SetSpatialReference(pSpatialRef);
-			pWL->SetCRS(proj);
-			pRL->SetCRS(proj);
+			crs.SetSpatialReference(pSpatialRef);
+			pWL->SetCRS(crs);
+			pRL->SetCRS(crs);
 		}
 
 		// Progress Dialog
@@ -2463,7 +2463,7 @@ bool Builder::ImportDataFromDXF(const char *filename)
 		pRL->SetFeatureSet(fs_points);
 		pRL->SetLayerFilename(_T("points.shp"));
 		pRL->SetModified(true);
-		// Assume existing projection
+		// Assume existing CRS
 		pRL->SetCRS(m_crs);
 		if (!AddLayerWithCheck(pRL, true))
 			delete pRL;
@@ -2477,7 +2477,7 @@ bool Builder::ImportDataFromDXF(const char *filename)
 		pRL->SetFeatureSet(fs_polylines);
 		pRL->SetLayerFilename(_T("polylines.shp"));
 		pRL->SetModified(true);
-		// Assume existing projection
+		// Assume existing CRS
 		pRL->SetCRS(m_crs);
 		if (!AddLayerWithCheck(pRL, true))
 			delete pRL;

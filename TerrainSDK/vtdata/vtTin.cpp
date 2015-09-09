@@ -133,7 +133,7 @@ bool vtTin::_ReadTin(FILE *fp, bool progress_callback(int))
 
 bool vtTin::_ReadTinHeader(FILE *fp)
 {
-	int proj_len;
+	int crs_length;
 
 	char marker[5];
 	fread(marker, 5, 1, fp);
@@ -144,15 +144,15 @@ bool vtTin::_ReadTinHeader(FILE *fp)
 	fread(&m_file_verts, 4, 1, fp);
 	fread(&m_file_tris, 4, 1, fp);
 	fread(&m_file_data_start, 4, 1, fp);
-	fread(&proj_len, 4, 1, fp);
-	if (proj_len > 2000)
+	fread(&crs_length, 4, 1, fp);
+	if (crs_length > 2000)
 		return false;
 
-	if (proj_len)
+	if (crs_length)
 	{
 		char wkt_buf[2000], *wkt = wkt_buf;
-		fread(wkt, proj_len, 1, fp);
-		wkt_buf[proj_len] = 0;
+		fread(wkt, crs_length, 1, fp);
+		wkt_buf[crs_length] = 0;
 
 		OGRErr err = m_crs.importFromWkt((char **) &wkt);
 		if (err != OGRERR_NONE)
@@ -1122,8 +1122,8 @@ bool vtTin::Write(const char *fname, bool progress_callback(int)) const
 		fclose(fp);
 		return false;
 	}
-	int proj_len = strlen(wkt);
-	int data_start = 5 + 4 + 4 + 4 + + 4 + proj_len + 32 + 4 + 4;
+	int crs_length = strlen(wkt);
+	int data_start = 5 + 4 + 4 + 4 + + 4 + crs_length + 32 + 4 + 4;
 
 	int i;
 	int verts = NumVerts();
@@ -1133,8 +1133,8 @@ bool vtTin::Write(const char *fname, bool progress_callback(int)) const
 	fwrite(&verts, 4, 1, fp);
 	fwrite(&tris, 4, 1, fp);
 	fwrite(&data_start, 4, 1, fp);
-	fwrite(&proj_len, 4, 1, fp);
-	fwrite(wkt, proj_len, 1, fp);
+	fwrite(&crs_length, 4, 1, fp);
+	fwrite(wkt, crs_length, 1, fp);
 	OGRFree(wkt);
 
 	// version 2 of the format has extents: left, top, right, bottom, min z, max h
@@ -1444,7 +1444,7 @@ bool vtTin::ConvertCRS(const vtCRS &crs_new)
 	// Create conversion object
 	ScopedOCTransform trans(CreateCoordTransform(&m_crs, &crs_new));
 	if (!trans)
-		return false;		// inconvertible projections
+		return false;		// inconvertible coordinate systems
 
 	int size = NumVerts();
 	for (int i = 0; i < size; i++)
@@ -1453,7 +1453,7 @@ bool vtTin::ConvertCRS(const vtCRS &crs_new)
 		trans->Transform(1, &p.x, &p.y);
 	}
 
-	// adopt new projection
+	// adopt new coordinate system
 	m_crs = crs_new;
 
 	return true;

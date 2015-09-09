@@ -85,14 +85,14 @@ bool vtAbstractLayer::Load(const vtCRS &crs, vtFeatureLoader *loader,
 	//  terrain (before converting from terrain to world coordinates)
 	vtCRS &crs_feat = m_pSet->GetAtCRS();
 
-	VTLOG("  features: projection has root: %p\n", crs_feat.GetRoot());
+	VTLOG("  features: CRS has root: %p\n", crs_feat.GetRoot());
 	char type[7], value[4000];
 	if (crs_feat.GetRoot())
 	{
 		crs_feat.GetTextDescription(type, value);
 		VTLOG("   (%s: %s)\n", type, value);
 	}
-	VTLOG("   terrain: projection has root: %p\n", crs.GetRoot());
+	VTLOG("   terrain: CRS has root: %p\n", crs.GetRoot());
 	if (crs.GetRoot())
 	{
 		crs.GetTextDescription(type, value);

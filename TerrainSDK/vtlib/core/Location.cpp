@@ -197,9 +197,9 @@ void vtLocationSaver::SetCRS(const vtCRS &crs)
 {
 	m_crs = crs;
 
-	// convert from projected to global CS
-	vtCRS global_proj;
-	OGRErr err = global_proj.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
+	// Prepare to convert from local to global CRS.
+	vtCRS global_crs;
+	OGRErr err = global_crs.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
 	if (err != OGRERR_NONE)
 	{
 		VTLOG("Can't set location saver's projection, error %d\n", err);
@@ -209,8 +209,8 @@ void vtLocationSaver::SetCRS(const vtCRS &crs)
 	delete m_pConvertToWGS;
 	delete m_pConvertFromWGS;
 
-	m_pConvertToWGS = CreateCoordTransform(&m_crs, &global_proj, true);
-	m_pConvertFromWGS = CreateCoordTransform(&global_proj, &m_crs, true);
+	m_pConvertToWGS = CreateCoordTransform(&m_crs, &global_crs, true);
+	m_pConvertFromWGS = CreateCoordTransform(&global_crs, &m_crs, true);
 }
 
 bool vtLocationSaver::StoreTo(uint num, const LocNameString &name)

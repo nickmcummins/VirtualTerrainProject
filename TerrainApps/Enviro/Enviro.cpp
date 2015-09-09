@@ -3365,14 +3365,14 @@ bool Enviro::ImportModelFromKML(const char *kmlfile)
 	vtStructureLayer *st_layer = pTerr->GetStructureLayer();
 	vtStructInstance3d *inst = (vtStructInstance3d *) st_layer->AddNewInstance();
 
-	const vtCRS &tproj = pTerr->GetCRS();
+	const vtCRS &tcrs = pTerr->GetCRS();
 	DPoint2 p = visitor.m_pos;
-	if (tproj.IsGeographic() == false)
+	if (tcrs.IsGeographic() == false)
 	{
 		// Must transform from KML's CRS (WGS84 geo) to the terrain's CRS
 		vtCRS wgs84_geo;
 		wgs84_geo.SetGeogCSFromDatum(EPSG_DATUM_WGS84);
-		ScopedOCTransform trans(CreateCoordTransform(&wgs84_geo, &tproj));
+		ScopedOCTransform trans(CreateCoordTransform(&wgs84_geo, &tcrs));
 		if (!trans)
 		{
 			VTLOG1(" Couldn't transform coordinates\n");

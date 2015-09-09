@@ -39,9 +39,9 @@ typedef scoped_ptr<OGRCoordinateTransformation> ScopedOCTransform;
 ///////////////////////////
 
 /**
- * The vtCRS class represents an earth coordinate reference system
- * (CRS), which is generally a projected coordinate system (PCS).  It is
- * based on the class
+ * The vtCRS class represents an earth coordinate reference system (CRS), which
+ * is generally a projected coordinate system (PCS) or a geographic coordinate
+ * system (GCS).  It is based on the OGR class
  * <a href="http://www.gdal.org/ogr/classOGRSpatialReference.html">OGRSpatialReference</a>
  * which represents a full OpenGIS Spatial Reference System.  The vtCRS
  * class extends OGRSpatialReference with several useful methods.

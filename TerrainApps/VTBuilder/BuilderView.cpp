@@ -314,7 +314,7 @@ void BuilderView::DrawUTMBounds()
 	{
 		int zone_start = 0;
 		int zone_end = 60;
-		DPoint2 proj_point;
+		DPoint2 projectedPoint;
 
 		vtCRS geo;
 		CreateSimilarGeographicCRS(crs, geo);
@@ -322,14 +322,14 @@ void BuilderView::DrawUTMBounds()
 		ScopedOCTransform trans1(CreateCoordTransform(&crs, &geo));
 
 		// Avoid zones that are too far from our location.
-		ClientToWorld(wxPoint(0, height/2), proj_point);
-		trans1->Transform(1, &proj_point.x, &proj_point.y);
-		zone = GuessZoneFromGeo(proj_point);
+		ClientToWorld(wxPoint(0, height/2), projectedPoint);
+		trans1->Transform(1, &projectedPoint.x, &projectedPoint.y);
+		zone = GuessZoneFromGeo(projectedPoint);
 		if (zone-1 > zone_start) zone_start = zone-1;
 
-		ClientToWorld(wxPoint(width, height/2), proj_point);
-		trans1->Transform(1, &proj_point.x, &proj_point.y);
-		zone = GuessZoneFromGeo(proj_point);
+		ClientToWorld(wxPoint(width, height/2), projectedPoint);
+		trans1->Transform(1, &projectedPoint.x, &projectedPoint.y);
+		zone = GuessZoneFromGeo(projectedPoint);
 		if (zone+1 < zone_end) zone_end = zone+1;
 
 		// Now convert the longitude lines (boundaries between the UTM zones)
@@ -342,9 +342,9 @@ void BuilderView::DrawUTMBounds()
 			ll.x = -180.0f + zone * 6.0;
 			for (ll.y = -70.0; ll.y <= 70.0; ll.y += 0.1)
 			{
-				proj_point = ll;
-				trans2->Transform(1, &proj_point.x, &proj_point.y);
-				SendVertex(proj_point);
+				projectedPoint = ll;
+				trans2->Transform(1, &projectedPoint.x, &projectedPoint.y);
+				SendVertex(projectedPoint);
 			}
 			glEnd();
 		}
@@ -437,8 +437,8 @@ void BuilderView::SetWMProj(const vtCRS &crs)
 	if (WMPoly.size() == 0)
 		return;
 
-	const char *proj_name = crs.GetNameShort();
-	if (!strcmp(proj_name, "Geo") || !strcmp(proj_name, "Unknown"))
+	const char *crs_name = crs.GetNameShort();
+	if (!strcmp(crs_name, "Geo") || !strcmp(crs_name, "Unknown"))
 	{
 		// the data is already in latlon so just use WMPoly
 		for (i = 0; i < m_iEntities; i++)
@@ -451,10 +451,10 @@ void BuilderView::SetWMProj(const vtCRS &crs)
 	CreateSimilarGeographicCRS(crs, Source);
 
 #if VTDEBUG
-	// Check projection text
+	// Check CRS text
 	char *str1, *str2;
 	Source.exportToWkt(&str1);
-	proj.exportToWkt(&str2);
+	crs.exportToWkt(&str2);
 	VTLOG("World Map projection, converting:\n");
 	VTLOG(" From: ");
 	VTLOG(str1);
@@ -468,7 +468,7 @@ void BuilderView::SetWMProj(const vtCRS &crs)
 	Source.exportToProj4(&str3);
 	VTLOG("\n From: ");
 	VTLOG(str3);
-	proj.exportToProj4(&str4);
+	crs.exportToProj4(&str4);
 	VTLOG("\n   To: ");
 	VTLOG(str4);
 	VTLOG("\n");

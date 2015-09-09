@@ -5,8 +5,7 @@
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef VTENGINEH
-#define VTENGINEH
+#pragma once
 
 #include "vtdata/vtString.h"
 #include "Event.h"
@@ -126,13 +125,13 @@ public:
  * This simple engine extends the base class vtEngine with the ability to
  * remember the last state of the mouse.  This is useful for engines which
  * simply need to know mouse state (cursor position and button state).  They
- * can simply subclass from vtLastMouse and use the inherited fields rather
+ * can simply subclass from vtMouseStateEngine and use the inherited fields rather
  * than having to catch mouse events.
  */
-class vtLastMouse : public vtEngine
+class vtMouseStateEngine : public vtEngine
 {
 public:
-	vtLastMouse();
+	vtMouseStateEngine();
 
 	void OnMouse(vtMouseEvent &event);
 
@@ -148,7 +147,7 @@ public:
 	int m_flags;
 
 protected:
-	virtual ~vtLastMouse() {}
+	virtual ~vtMouseStateEngine() {}
 };
 
 /**
@@ -170,6 +169,4 @@ public:
 };
 
 /*@}*/	// Group eng
-
-#endif	// VTENGINEH
 

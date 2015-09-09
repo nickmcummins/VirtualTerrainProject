@@ -123,7 +123,7 @@ bool vtFeatureSet::SaveToSHP(const char *filename, bool progress_callback(int)) 
 		DBFClose(db);
 	}
 
-	// Try saving projection to PRJ
+	// Try saving CRS to PRJ
 	VTLOG1(" SaveToSHP: writing PRJ\n");
 	vtString prjname = filename;
 	prjname = prjname.Left(prjname.GetLength() - 4);

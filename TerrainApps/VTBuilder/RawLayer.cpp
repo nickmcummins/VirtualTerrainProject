@@ -254,7 +254,7 @@ bool vtRawLayer::TransformCoords(vtCRS &crs)
 	// Create conversion object
 	ScopedOCTransform trans(CreateCoordTransform(&(m_pSet->GetAtCRS()), &crs));
 	if (!trans.get())
-		return false;		// inconvertible projections
+		return false;		// inconvertible coordinate systems
 
 	bool success = m_pSet->TransformCoords(trans, progress_callback);
 

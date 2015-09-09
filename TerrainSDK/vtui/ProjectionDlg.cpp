@@ -133,7 +133,7 @@ void ProjectionDlg::RefreshDatums()
 }
 
 
-// Re-arrange the UI for a given projection
+// Re-arrange the UI for a given CRS
 void ProjectionDlg::SetProjectionUI(ProjType type)
 {
 	m_eProj = type;
@@ -304,9 +304,9 @@ void ProjectionDlg::SetUIFromProjection()
 		SetProjectionUI(PT_GEO);
 	else
 	{
-		const char *proj_string = m_crs.GetName();
+		const char *crs_string = m_crs.GetName();
 
-		if (!strcmp(proj_string, SRS_PT_TRANSVERSE_MERCATOR))
+		if (!strcmp(crs_string, SRS_PT_TRANSVERSE_MERCATOR))
 		{
 			if (m_crs.GetUTMZone() != 0)
 				SetProjectionUI(PT_UTM);
@@ -315,49 +315,49 @@ void ProjectionDlg::SetUIFromProjection()
 		}
 
 		// Supposedly, Gauss-Kruger is just a form of Transverse Mercator
-		else if (!strcmp(proj_string, "Gauss_Kruger"))
+		else if (!strcmp(crs_string, "Gauss_Kruger"))
 			SetProjectionUI(PT_TM);
 
-		else if (!strcmp(proj_string, SRS_PT_ALBERS_CONIC_EQUAL_AREA))
+		else if (!strcmp(crs_string, SRS_PT_ALBERS_CONIC_EQUAL_AREA))
 			SetProjectionUI(PT_ALBERS);
 
-		else if (!strcmp(proj_string, SRS_PT_MERCATOR_1SP))
+		else if (!strcmp(crs_string, SRS_PT_MERCATOR_1SP))
 			SetProjectionUI(PT_MERC);
 
-		else if (!strcmp(proj_string, SRS_PT_HOTINE_OBLIQUE_MERCATOR))
+		else if (!strcmp(crs_string, SRS_PT_HOTINE_OBLIQUE_MERCATOR))
 			SetProjectionUI(PT_HOM);
 
-		else if (!strcmp(proj_string, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP))
+		else if (!strcmp(crs_string, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP))
 			SetProjectionUI(PT_LCC1SP);
 
-		else if (!strcmp(proj_string, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP))
+		else if (!strcmp(crs_string, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP))
 			SetProjectionUI(PT_LCC);
 
-		else if (!strcmp(proj_string, SRS_PT_LAMBERT_AZIMUTHAL_EQUAL_AREA))
+		else if (!strcmp(crs_string, SRS_PT_LAMBERT_AZIMUTHAL_EQUAL_AREA))
 			SetProjectionUI(PT_LAEA);
 
-		else if (!strcmp(proj_string, SRS_PT_NEW_ZEALAND_MAP_GRID))
+		else if (!strcmp(crs_string, SRS_PT_NEW_ZEALAND_MAP_GRID))
 			SetProjectionUI(PT_NZMG);
 
-		else if (!strcmp(proj_string, SRS_PT_SINUSOIDAL))
+		else if (!strcmp(crs_string, SRS_PT_SINUSOIDAL))
 			SetProjectionUI(PT_SINUS);
 
-		else if (!strcmp(proj_string, SRS_PT_STEREOGRAPHIC))
+		else if (!strcmp(crs_string, SRS_PT_STEREOGRAPHIC))
 			SetProjectionUI(PT_STEREO);
 
-		else if (!strcmp(proj_string, SRS_PT_OBLIQUE_STEREOGRAPHIC))
+		else if (!strcmp(crs_string, SRS_PT_OBLIQUE_STEREOGRAPHIC))
 			SetProjectionUI(PT_OS);
 
-		else if (!strcmp(proj_string, SRS_PT_POLAR_STEREOGRAPHIC))
+		else if (!strcmp(crs_string, SRS_PT_POLAR_STEREOGRAPHIC))
 			SetProjectionUI(PT_PS);
 
-		else if (!strcmp(proj_string, SRS_PT_KROVAK))
+		else if (!strcmp(crs_string, SRS_PT_KROVAK))
 			SetProjectionUI(PT_KROVAK);
 
 		// I've seen a .prj file for Stereo70 which refers to the projection
 		//  as "Double_Stereographic", but this is unknown by OGR.  We do know
 		//  about Oblique Stereographic, which is what i believe is meant.
-		else if (!strcmp(proj_string, "Double_Stereographic"))
+		else if (!strcmp(crs_string, "Double_Stereographic"))
 		{
 			OGR_SRSNode *node = m_crs.GetAttrNode("PROJECTION");
 			node = node->GetChild(0);
@@ -367,7 +367,7 @@ void ProjectionDlg::SetUIFromProjection()
 		else
 		{
 			wxString str = _("Unknown projection: ");
-			str += wxString(proj_string, wxConvUTF8);
+			str += wxString(crs_string, wxConvUTF8);
 			wxMessageBox(str);
 		}
 	}
@@ -383,7 +383,7 @@ void ProjectionDlg::GetCRS(vtCRS &crs)
 
 void ProjectionDlg::OnProjSave( wxCommandEvent &event )
 {
-	wxFileDialog saveFile(NULL, _("Save Projection to File"), _T(""), _T(""),
+	wxFileDialog saveFile(NULL, _("Save Coordinate System to File"), _T(""), _T(""),
 		FSTRING_PRJ, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	if (saveFile.ShowModal() == wxID_CANCEL)
 		return;
@@ -393,7 +393,7 @@ void ProjectionDlg::OnProjSave( wxCommandEvent &event )
 
 void ProjectionDlg::OnProjLoad( wxCommandEvent &event )
 {
-	wxFileDialog loadFile(NULL, _("Load Projection from File"), _T(""), _T(""),
+	wxFileDialog loadFile(NULL, _("Load Coordinate System from File"), _T(""), _T(""),
 		FSTRING_PRJ, wxFD_OPEN);
 	if (loadFile.ShowModal() != wxID_OK)
 		return;
@@ -401,7 +401,7 @@ void ProjectionDlg::OnProjLoad( wxCommandEvent &event )
 	if (m_crs.ReadProjFile(strPathName.mb_str(wxConvUTF8)))
 		SetUIFromProjection();
 	else
-		wxMessageBox(_("Couldn't load projection from that file.\n"));
+		wxMessageBox(_("Couldn't load coordinate system from that file.\n"));
 }
 
 void ProjectionDlg::OnDatum( wxCommandEvent &event )
@@ -647,7 +647,9 @@ void ProjectionDlg::AskStatePlane()
 
 	if (result == OGRERR_FAILURE)
 	{
-		wxMessageBox(_("Couldn't set state plane projection.  Perhaps the\n EPSG tables could not be located.  Check that your\n GEOTIFF_CSV environment variable is set."));
+		wxMessageBox(_("Couldn't set state plane projection.  Perhaps the\n\
+ EPSG tables could not be located.  Check that your\n\
+ GEOTIFF_CSV environment variable is set."));
 	}
 	else
 	{

@@ -97,7 +97,7 @@ void DistanceDlg::SetCRS(const vtCRS &crs)
 {
 	if (m_crs != crs)
 	{
-		// Changing projection
+		// Changing CRS
 		Reset();
 	}
 	m_crs = crs;

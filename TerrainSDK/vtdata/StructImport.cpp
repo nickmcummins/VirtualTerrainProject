@@ -613,7 +613,7 @@ void vtStructureArray::AddElementsFromOGR_RAW(GDALDataset *pDatasource,
 	if (!pLayer)
 		return;
 
-	// Get the projection (SpatialReference) from this layer
+	// Get the CRS (SpatialReference) from this layer
 	OGRSpatialReference *pSpatialRef = pLayer->GetSpatialRef();
 	if (pSpatialRef)
 		m_crs.SetSpatialReference(pSpatialRef);

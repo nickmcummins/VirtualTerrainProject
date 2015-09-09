@@ -66,15 +66,15 @@ void vtEngine::OnWindowSize(int width, int height)
 }
 
 //
-// vtLastMouse
+// vtMouseStateEngine
 //
-vtLastMouse::vtLastMouse() : vtEngine()
+vtMouseStateEngine::vtMouseStateEngine() : vtEngine()
 {
 	m_buttons = VT_NONE;
 	m_pos.Set(0, 0);
 }
 
-void vtLastMouse::OnMouse(vtMouseEvent &event)
+void vtMouseStateEngine::OnMouse(vtMouseEvent &event)
 {
 	switch (event.type)
 	{
@@ -113,7 +113,7 @@ void apply_dead_zone(float amount, float &val)
  * Returns the mouse coordinates in the window, normalized such that X and Y
  * range from -1 to 1 (left to right, top to bottom across the window.
  */
-void vtLastMouse::GetNormalizedMouseCoords(float &mx, float &my)
+void vtMouseStateEngine::GetNormalizedMouseCoords(float &mx, float &my)
 {
 	vtWindow *window = m_pWindow;
 	if (!window) window = vtGetScene()->GetWindow(0);

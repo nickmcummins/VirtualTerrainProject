@@ -246,7 +246,7 @@ bool TiledDatasetDescription::GetCorners(DLine2 &line, bool bGeo) const
 
 		if (!trans)
 		{
-			// inconvertible projections
+			// inconvertible coordinate systems
 			return false;
 		}
 		for (int i = 0; i < 4; i++)
@@ -499,7 +499,7 @@ bool vtTiledGeom::ReadTileList(const char *dataset_fname_elev,
 		m_elev_info.maxheight = 8192;
 	}
 
-	// We assume that the projection and extents of the two datasets are the same,
+	// We assume that the CRS and extents of the two datasets are the same,
 	//  so simply take them from the elevation dataset.
 
 	// Set up earth->world heightfield properties

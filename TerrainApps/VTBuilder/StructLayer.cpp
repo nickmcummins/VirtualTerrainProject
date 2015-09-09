@@ -315,12 +315,12 @@ bool vtStructureLayer::TransformCoords(vtCRS &crs)
 	if (crs == m_crs)
 		return true;
 
-	// Create conversion object
+	// Create conversion object.
 	vtCRS Source;
 	GetCRS(Source);
 	ScopedOCTransform trans(CreateCoordTransform(&Source, &crs));
 	if (!trans)
-		return false;		// inconvertible projections
+		return false;		// Inconvertible coordinate systems.
 
 	DPoint2 loc;
 	uint i, j;
@@ -350,7 +350,7 @@ bool vtStructureLayer::TransformCoords(vtCRS &crs)
 		}
 	}
 
-	// set the projection
+	// Set the CRS.
 	m_crs = crs;
 	SetModified(true);
 

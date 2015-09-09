@@ -61,7 +61,7 @@ public:
 	vtAnimPath(const vtAnimPath &ap);
 	virtual ~vtAnimPath();
 
-	/// Must tell the AnimPath what projection its points are in, for serialization.
+	/// Must tell the AnimPath what CRS its points are in, for serialization.
 	bool SetCRS(const vtCRS &crs, const LocalCS &conv);
 
 	/// Get the transformation matrix for a point in time.
@@ -144,7 +144,7 @@ protected:
 	double			m_fLoopSegmentTime;
 	ControlPoint	m_LoopControlPoint;
 
-	// For dealing with global projection
+	// For dealing with the global CRS.
 	vtCRS	m_crs;
 	OCTransform		*m_pConvertToWGS;
 	OCTransform		*m_pConvertFromWGS;

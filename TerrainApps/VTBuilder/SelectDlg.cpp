@@ -60,8 +60,8 @@ void SelectDlg::SetRawLayer(vtRawLayer *pRL)
 
 void SelectDlg::OnInitDialog(wxInitDialogEvent& event)
 {
-	vtCRS proj;
-	m_pLayer->GetCRS(proj);
+	vtCRS crs;
+	m_pLayer->GetCRS(crs);
 
 	m_iFauxFields = 0;
 	vtFeatureSet *pSet = m_pLayer->GetFeatureSet();
@@ -69,7 +69,7 @@ void SelectDlg::OnInitDialog(wxInitDialogEvent& event)
 	OGRwkbGeometryType type = pSet->GetGeomType();
 	if (type == wkbPoint || type == wkbPoint25D)
 	{
-		if (proj.IsGeographic())
+		if (crs.IsGeographic())
 		{
 			GetField()->Append(_("X (longitude)"), (void *) 900);
 			GetField()->Append(_("Y (latitude)"), (void *) 901);

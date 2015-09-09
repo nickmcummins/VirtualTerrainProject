@@ -57,7 +57,7 @@ bool vtImageLayer::TransformCoords(vtCRS &crs_new)
 
 	bool success = false;
 
-	// Check to see if the projections differ *only* by datum
+	// Check to see if the CRS differ *only* by datum
 	vtCRS test = crs_old;
 	test.SetDatum(crs_new.GetDatum());
 	if (test == crs_new)
@@ -149,8 +149,8 @@ void vtImageLayer::GetPropertyText(wxString &strIn)
 	}
 
 	IPoint2 size = m_pImage->GetDimensions();
-	vtCRS proj;
-	m_pImage->GetCRS(proj);
+	vtCRS crs;
+	m_pImage->GetCRS(crs);
 
 	strIn.Printf(_("Dimensions %d by %d pixels"), size.x, size.y);
 	strIn += _T("\n");
@@ -158,7 +158,7 @@ void vtImageLayer::GetPropertyText(wxString &strIn)
 	strIn += _("Spacing: ");
 	DPoint2 spacing(extents.Width() / size.x, extents.Height() / size.y);
 
-	bool bGeo = (proj.IsGeographic() != 0);
+	bool bGeo = (crs.IsGeographic() != 0);
 	wxString str;
 	str += wxString(FormatCoord(bGeo, spacing.x), wxConvUTF8);
 	str += _T(" x ");

@@ -87,32 +87,32 @@ public:
 	/// Return number of locations
 	int NumLocations() { return m_loc.GetSize(); }
 
-	/// Get a location by index
+	/// Get a location by index.
 	vtLocation *GetLocation(int num) const { return m_loc[num]; }
 
-	/// Find a location by name
+	/// Find a location by name.
 	int FindLocation(const char *locname);
 
 	void Clear();
 
-	// you must call these methods before this class is useful for vtTerrain:
-	/// Attach this LocationSaver to an object in the scenegraph
+	// You must call these methods before this class is useful for vtTerrain:
+	/// Attach this LocationSaver to an object in the scenegraph.
 	void SetTransform(vtTransform *trans) { m_pTransform = trans; }
 	/// Return the object attached to this LocationSaver
 	vtTransform *GetTransform() { return m_pTransform; }
 
-	/// Define the conversion between this saver and terrain coordinates
+	/// Define the conversion between this saver and terrain coordinates.
 	void SetLocalCS(const LocalCS &conv) { m_LocalCS = conv; }
 	const LocalCS &GetLocalCS() { return m_LocalCS; }
 
-	/// Define the projection of the object attached to this LocationSaver
+	/// Define the CRS of the object attached to this LocationSaver.
 	void SetCRS(const vtCRS &crs);
 	const vtCRS &GetAtCRS() const { return m_crs; }
 
-	/// Get the location of the attached object and store it
+	/// Get the location of the attached object and store it.
 	bool StoreTo(uint num, const LocNameString &name = "");
 
-	/// Recall a location by index, and set it to the attached object
+	/// Recall a location by index, and set it to the attached object.
 	bool RecallFrom(int num);
 	bool RecallFrom(const char *name);
 
@@ -120,9 +120,9 @@ protected:
 	// Implementation
 	// Store information necessary to convert from global earth CS
 	// to the local CS
-	LocalCS	m_LocalCS;
+	LocalCS		m_LocalCS;
 	vtCRS		m_crs;
-	vtTransform			*m_pTransform;
+	vtTransform	*m_pTransform;
 
 	vtString	m_strFilename;
 	OCTransform	*m_pConvertToWGS;
