@@ -1607,7 +1607,6 @@ bool vtImage::ReadFeaturesFromTerraserver(const DRECT &area, int iTheme,
 											   const char *filename)
 {
 #if SUPPORT_CURL
-
 	// The cache directory needs to exist; test if it's already there.
 	const char *testname = TileDownloadDir "/test.txt";
 	FILE *fp = vtFileOpen(testname, "wb");
@@ -1667,12 +1666,13 @@ bool vtImage::ReadFeaturesFromTerraserver(const DRECT &area, int iTheme,
 	int iXSize = (TerrainEastingE - TerrainEastingW) / MetersPerPixel;
 	int iYSize = (TerrainNorthingN - TerrainNorthingS) / MetersPerPixel;
 	vtBitmap *pBitmap = new vtBitmap;
-	pBitmap->Allocate(iXSize, iYSize);
-	SetupBitmapInfo(iXSize, iYSize);
+	IPoint2 size(iXSize, iYSize);
+	pBitmap->Allocate(size);
+	SetupBitmapInfo(size);
 	m_Bitmaps[0].m_pBitmap = pBitmap;
 
 	vtDIB dib;
-	dib.Create(iXSize, iYSize, 8, true);
+	dib.Create(size, 8);
 	if (!MosaicAllTiles(dib))
 		return false;
 

@@ -124,14 +124,14 @@ void gfclose(GZOutput &out);
 gzFile vtGZOpen(const char *path, const char *mode);
 
 
-// These functions encapsulate reading from a file which may be compressed
-//  with gzip, compressed with bzip2, or not compressed.  They automatically
-//  recognize the compression so the caller doesn't have to check.
-class VTCompress
+// This class encapsulate reading from a file which may be compressed
+//  with gzip, compressed with bzip2, or not compressed.  It automatically
+//  recognizes the compression so the caller doesn't have to check.
+class vtCompressionReader
 {
 public:
-	VTCompress();
-	~VTCompress();
+	vtCompressionReader();
+	~vtCompressionReader();
 
 	bool open(const char *fname);
 	size_t read(void *buf, size_t size);

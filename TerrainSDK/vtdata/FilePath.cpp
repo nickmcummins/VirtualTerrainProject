@@ -657,9 +657,9 @@ void gfclose(GZOutput &out)
 
 
 /////////////////////////////////////////////////////////////////////////////
-// VTCompress class
+// vtCompressionReader class
 
-VTCompress::VTCompress()
+vtCompressionReader::vtCompressionReader()
 {
 	fp = NULL;
 	gfp = NULL;
@@ -668,12 +668,12 @@ VTCompress::VTCompress()
 #endif
 }
 
-VTCompress::~VTCompress()
+vtCompressionReader::~vtCompressionReader()
 {
 	close();
 }
 
-bool VTCompress::open(const char *fname)
+bool vtCompressionReader::open(const char *fname)
 {
 	fp = vtFileOpen(fname, "rb");
 	if (!fp)
@@ -688,7 +688,7 @@ bool VTCompress::open(const char *fname)
 		fclose(fp);
 		return false;
 	}
-	// Gzip signature: 1f8b 08
+	// Gzip signature: 1f 8b 08
 	if (buf[0] == 0x1f && buf[1] == 0x8b && buf[2] == 0x08)
 	{
 		fclose(fp);
@@ -698,7 +698,7 @@ bool VTCompress::open(const char *fname)
 			return false;
 	}
 #if SUPPORT_BZIP2
-	// BZip2 signature: 5a42 31 ("BZh")
+	// BZip2 signature: 5a 42 31 ("BZh")
 	else if (buf[0] == 'B' && buf[1] == 'Z' && buf[2] == 'h')
 	{
 		fclose(fp);
@@ -716,7 +716,7 @@ bool VTCompress::open(const char *fname)
 	return true;
 }
 
-size_t VTCompress::read(void *buf, size_t size)
+size_t vtCompressionReader::read(void *buf, size_t size)
 {
 	if (gfp)
 		return gzread(gfp, buf, size);
@@ -729,7 +729,7 @@ size_t VTCompress::read(void *buf, size_t size)
 	return 0;
 }
 
-void VTCompress::close()
+void vtCompressionReader::close()
 {
 	if (gfp)
 	{

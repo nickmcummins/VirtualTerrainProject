@@ -2551,7 +2551,7 @@ bool vtElevationGrid::LoadFromHGT(const char *szFileName, bool progress_callback
 	bool b1arcsec = (ftell(ffp) > 3000000);
 	fclose(ffp);
 
-	VTCompress reader;
+	vtCompressionReader reader;
 
 	if (!reader.open(szFileName))
 		return false;

@@ -10,9 +10,11 @@
 #include "vtlib/vtlib.h"
 
 #if SUPPORT_QUIKGRID
+
 #include "vtdata/QuikGrid.h"
-#include "Contours.h"
-#include <vtlib/core/TiledGeom.h>
+#include "vtlib/core/Contours.h"
+#include "vtlib/core/GeomFactory.h"
+#include "vtlib/core/TiledGeom.h"
 
 //
 // This callback function will receive points output from QuikGrid.

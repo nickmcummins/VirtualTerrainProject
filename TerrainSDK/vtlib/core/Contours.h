@@ -1,17 +1,17 @@
 //
 // Contours.h
 //
-// Copyright (c) 2004-2009 Virtual Terrain Project
+// Copyright (c) 2004-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef CONTOURSH
-#define CONTOURSH
+#pragma once
 
 #if SUPPORT_QUIKGRID
 
 #include "Terrain.h"
 class SurfaceGrid;
+class vtGeomFactory;
 
 /** \defgroup utility Utility classes
  */
@@ -94,4 +94,3 @@ protected:
 /*@}*/  // utility
 
 #endif // SUPPORT_QUIKGRID
-#endif // CONTOURSH
