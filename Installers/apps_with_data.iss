@@ -71,13 +71,13 @@ Source: "C:\APIs\bzip2-1.0.6\Release\libbz2.dll"; DestDir: "{app}\Apps"; Flags: 
 Source: "C:\APIs\gdal-2.0.0\bin-release\gdal200-vc14.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 Source: "C:\APIs\gdal-2.0.0\bin-release\proj.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 Source: "C:\APIs\gdal-2.0.0\bin-release\*.exe"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\curl-7.23.1\libcurl.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\lpng1513\libpng15.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\lpng1513\zlib1.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\netcdf-3.6.1-1-bin\bin\netcdf.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\OpenSceneGraph-3.0.1\vc10\bin-rel-only\*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion recursesubdirs; Components: dlls
-Source: "C:\APIs\wxWidgets-2.9.4\lib\vc_dll\*u_*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\expat-2.0.1\win32\bin\Release\libexpat.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\curl-7.44.0\vc14\lib\Release\libcurl.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\lpng1618\vc14\Release\libpng16.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\lpng1618\vc14\Release\zlib1.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+;Source: "C:\APIs\netcdf-3.6.1-1-bin\bin\netcdf.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\OpenSceneGraph-3.4.0\build\bin-rel-only\*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion recursesubdirs; Components: dlls
+Source: "C:\APIs\wxWidgets-3.0.2\lib\vc_dll\*u_*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+;Source: "C:\APIs\expat-2.0.1\win32\bin\Release\libexpat.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 ; DAE plugin might want this:
 ;Source: "C:\APIs\Collada_DOM_2.2\dom\external-libs\libxml2\win32\lib\libxml2.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
  

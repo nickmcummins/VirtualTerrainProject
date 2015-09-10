@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=VTBuilder
-AppVerName=VTBuilder 1.52 (2013.06.14)
+AppVerName=VTBuilder 1.6 BETA (2015.09.09)
 AppPublisher=Virtual Terrain Project
 AppPublisherURL=http://vterrain.org/
 AppSupportURL=http://vterrain.org/
@@ -12,7 +12,7 @@ DefaultDirName={pf}\VTP
 DefaultGroupName=VTP
 AllowNoIcons=yes
 LicenseFile=C:\VTP\license.txt
-OutputBaseFilename=VTBuilder_130614
+OutputBaseFilename=VTBuilder_150909
 OutputDir=C:\Distrib
 ; We need the following because some Windows machines won't turn Registry settings into Environment variables w/o a reboot
 AlwaysRestart=yes
@@ -37,10 +37,13 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
 [Files]
 Source: "C:\VTP\license.txt"; DestDir: "{app}"; Flags: ignoreversion; Components: main
 
-Source: "C:\VTP\vc10\TerrainApps\VTBuilder\Release\VTBuilder.exe"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: main
-Source: "C:\VTP\TerrainApps\VTBuilder\Ship\VTBuilder.xml"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: main
+Source: "C:\VTP\vc14\TerrainApps\VTBuilder\Release\VTBuilder.exe"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: main
+Source: "C:\VTP\Installers\VTBuilder.xml"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: main
 Source: "C:\VTP\TerrainApps\VTBuilder\Docs\*"; DestDir: "{app}\Docs\VTBuilder"; Flags: ignoreversion recursesubdirs; Components: docs
 Source: "C:\VTP\TerrainApps\docs.css"; DestDir: "{app}\Docs"; Flags: ignoreversion; Components: docs
+
+; Common to all documentation
+Source: "C:\VTP\TerrainApps\docs.css"; DestDir: "{app}\Docs"; Flags: ignoreversion recursesubdirs; Components: docs
 
 ; Translation files
 Source: "C:\VTP\i18n\*"; DestDir: "{app}\Apps"; Excludes: "*.po,Enviro.*"; Flags: ignoreversion recursesubdirs; Components: main
@@ -51,20 +54,20 @@ Source: "G:\Data-Distro\Culture\materials.xml"; DestDir: "{app}/Data/Culture"; F
 Source: "G:\Data-Distro\GeoTypical\*.cmt"; DestDir: "{app}/Data/GeoTypical"; Flags: ignoreversion; Components: data
 
 ; Projection Stuff
-Source: "C:\APIs\gdal-1.9.2\bld\data\*"; DestDir: "{app}\GDAL-data"; Flags: ignoreversion; Components: proj
-Source: "C:\APIs\proj-4.8.0\nad\*"; DestDir: "{app}\PROJ4-data"; Flags: ignoreversion; Components: proj
+Source: "C:\APIs\gdal-2.0.0\data\*"; DestDir: "{app}\GDAL-data"; Flags: ignoreversion; Components: proj
+Source: "C:\APIs\proj-4.9.1\nad\*"; DestDir: "{app}\PROJ4-data"; Flags: ignoreversion; Components: proj
 
 ; DLLs
-;Source: "C:\APIs\bzip2-1.0.3-bin-vc9\bzip2.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\gdal-1.9.2\distro-vc10\bin\gdal19-vc10.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\gdal-1.9.2\distro-vc10\bin\proj.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\gdal-1.9.2\distro-vc10\bin\*.exe"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\curl-7.23.1\libcurl.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\lpng1513\libpng15.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\lpng1513\zlib1.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\netcdf-3.6.1-1-bin\bin\netcdf.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\wxWidgets-2.9.4\lib\vc_dll\*u_*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
-Source: "C:\APIs\expat-2.0.1\win32\bin\Release\libexpat.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\bzip2-1.0.6\Release\libbz2.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\gdal-2.0.0\bin-release\gdal200-vc14.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\gdal-2.0.0\bin-release\proj.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\gdal-2.0.0\bin-release\*.exe"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\curl-7.44.0\vc14\lib\Release\libcurl.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\lpng1618\vc14\Release\libpng16.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\lpng1618\vc14\Release\zlib1.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+;Source: "C:\APIs\netcdf-3.6.1-1-bin\bin\netcdf.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\wxWidgets-3.0.2\lib\vc_dll\*u_*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+;Source: "C:\APIs\expat-2.0.1\win32\bin\Release\libexpat.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
