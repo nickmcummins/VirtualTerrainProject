@@ -202,6 +202,7 @@ void InstanceDlg::OnBrowseModelFile( wxCommandEvent &event )
 	AddType(filter, FSTRING_FLT);
 	AddType(filter, FSTRING_OSG);
 	AddType(filter, FSTRING_IVE);
+	AddType(filter, FSTRING_PLY);
 	filter += _T("|");
 	filter += FSTRING_ALL;
 	wxFileDialog SelectFile(this, _("Choose model file"),
