@@ -1,5 +1,11 @@
+//
+// widestring.h
+//
+
 #include <string>
 #include <wchar.h>
+
+#if !__DARWIN_OSX__		// Mac doesn't need this class.
 
 #define MAX_WSTRING2_SIZE 4096
 /**
@@ -24,3 +30,5 @@ public:
 private:
 	static char s_buffer[MAX_WSTRING2_SIZE];
 };
+
+#endif // __DARWIN_OSX__

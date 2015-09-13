@@ -1,9 +1,16 @@
+//
+// widestring.cpp
+//
+
 #include "widestring.h"
+#include <cstdlib>
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ >= 3
   #include <cstring>
   #include <cstdlib>
 #endif
+
+#if !__DARWIN_OSX__		// Mac doesn't need this class.
 
 char widestring::s_buffer[MAX_WSTRING2_SIZE];
 
@@ -189,3 +196,4 @@ const char *widestring::to_utf8() const
 	return s_buffer;
 }
 
+#endif // __DARWIN_OSX__
