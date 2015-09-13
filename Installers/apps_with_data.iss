@@ -78,6 +78,8 @@ Source: "C:\APIs\lpng1618\vc14\Release\zlib1.dll"; DestDir: "{app}\Apps"; Flags:
 Source: "C:\APIs\OpenSceneGraph-3.4.0\build\bin-rel-only\*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion recursesubdirs; Components: dlls
 Source: "C:\APIs\wxWidgets-3.0.2\lib\vc_dll\*u_*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 ;Source: "C:\APIs\expat-2.0.1\win32\bin\Release\libexpat.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\openssl-1.0.2d-install\bin\*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+
 ; DAE plugin might want this:
 ;Source: "C:\APIs\Collada_DOM_2.2\dom\external-libs\libxml2\win32\lib\libxml2.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
  

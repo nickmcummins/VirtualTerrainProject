@@ -68,6 +68,7 @@ Source: "C:\APIs\lpng1618\vc14\Release\zlib1.dll"; DestDir: "{app}\Apps"; Flags:
 ;Source: "C:\APIs\netcdf-3.6.1-1-bin\bin\netcdf.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 Source: "C:\APIs\wxWidgets-3.0.2\lib\vc_dll\*u_*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 ;Source: "C:\APIs\expat-2.0.1\win32\bin\Release\libexpat.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
+Source: "C:\APIs\openssl-1.0.2d-install\bin\*.dll"; DestDir: "{app}\Apps"; Flags: ignoreversion; Components: dlls
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
