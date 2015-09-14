@@ -293,7 +293,6 @@ void vtMesh::AddTri(int p0, int p1, int p2)
 */
 void vtMesh::AddFan(int p0, int p1, int p2, int p3, int p4, int p5)
 {
-#ifdef VTP_AVOID_OSG_INDICES
 	osg::DrawElements *pDrawElements;
 	pDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_FAN);
 	pDrawElements->addElement(p0);
@@ -307,20 +306,6 @@ void vtMesh::AddFan(int p0, int p1, int p2, int p3, int p4, int p5)
 	if (p5 != -1)
 		pDrawElements->addElement(p5);
 	addPrimitiveSet(pDrawElements);
-#else
-	int len = 2;
-
-	osg::UIntArray *uia = (osg::UIntArray*) getVertexIndices();
-	uia->push_back(p0);
-	uia->push_back(p1);
-
-	if (p2 != -1) { uia->push_back(p2); len = 3; }
-	if (p3 != -1) { uia->push_back(p3); len = 4; }
-	if (p4 != -1) { uia->push_back(p4); len = 5; }
-	if (p5 != -1) { uia->push_back(p5); len = 6; }
-
-	getDrawArrayLengths()->push_back(len);
-#endif
 }
 
 /**
@@ -330,21 +315,12 @@ void vtMesh::AddFan(int p0, int p1, int p2, int p3, int p4, int p5)
 */
 void vtMesh::AddFan(int *idx, int iNVerts)
 {
-#ifdef VTP_AVOID_OSG_INDICES
 	osg::DrawElements *pDrawElements;
 	pDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_FAN);
 	pDrawElements->reserveElements(iNVerts);
 	for (int i = 0; i < iNVerts; i++)
 		pDrawElements->addElement(idx[i]);
 	addPrimitiveSet(pDrawElements);
-#else
-	osg::UIntArray *uia = getIndices();
-
-	for (int i = 0; i < iNVerts; i++)
-		uia->push_back(idx[i]);
-
-	getDrawArrayLengths()->push_back(iNVerts);
-#endif
 }
 
 /**
@@ -1294,7 +1270,6 @@ void vtMesh::SetNormalsFromPrimitives()
 
 void vtMesh::_AddStripNormals()
 {
-#ifdef VTP_AVOID_OSG_INDICES
 	uint numPrimitiveSets = getNumPrimitiveSets();
 	unsigned short v0 = 0, v1 = 0, v2 = 0;
 	osg::Vec3 p0, p1, p2, d0, d1, norm;
@@ -1328,48 +1303,10 @@ void vtMesh::_AddStripNormals()
 			}
 		}
 	}
-#else
-	osg::DrawArrayLengths *dal = getDrawArrayLengths();
-	int prims = NumPrims();
-	int i, j, len, idx;
-	unsigned short v0 = 0, v1 = 0, v2 = 0;
-	osg::Vec3 p0, p1, p2, d0, d1, norm;
-
-	osg::UIntArray *uia = getIndices();
-	osg::Vec3Array *norms = getNormals();
-
-	idx = 0;
-	for (i = 0; i < prims; i++)
-	{
-		len = dal->at(i);
-		for (j = 0; j < len; j++)
-		{
-			v0 = v1; p0 = p1;
-			v1 = v2; p1 = p2;
-			v2 = uia->at(idx);
-			p2 = getVerts()->at(v2);
-			if (j >= 2)
-			{
-				d0 = (p1 - p0);
-				d1 = (p2 - p0);
-				d0.normalize();
-				d1.normalize();
-
-				norm = d0^d1;
-
-				norms->at(v0) += norm;
-				norms->at(v1) += norm;
-				norms->at(v2) += norm;
-			}
-			idx++;
-		}
-	}
-#endif
 }
 
 void vtMesh::_AddPolyNormals()
 {
-#ifdef VTP_AVOID_OSG_INDICES
 	uint i, j, len;
 	uint NumPrimitiveSets = getNumPrimitiveSets();
 	unsigned short v0 = 0, v1 = 0, v2 = 0;
@@ -1404,53 +1341,10 @@ void vtMesh::_AddPolyNormals()
 			}
 		}
 	}
-#else
-	osg::DrawArrayLengths *dal = getDrawArrayLengths();
-	if (!dal)
-		return;
-
-	int prims = NumPrims();
-	int i, j, len, idx;
-	unsigned short v0 = 0, v1 = 0, v2 = 0;
-	osg::Vec3 p0, p1, p2, d0, d1, norm;
-
-	osg::UIntArray *uia = getIndices();
-
-	idx = 0;
-	for (i = 0; i < prims; i++)
-	{
-		len = dal->at(i);
-		// ensure this poly has enough verts to define a surface
-		if (len >= 3)
-		{
-			v0 = uia->at(idx);
-			v1 = uia->at(idx+1);
-			v2 = uia->at(idx+2);
-			p0 = getVerts()->at(v0);
-			p1 = getVerts()->at(v1);
-			p2 = getVerts()->at(v2);
-
-			d0 = (p1 - p0);
-			d1 = (p2 - p0);
-			d0.normalize();
-			d1.normalize();
-
-			norm = d0^d1;
-
-			for (j = 0; j < len; j++)
-			{
-				int v = uia->at(idx + j);
-				getNormals()->at(v) += norm;
-			}
-		}
-		idx += len;
-	}
-#endif
 }
 
 void vtMesh::_AddTriangleNormals()
 {
-#ifdef VTP_AVOID_OSG_INDICES
 	int tris = NumPrims();
 	unsigned short v0, v1, v2;
 	osg::Vec3 p0, p1, p2, d0, d1, norm;
@@ -1477,39 +1371,10 @@ void vtMesh::_AddTriangleNormals()
 		getNormals()->at(v1) += norm;
 		getNormals()->at(v2) += norm;
 	}
-#else
-	int tris = NumPrims();
-	unsigned short v0, v1, v2;
-	osg::Vec3 p0, p1, p2, d0, d1, norm;
-
-	osg::UIntArray *uia = getIndices();
-
-	for (int i = 0; i < tris; i++)
-	{
-		v0 = uia->at(i*3);
-		v1 = uia->at(i*3+1);
-		v2 = uia->at(i*3+2);
-		p0 = getVerts()->at(v0);
-		p1 = getVerts()->at(v1);
-		p2 = getVerts()->at(v2);
-
-		d0 = (p1 - p0);
-		d1 = (p2 - p0);
-		d0.normalize();
-		d1.normalize();
-
-		norm = d0^d1;
-
-		getNormals()->at(v0) += norm;
-		getNormals()->at(v1) += norm;
-		getNormals()->at(v2) += norm;
-	}
-#endif
 }
 
 void vtMesh::_AddQuadNormals()
 {
-#ifdef VTP_AVOID_OSG_INDICES
 	int quads = NumPrims();
 	unsigned short v0, v1, v2, v3;
 	osg::Vec3 p0, p1, p2, d0, d1, norm;
@@ -1540,37 +1405,6 @@ void vtMesh::_AddQuadNormals()
 		norms->at(v2) += norm;
 		norms->at(v3) += norm;
 	}
-#else
-	int quads = NumPrims();
-	unsigned short v0, v1, v2, v3;
-	osg::Vec3 p0, p1, p2, d0, d1, norm;
-
-	osg::UIntArray *uia = getIndices();
-	osg::Vec3Array *norms = getNormals();
-
-	for (int i = 0; i < quads; i++)
-	{
-		v0 = uia->at(i*4);
-		v1 = uia->at(i*4+1);
-		v2 = uia->at(i*4+2);
-		v3 = uia->at(i*4+3);
-		p0 = getVerts()->at(v0);
-		p1 = getVerts()->at(v1);
-		p2 = getVerts()->at(v2);
-
-		d0 = (p1 - p0);
-		d1 = (p2 - p0);
-		d0.normalize();
-		d1.normalize();
-
-		norm = d0^d1;
-
-		norms->at(v0) += norm;
-		norms->at(v1) += norm;
-		norms->at(v2) += norm;
-		norms->at(v3) += norm;
-	}
-#endif
 }
 
 

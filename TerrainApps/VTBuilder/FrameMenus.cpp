@@ -221,13 +221,15 @@ EVT_MENU(ID_IMAGE_REPLACE_RGB,		MainFrame::OnImageReplaceRGB)
 EVT_MENU(ID_IMAGE_CREATE_OVERVIEWS,	MainFrame::OnImageCreateOverviews)
 EVT_MENU(ID_IMAGE_CREATE_OVER_ALL,	MainFrame::OnImageCreateOverviewsAll)
 EVT_MENU(ID_IMAGE_CREATE_MIPMAPS,	MainFrame::OnImageCreateMipMaps)
+EVT_MENU(ID_IMAGE_LOAD_MIPMAPS,		MainFrame::OnImageLoadMipMaps)
 EVT_MENU(ID_IMAGE_EXPORT_TILES,		MainFrame::OnImageExportTiles)
 EVT_MENU(ID_IMAGE_EXPORT_PPM,		MainFrame::OnImageExportPPM)
 
 EVT_UPDATE_UI(ID_IMAGE_REPLACE_RGB,	MainFrame::OnUpdateHaveImageLayer)
 EVT_UPDATE_UI(ID_IMAGE_CREATE_OVERVIEWS, MainFrame::OnUpdateHaveImageLayer)
 EVT_UPDATE_UI(ID_IMAGE_CREATE_OVER_ALL, MainFrame::OnUpdateHaveImageLayer)
-EVT_UPDATE_UI(ID_IMAGE_CREATE_MIPMAPS,	MainFrame::OnUpdateHaveImageLayerInMem)
+EVT_UPDATE_UI(ID_IMAGE_CREATE_MIPMAPS, MainFrame::OnUpdateHaveImageLayerInMem)
+EVT_UPDATE_UI(ID_IMAGE_LOAD_MIPMAPS, MainFrame::OnUpdateHaveImageLayer)
 EVT_UPDATE_UI(ID_IMAGE_EXPORT_TILES,MainFrame::OnUpdateHaveImageLayer)
 EVT_UPDATE_UI(ID_IMAGE_EXPORT_PPM,	MainFrame::OnUpdateHaveImageLayer)
 
@@ -545,6 +547,7 @@ void MainFrame::CreateMenus()
 	imgMenu->Append(ID_IMAGE_CREATE_OVERVIEWS, _("Create Overviews on Disk"));
 	imgMenu->Append(ID_IMAGE_CREATE_OVER_ALL, _("Create Overviews on Disk for All Images"));
 	imgMenu->Append(ID_IMAGE_CREATE_MIPMAPS, _("Create Overviews in Memory"));
+	//imgMenu->Append(ID_IMAGE_LOAD_MIPMAPS, _("Load Overviews into Memory"));
 	imgMenu->AppendSeparator();
 	imgMenu->Append(ID_IMAGE_EXPORT_TILES, _("Export to libMini tileset..."));
 	imgMenu->Append(ID_IMAGE_EXPORT_PPM, _("Export to PPM"));
@@ -2528,6 +2531,17 @@ void MainFrame::OnImageCreateMipMaps(wxCommandEvent& event)
 
 	pIL->GetImage()->AllocMipMaps();
 	pIL->GetImage()->DrawMipMaps();
+
+	CloseProgressDialog();
+}
+
+void MainFrame::OnImageLoadMipMaps(wxCommandEvent& event)
+{
+	vtImageLayer *pIL = GetActiveImageLayer();
+
+	OpenProgressDialog(_("Loading Overviews"), _T(""), false, this);
+
+	pIL->GetImage()->LoadOverviews();
 
 	CloseProgressDialog();
 }

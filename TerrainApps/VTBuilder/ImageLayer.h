@@ -1,16 +1,17 @@
 //
 // ImageLayer.h
 //
-// Copyright (c) 2002-2008 Virtual Terrain Project
+// Copyright (c) 2002-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
-#ifndef IMAGELAYER_H
-#define IMAGELAYER_H
+#pragma once
 
 class vtImage;
 
+#include <map>
 #include "Layer.h"
+#include "GLTexture.h"
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -43,11 +44,16 @@ public:
 	void ReplaceColor(const RGBi &rgb1, const RGBi &rgb2);
 
 protected:
+	void DrawLayerOutline(vtScaledView *pView);
+
+	// One vtImage can have any number of overviews, of which some may be on
+	// disk, and others in memory as vtDIBs.
 	vtImage	*m_pImage;
+
+	// Each vtDIB we want to draw will need a GLTexture.
+	std::map<vtDIB*, GLTexture> m_Textures;
 };
 
 // Helper
 int GetBitDepthUsingGDAL(const char *fname);
 void MakeSampleOffsets(const DPoint2 cellsize, uint N, DLine2 &offsets);
-
-#endif	// IMAGELAYER_H

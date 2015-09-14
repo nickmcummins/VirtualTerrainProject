@@ -16,6 +16,7 @@
 #include "ImageLayer.h"
 #include "vtImage.h"
 #include "Options.h"
+#include "ScaledView.h"
 #include "minidata/LocalDatabuf.h"
 
 vtImageLayer::vtImageLayer() : vtLayer(LT_IMAGE)
@@ -44,7 +45,33 @@ bool vtImageLayer::GetExtent(DRECT &rect)
 
 void vtImageLayer::DrawLayer(vtScaledView *pView, UIContext &ui)
 {
-	m_pImage->DrawToView(pView);
+	vtDIB *pDib = m_pImage->GetBitmapToDraw(pView);
+
+	if (pDib)
+	{
+		auto iter = m_Textures.find(pDib);
+		if (iter == m_Textures.end())
+		{
+			GLTexture glt;
+			glt.CreateFromBitmap(pDib);
+			m_Textures[pDib] = glt;
+		}
+
+		DRECT rect;
+		m_pImage->GetExtent(rect);
+		m_Textures[pDib].Draw(pView, rect);
+		return;
+	}
+
+	DrawLayerOutline(pView);
+}
+
+void vtImageLayer::DrawLayerOutline(vtScaledView *pView)
+{
+	DRECT rect;
+	m_pImage->GetExtent(rect);
+	glColor3f(1.0f, 1.0f, 0.0f);
+	pView->DrawRectangle(rect);
 }
 
 bool vtImageLayer::TransformCoords(vtCRS &crs_new)
@@ -189,7 +216,7 @@ void vtImageLayer::GetPropertyText(wxString &strIn)
 		if (bmi.m_bOnDisk)
 		{
 			str += _T(", ");
-			str += _("overview on disk");
+			str += _("on disk");
 		}
 
 		str += _T("\n");

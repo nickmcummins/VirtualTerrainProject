@@ -424,7 +424,7 @@ void Builder::ExportBitmap(vtElevLayer *pEL, RenderOptions &ropt)
 
 	if (ropt.m_bToFile)
 	{
-		if (!dib.Create(size, 24))
+		if (!dib.Allocate(size, 24))
 		{
 			DisplayAndLog("Failed to create bitmap.");
 			return;
@@ -952,12 +952,12 @@ bool Builder::SampleElevationToTileset(BuilderView *pView, TilingOptions &opts,
 
 				if (opts.bImageAlpha)
 				{
-					dib.Create(IPoint2(base_tilesize, base_tilesize), 32);
+					dib.Allocate(IPoint2(base_tilesize, base_tilesize), 32);
 					base_lod.ColorDibFromTable(&dib, &cmap, RGBAi(0,0,0,0));	// Black transparent
 				}
 				else
 				{
-					dib.Create(IPoint2(base_tilesize, base_tilesize), 24);
+					dib.Allocate(IPoint2(base_tilesize, base_tilesize), 24);
 					base_lod.ColorDibFromTable(&dib, &cmap, RGBi(255,0,0));		// Red
 				}
 
@@ -1329,12 +1329,5 @@ bool Builder::SampleImageryToTileset(BuilderView *pView, TilingOptions &opts,
 	VTLOG1("\n");
 	wxMessageBox(str);
 
-	// Statistics
-	for (im = 0; im < num_image; im++)
-	{
-		LineBufferGDAL &buf = images[im]->GetImage()->m_linebuf;
-		VTLOG(" Image %d (size %d x %d): %d line reads, %d block reads\n", im,
-			buf.m_iXSize, buf.m_iYSize, buf.m_linereads, buf.m_blockreads);
-	}
 	return true;
 }

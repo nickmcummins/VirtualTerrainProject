@@ -209,8 +209,8 @@ void vtBitmap::ContentsChanged()
 class membuf
 {
 public:
-	membuf(byte *data) { m_data = data; m_offset = 0; }
-	byte *m_data;
+	membuf(uint8_t *data) { m_data = data; m_offset = 0; }
+	uint8_t *m_data;
 	int m_offset;
 };
 
@@ -222,14 +222,14 @@ void user_read_data(png_structp png_ptr,
 	buf->m_offset += (uint)length;
 }
 
-bool vtBitmap::ReadPNGFromMemory(uchar *buf, int len)
+bool vtBitmap::ReadPNGFromMemory(uchar *buf, int len, bool progress_callback(int))
 {
 #if USE_DIBSECTIONS
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png)
 	{
-		// We compiled against the headers of one version of libpng, but
-		// linked against the libraries from another version.
+		// Possibly, we compiled against the headers of one version of libpng,
+		// but linked against the libraries from another version.
 		return false;
 	}
 	png_infop info = png_create_info_struct(png);
@@ -256,26 +256,25 @@ bool vtBitmap::ReadPNGFromMemory(uchar *buf, int len)
 	if (color == PNG_COLOR_TYPE_GRAY || color == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb(png);
 
-	// Do strip alpha
-	if (color&PNG_COLOR_MASK_ALPHA)
-	{
-		png_set_strip_alpha(png);
-		color &= ~PNG_COLOR_MASK_ALPHA;
-	}
+	// Don't strip alpha
+	//if (color&PNG_COLOR_MASK_ALPHA)
+	//{
+	//	png_set_strip_alpha(png);
+	//	color &= ~PNG_COLOR_MASK_ALPHA;
+	//}
 
 	// Always expand paletted images
 //	if (!(PalettedTextures && mipmap >= 0 && trans == PNG_SOLID))
-		if (color == PNG_COLOR_TYPE_PALETTE)
-			png_set_expand(png);
+	if (color == PNG_COLOR_TYPE_PALETTE)
+		png_set_expand(png);
 
 	png_read_update_info(png, info);
 
 	uchar *m_pPngData = (png_bytep) malloc(png_get_rowbytes(png, info)*height);
 	png_bytep *row_p = (png_bytep *) malloc(sizeof(png_bytep)*height);
 
-	png_uint_32 i;
-	bool StandardOrientation = false;
-	for (i = 0; i < height; i++) {
+	const bool StandardOrientation = false;
+	for (png_uint_32 i = 0; i < height; i++) {
 		if (StandardOrientation)
 			row_p[height - 1 - i] = &m_pPngData[png_get_rowbytes(png, info)*i];
 		else
@@ -293,22 +292,23 @@ bool vtBitmap::ReadPNGFromMemory(uchar *buf, int len)
 		case PNG_COLOR_TYPE_PALETTE:
 			iBitCount = 24;
 			break;
-
 		case PNG_COLOR_TYPE_GRAY_ALPHA:
 		case PNG_COLOR_TYPE_RGB_ALPHA:
 			iBitCount = 32;
 			break;
-
 		default:
 			return false;
 	}
 
-	Allocate24(IPoint2(width, height));
+	Allocate(IPoint2(width, height), iBitCount);
 
-	size_t png_stride = png_get_rowbytes(png, info);
+	png_size_t png_stride = png_get_rowbytes(png, info);
 	uint row, col;
 	for (row = 0; row < height; row++)
 	{
+		if (progress_callback != NULL)
+			progress_callback(row * 100 / height);
+
 		byte *adr = m_pScanline + (row * m_iScanlineWidth);
 		png_bytep inptr = m_pPngData + row*png_stride;
 

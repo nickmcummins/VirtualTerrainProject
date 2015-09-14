@@ -14,6 +14,7 @@
 #include "Layer.h"
 #include "ElevDrawOptions.h"
 #include "TilingOptions.h"
+#include "GLTexture.h"
 
 #define SHADING_BIAS	200
 
@@ -115,15 +116,14 @@ protected:
 	vtTin2d *m_pTin;
 
 	bool	m_bNeedsDraw;
-	bool	m_bBitmapRendered;
+	bool	m_bBitmapRendered;	// Rendered, and copied to m_Texture
 	float	m_fSpacing;
 	bool	m_bPreferGZip;	// user wants their elevation treated as a .gz file
 	DPoint2 mTrim1, mTrim2;
 
-	IPoint2 m_ImageSize;
-
 	vtDIB	m_Bitmap;
-	unsigned int m_iTextureId;
+	IPoint2 m_ImageSize;
+	GLTexture m_Texture;
 };
 
 // Helpers

@@ -426,21 +426,13 @@ void vtElevLayer::SetupBitmap()
 		m_ImageSize.y = rows / div;
 	}
 
-	if (!m_Bitmap.Create(m_ImageSize, 32))
+	if (!m_Bitmap.Allocate(m_ImageSize, 32))
 	{
 		DisplayAndLog(_("Couldn't create bitmap, probably too large."));
 	}
-	// And also the texture
-	// allocate a texture name
-	glGenTextures(1, &m_iTextureId);
-	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_ImageSize.x, m_ImageSize.y, 0, GL_RGBA,
-		GL_UNSIGNED_BYTE, m_Bitmap.GetData());
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	// And also the texture
+	m_Texture.CreateFromBitmap(&m_Bitmap);
 
 	m_bNeedsDraw = true;
 }
@@ -511,9 +503,7 @@ void vtElevLayer::RenderBitmap()
 	VTLOG("RenderBitmap: %.3f seconds.\n", time);
 
 	// Copy to texture
-	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_ImageSize.x, m_ImageSize.y, GL_RGBA,
-		GL_UNSIGNED_BYTE, m_Bitmap.GetData());
+	m_Texture.CopyImageFromBitmap(&m_Bitmap);
 
 	m_bBitmapRendered = true;
 }
@@ -533,22 +523,7 @@ void vtElevLayer::DrawLayerBitmap(vtScaledView *pView)
 		return;
 	}
 
-	// Enable textures
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
-	glDisable(GL_LIGHTING);
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-	DRECT area = m_pGrid->GetAreaExtents();
-
-	glBegin(GL_QUADS);
-	glTexCoord2d(0.0, 0.0);		pView->SendVertex(area.left, area.bottom);
-	glTexCoord2d(1.0, 0.0); 	pView->SendVertex(area.right, area.bottom);
-	glTexCoord2d(1.0, 1.0); 	pView->SendVertex(area.right, area.top);
-	glTexCoord2d(0.0, 1.0); 	pView->SendVertex(area.left, area.top);
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
+	m_Texture.Draw(pView, m_pGrid->GetAreaExtents());
 }
 
 void vtElevLayer::DrawLayerOutline(vtScaledView *pView)
@@ -1554,12 +1529,12 @@ bool vtElevLayer::WriteElevationTileset(TilingOptions &opts, BuilderView *pView)
 
 				if (opts.bImageAlpha)
 				{
-					dib.Create(IPoint2(base_tilesize, base_tilesize), 32);
+					dib.Allocate(IPoint2(base_tilesize, base_tilesize), 32);
 					base_lod.ColorDibFromElevation(&dib, &cmap, 4000, RGBAi(0,0,0,0));
 				}
 				else
 				{
-					dib.Create(IPoint2(base_tilesize, base_tilesize), 24);
+					dib.Allocate(IPoint2(base_tilesize, base_tilesize), 24);
 					base_lod.ColorDibFromElevation(&dib, &cmap, 4000, RGBi(255,0,0));
 				}
 

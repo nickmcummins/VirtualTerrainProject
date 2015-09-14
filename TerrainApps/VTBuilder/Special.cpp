@@ -40,7 +40,7 @@ bool ProcessBillboardTexture(const char *fname_in, const char *fname_out,
 	// First pass: restore color of edge texels by guessing correct
 	//  non-background color.
 	RGBAi c, res, diff;
-	dib2.Create(size, 32);
+	dib2.Allocate(size, 32);
 	for (int i = 0; i < size.x; i++)
 	{
 		progress_callback(i * 100 / size.x);
@@ -71,7 +71,7 @@ bool ProcessBillboardTexture(const char *fname_in, const char *fname_out,
 
 	// Now make many passes over the bitmap, filling in areas of alpha==0
 	//  with values from the nearest pixels.
-	dib3.Create(size, 24);
+	dib3.Allocate(size, 24);
 	int filled_in = 1;
 	int progress_target = -1;
 	while (filled_in)
@@ -677,7 +677,7 @@ void MainFrame::DoDymaxTexture()
 	for (int i = 0; i < 10; i++)
 	{
 		vtDIB out;
-		out.Create(IPoint2(output_size, output_size), depth);
+		out.Allocate(IPoint2(output_size, output_size), depth);
 
 		wxString msg;
 		msg.Printf(_("Creating tile %d ..."), i+1);
@@ -801,7 +801,7 @@ void MainFrame::DoDymaxMap()
 	// Make output
 	vtDIB out;
 	VTLOG("output: size %d %d\n", output_x, output_y);
-	if (!out.Create(IPoint2(output_x, output_y), depth))
+	if (!out.Allocate(IPoint2(output_x, output_y), depth))
 	{
 		vtString msg;
 		msg.Format("Could not allocate DIB of size %d x %d (%.1f MB)", output_x, output_y,

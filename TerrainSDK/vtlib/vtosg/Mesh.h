@@ -13,9 +13,7 @@
 #include <osgText/Font>
 #include <osgText/Text>
 
-#ifdef VTP_AVOID_OSG_INDICES
 //#define USE_OPENGL_BUFFER_OBJECTS
-#endif
 
 // Vertex values
 #define VT_Normals		1
@@ -167,9 +165,11 @@ protected:
 	const osg::Vec2Array *getTexCoords() const { return (const osg::Vec2Array*) getTexCoordArray(0); }
 
 	int m_iMatIdx;
-#ifdef VTP_AVOID_OSG_INDICES
+
+	// OSG Geometry objects can have many kinds of primitives in them, but
+	// vtMesh expects them to all the same kind, so we store that here.
+	// TODO: Could we remove this and simply get the type of the first PrimSet?
 	PrimType m_PrimType;
-#endif
 };
 
 /** A Font for use with vtTextMesh. */

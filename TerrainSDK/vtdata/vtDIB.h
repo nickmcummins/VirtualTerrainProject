@@ -19,6 +19,9 @@ class vtBitmapBase
 public:
 	virtual ~vtBitmapBase() {}
 
+	virtual bool Allocate(const IPoint2 &size, int bitdepth) = 0;
+	virtual bool IsAllocated() const = 0;
+
 	virtual uchar GetPixel8(int x, int y) const = 0;
 	virtual void GetPixel24(int x, int y, RGBi &rgb) const = 0;
 	virtual void GetPixel32(int x, int y, RGBAi &rgba) const = 0;
@@ -47,12 +50,13 @@ public:
 	vtDIB();
 	virtual ~vtDIB();
 
-	bool Create(const IPoint2 &size, int bitdepth);
+	bool Allocate(const IPoint2 &size, int bitdepth);
 	bool IsAllocated() const;
 
 	bool Read(const char *fname, bool progress_callback(int) = NULL);
 	bool ReadJPEG(const char *fname, bool progress_callback(int) = NULL);
 	bool ReadPNG(const char *fname, bool progress_callback(int) = NULL);
+	bool ReadPNGFromMemory(uchar *buf, int len, bool progress_callback(int) = NULL);
 
 	bool WriteJPEG(const char *fname, int quality, bool progress_callback(int) = NULL);
 	bool WritePNG(const char *fname);
@@ -80,8 +84,6 @@ public:
 	uint GetDepth() const { return m_iByteCount * 8; }
 
 	void *GetData() const { return m_Data; }
-
-	bool	m_bLoadedSuccessfully;
 
 private:
 	// The DIB's header and data

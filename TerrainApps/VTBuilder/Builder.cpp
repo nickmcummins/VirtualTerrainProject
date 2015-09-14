@@ -1290,7 +1290,7 @@ bool Builder::SampleCurrentImages(vtImageLayer *pTargetLayer)
 				pTarget->SetRGBA(i, Size.y-1-j, rgba);
 			else
 				// write NODATA (black, with no alpha, for now)
-				pTarget->SetRGBA(i, Size.y-1-j, 0, 0, 0, 0);
+				pTarget->SetRGBA(i, Size.y-1-j, RGBAi(0, 0, 0, 0));
 		}
 	}
 	CloseProgressDialog();

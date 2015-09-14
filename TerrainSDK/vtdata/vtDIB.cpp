@@ -112,7 +112,6 @@ void vtBitmapBase::BlitTo(vtBitmapBase &target, int x, int y)
  */
 vtDIB::vtDIB()
 {
-	m_bLoadedSuccessfully = false;
 	m_Data = NULL;
 }
 
@@ -127,7 +126,7 @@ vtDIB::~vtDIB()
 /**
  * Create a new DIB in memory.
  */
-bool vtDIB::Create(const IPoint2 &size, int bitdepth)
+bool vtDIB::Allocate(const IPoint2 &size, int bitdepth)
 {
 	m_iWidth = size.x;
 	m_iHeight = size.y;
@@ -200,7 +199,7 @@ bool vtDIB::ReadJPEG(const char *fname, bool progress_callback(int))
 		bitdepth = 8;
 	else
 		bitdepth = 24;
-	if (!Create(IPoint2(cinfo.image_width, cinfo.image_height), bitdepth))
+	if (!Allocate(IPoint2(cinfo.image_width, cinfo.image_height), bitdepth))
 		return false;
 
 	/* Start decompressor */
@@ -352,30 +351,18 @@ bool vtDIB::WriteJPEG(const char *fname, int quality, bool progress_callback(int
  */
 bool vtDIB::ReadPNG(const char *fname, bool progress_callback(int))
 {
-	FILE *fp = NULL;
-
-	uchar header[8];
-	png_structp png;
-	png_infop   info;
-	png_infop   endinfo;
-	png_bytep  *row_p;
-
-	png_uint_32 width, height;
-	int depth, color;
-
-	png_uint_32 i;
-	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png)
 	{
-		// We compiled against the headers of one version of libpng, but
-		// linked against the libraries from another version.  If you get
-		// this, fix the paths in your development environment.
+		// Possibly, we compiled against the headers of one version of libpng,
+		// but linked against the libraries from another version.
 		return false;
 	}
-	info = png_create_info_struct(png);
-	endinfo = png_create_info_struct(png);
+	png_infop info = png_create_info_struct(png);
+	png_infop endinfo = png_create_info_struct(png);
 
-	fp = vtFileOpen(fname, "rb");
+	FILE *fp = vtFileOpen(fname, "rb");
+	uchar header[8];
 	if (fp && fread(header, 1, 8, fp) && png_check_sig(header, 8))
 		png_init_io(png, fp);
 	else
@@ -386,27 +373,31 @@ bool vtDIB::ReadPNG(const char *fname, bool progress_callback(int))
 	png_set_sig_bytes(png, 8);
 
 	png_read_info(png, info);
+
+	png_uint_32 width, height;
+	int depth, color;
 	png_get_IHDR(png, info, &width, &height, &depth, &color, NULL, NULL, NULL);
 
 	if (color == PNG_COLOR_TYPE_GRAY || color == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb(png);
 
 	// Don't strip alpha
-//	if (color&PNG_COLOR_MASK_ALPHA)
-//	{
-//		png_set_strip_alpha(png);
-//		color &= ~PNG_COLOR_MASK_ALPHA;
-//	}
+	//if (color&PNG_COLOR_MASK_ALPHA)
+	//{
+	//	png_set_strip_alpha(png);
+	//	color &= ~PNG_COLOR_MASK_ALPHA;
+	//}
 
 	// Always expand paletted images
 //	if (!(PalettedTextures && mipmap >= 0 && trans == PNG_SOLID))
-		if (color == PNG_COLOR_TYPE_PALETTE)
-			png_set_expand(png);
+	if (color == PNG_COLOR_TYPE_PALETTE)
+		png_set_expand(png);
 
-	/*--GAMMA--*/
+#if 0
+		/*--GAMMA--*/
 //	checkForGammaEnv();
 	double screenGamma = 2.2 / 1.0;
-#if 0
+
 	// Getting the gamma from the PNG file is disabled here, since
 	// PhotoShop writes bizarre gamma values like .227 (PhotoShop 5.0)
 	// or .45 (newer versions)
@@ -414,20 +405,20 @@ bool vtDIB::ReadPNG(const char *fname, bool progress_callback(int))
 	if (png_get_gAMA(png, info, &fileGamma))
 		png_set_gamma(png, screenGamma, fileGamma);
 	else
-#endif
 		png_set_gamma(png, screenGamma, 1.0/2.2);
+#endif
 
 	png_read_update_info(png, info);
 
-	uchar *m_pPngData = (png_bytep) malloc(png_get_rowbytes(png, info)*height);
-	row_p = (png_bytep *) malloc(sizeof(png_bytep)*height);
+	uchar *pPngData = (png_bytep) malloc(png_get_rowbytes(png, info)*height);
+	png_bytep  *row_p = (png_bytep *) malloc(sizeof(png_bytep)*height);
 
 	bool StandardOrientation = true;
-	for (i = 0; i < height; i++) {
+	for (png_uint_32 i = 0; i < height; i++) {
 		if (StandardOrientation)
-			row_p[height - 1 - i] = &m_pPngData[png_get_rowbytes(png, info)*i];
+			row_p[height - 1 - i] = &pPngData[png_get_rowbytes(png, info)*i];
 		else
-			row_p[i] = &m_pPngData[png_get_rowbytes(png, info)*i];
+			row_p[i] = &pPngData[png_get_rowbytes(png, info)*i];
 	}
 
 	png_read_image(png, row_p);
@@ -441,62 +432,189 @@ bool vtDIB::ReadPNG(const char *fname, bool progress_callback(int))
 		case PNG_COLOR_TYPE_PALETTE:
 			iBitCount = 24;
 			break;
-
 		case PNG_COLOR_TYPE_GRAY_ALPHA:
 		case PNG_COLOR_TYPE_RGB_ALPHA:
 			iBitCount = 32;
 			break;
-
 		default:
 			return false;
 	}
 
-	Create(IPoint2(width, height), iBitCount);
+	Allocate(IPoint2(width, height), iBitCount);
 
-	int png_stride = png_get_rowbytes(png, info);
-	uint row, col;
-	for (row = 0; row < height; row++)
+	png_size_t png_stride = png_get_rowbytes(png, info);
+	for (uint row = 0; row < height; row++)
 	{
 		if (progress_callback != NULL)
 			progress_callback(row * 100 / height);
 
 		uint8_t *adr = ((uint8_t *)m_Data) + row*m_iByteWidth;
-		png_bytep inptr = m_pPngData + row*png_stride;
+		const png_bytep inptr = pPngData + row*png_stride;
 		if (iBitCount == 8)
 		{
-			for (col = 0; col < width; col++)
-				*adr++ = *inptr++;
+			memcpy(adr, inptr, width);
 		}
 		else if (iBitCount == 24)
 		{
-			for (col = 0; col < width; col++)
-			{
-				adr[2] = *inptr++;
-				adr[1] = *inptr++;
-				adr[0] = *inptr++;
-				adr += 3;
-			}
+			memcpy(adr, inptr, width * 3);
 		}
 		else if (iBitCount == 32)
 		{
-			for (col = 0; col < width; col++)
-			{
-				adr[2] = *inptr++;
-				adr[1] = *inptr++;
-				adr[0] = *inptr++;
-				adr[3] = *inptr++;
-				adr += 4;
-			}
+			memcpy(adr, inptr, width * 4);
 		}
 	}
 
 	png_read_end(png, endinfo);
 	png_destroy_read_struct(&png, &info, &endinfo);
-	free(m_pPngData);
+	free(pPngData);
 	fclose(fp);
 	return true;
 }
 
+// The following small class and function provide the ability for libpng to
+//  read a PNG file from memory.
+class membuf
+{
+public:
+	membuf(uint8_t *data) { m_data = data; m_offset = 0; }
+	uint8_t *m_data;
+	int m_offset;
+};
+
+void user_read_data(png_structp png_ptr,
+	png_bytep data, png_size_t length)
+{
+	membuf *buf = (membuf *)png_get_io_ptr(png_ptr);
+	memcpy(data, buf->m_data + buf->m_offset, length);
+	buf->m_offset += (uint)length;
+}
+
+/**
+* Read a PNG file. A DIB of the necessary size and depth is allocated.
+*
+* \return True if successful.
+*/
+bool vtDIB::ReadPNGFromMemory(uchar *buf, int len, bool progress_callback(int))
+{
+	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if (!png)
+	{
+		// Possibly, we compiled against the headers of one version of libpng,
+		// but linked against the libraries from another version.
+		return false;
+	}
+	png_infop info = png_create_info_struct(png);
+	png_infop endinfo = png_create_info_struct(png);
+
+	if (!png_check_sig(buf, 8))
+	{
+		png_destroy_read_struct(&png, &info, &endinfo);
+		return false;
+	}
+	png_set_sig_bytes(png, 8);
+
+	// Tell libpng we want to use our own read function (to read from a memory
+	//  buffer instead of FILE io)
+	membuf buffer(buf + 8);
+	png_set_read_fn(png, &buffer, user_read_data);
+
+	png_read_info(png, info);
+
+	png_uint_32 width, height;
+	int depth, color;
+	png_get_IHDR(png, info, &width, &height, &depth, &color, NULL, NULL, NULL);
+
+	if (color == PNG_COLOR_TYPE_GRAY || color == PNG_COLOR_TYPE_GRAY_ALPHA)
+		png_set_gray_to_rgb(png);
+
+	// Don't strip alpha
+	//if (color&PNG_COLOR_MASK_ALPHA)
+	//{
+	//	png_set_strip_alpha(png);
+	//	color &= ~PNG_COLOR_MASK_ALPHA;
+	//}
+
+	// Always expand paletted images
+	//	if (!(PalettedTextures && mipmap >= 0 && trans == PNG_SOLID))
+	if (color == PNG_COLOR_TYPE_PALETTE)
+		png_set_expand(png);
+
+#if 0
+	/*--GAMMA--*/
+	//	checkForGammaEnv();
+	double screenGamma = 2.2 / 1.0;
+
+	// Getting the gamma from the PNG file is disabled here, since
+	// PhotoShop writes bizarre gamma values like .227 (PhotoShop 5.0)
+	// or .45 (newer versions)
+	double	fileGamma;
+	if (png_get_gAMA(png, info, &fileGamma))
+		png_set_gamma(png, screenGamma, fileGamma);
+	else
+		png_set_gamma(png, screenGamma, 1.0 / 2.2);
+#endif
+
+	png_read_update_info(png, info);
+
+	uchar *pPngData = (png_bytep)malloc(png_get_rowbytes(png, info)*height);
+	png_bytep  *row_p = (png_bytep *)malloc(sizeof(png_bytep)*height);
+
+	const bool StandardOrientation = true;
+	for (png_uint_32 i = 0; i < height; i++) {
+		if (StandardOrientation)
+			row_p[height - 1 - i] = &pPngData[png_get_rowbytes(png, info)*i];
+		else
+			row_p[i] = &pPngData[png_get_rowbytes(png, info)*i];
+	}
+
+	png_read_image(png, row_p);
+	free(row_p);
+
+	int iBitCount;
+	switch (color)
+	{
+	case PNG_COLOR_TYPE_GRAY:
+	case PNG_COLOR_TYPE_RGB:
+	case PNG_COLOR_TYPE_PALETTE:
+		iBitCount = 24;
+		break;
+	case PNG_COLOR_TYPE_GRAY_ALPHA:
+	case PNG_COLOR_TYPE_RGB_ALPHA:
+		iBitCount = 32;
+		break;
+	default:
+		return false;
+	}
+
+	Allocate(IPoint2(width, height), iBitCount);
+
+	png_size_t png_stride = png_get_rowbytes(png, info);
+	for (uint row = 0; row < height; row++)
+	{
+		if (progress_callback != NULL)
+			progress_callback(row * 100 / height);
+
+		uint8_t *adr = ((uint8_t *)m_Data) + row*m_iByteWidth;
+		const png_bytep inptr = pPngData + row*png_stride;
+		if (iBitCount == 8)
+		{
+			memcpy(adr, inptr, width);
+		}
+		else if (iBitCount == 24)
+		{
+			memcpy(adr, inptr, width * 3);
+		}
+		else if (iBitCount == 32)
+		{
+			memcpy(adr, inptr, width * 4);
+		}
+	}
+
+	png_read_end(png, endinfo);
+	png_destroy_read_struct(&png, &info, &endinfo);
+	free(pPngData);
+	return true;
+}
 
 /**
  * Write a PNG file.
@@ -506,7 +624,6 @@ bool vtDIB::ReadPNG(const char *fname, bool progress_callback(int))
 bool vtDIB::WritePNG(const char *fname)
 {
 	FILE *fp;
-	png_structp png_ptr;
 	png_infop info_ptr;
 	png_colorp palette = NULL;
 
@@ -521,37 +638,37 @@ bool vtDIB::WritePNG(const char *fname)
 	* the library version is compatible with the one used at compile time,
 	* in case we are using dynamically linked libraries.  REQUIRED.
 	*/
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING,
 		NULL, NULL, NULL);
 
-	if (png_ptr == NULL)
+	if (png == NULL)
 	{
 		fclose(fp);
 		return false;
 	}
 
 	/* Allocate/initialize the image information data.  REQUIRED */
-	info_ptr = png_create_info_struct(png_ptr);
+	info_ptr = png_create_info_struct(png);
 	if (info_ptr == NULL)
 	{
 		fclose(fp);
-		png_destroy_write_struct(&png_ptr,  png_infopp_NULL);
+		png_destroy_write_struct(&png,  png_infopp_NULL);
 		return false;
 	}
 
 	/* Set error handling.  REQUIRED if you aren't supplying your own
 	* error handling functions in the png_create_write_struct() call.
 	*/
-	if (setjmp(png_jmpbuf(png_ptr)))
+	if (setjmp(png_jmpbuf(png)))
 	{
 		/* If we get here, we had a problem reading the file */
 		fclose(fp);
-		png_destroy_write_struct(&png_ptr, &info_ptr);
+		png_destroy_write_struct(&png, &info_ptr);
 		return false;
 	}
 
 	/* set up the output control if you are using standard C streams */
-	png_init_io(png_ptr, fp);
+	png_init_io(png, fp);
 
 	/* This is the hard way */
 
@@ -576,7 +693,7 @@ bool vtDIB::WritePNG(const char *fname)
 		png_bit_depth = 8;
 	}
 
-	png_set_IHDR(png_ptr, info_ptr, m_iWidth, m_iHeight, png_bit_depth, color_type,
+	png_set_IHDR(png, info_ptr, m_iWidth, m_iHeight, png_bit_depth, color_type,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
 	/* You must not free palette here, because png_set_PLTE only makes a link to
@@ -586,14 +703,14 @@ bool vtDIB::WritePNG(const char *fname)
 	/* Optional gamma chunk is strongly suggested if you have any guess
 	* as to the correct gamma of the image.
 	*/
-//	png_set_gAMA(png_ptr, info_ptr, gamma);
+//	png_set_gAMA(png, info_ptr, gamma);
 
 	/* other optional chunks like cHRM, bKGD, tRNS, tIME, oFFs, pHYs, */
 	/* note that if sRGB is present the gAMA and cHRM chunks must be ignored
 	 * on read and must be written in accordance with the sRGB profile */
 
 	/* Write the file header information.  REQUIRED */
-	png_write_info(png_ptr, info_ptr);
+	png_write_info(png, info_ptr);
 
 	/* The easiest way to write the image (you may have a different memory
 	 * layout, however, so choose what fits your needs best).  You need to
@@ -639,7 +756,7 @@ bool vtDIB::WritePNG(const char *fname)
 	}
 
 	/* write out the entire image data in one call */
-	png_write_image(png_ptr, row_pointers);
+	png_write_image(png, row_pointers);
 
    /* You can write optional chunks like tEXt, zTXt, and tIME at the end
 	* as well.  Shouldn't be necessary in 1.1.0 and up as all the public
@@ -648,7 +765,7 @@ bool vtDIB::WritePNG(const char *fname)
 	*/
 
 	/* It is REQUIRED to call this to finish writing the rest of the file */
-	png_write_end(png_ptr, info_ptr);
+	png_write_end(png, info_ptr);
 
 	/* If you png_malloced a palette, free it here (don't free info_ptr->palette,
 	  as recommended in versions 1.0.5m and earlier of this example; if
@@ -657,7 +774,7 @@ bool vtDIB::WritePNG(const char *fname)
 	  of png_free(). */
 	if (palette)
 	{
-		png_free(png_ptr, palette);
+		png_free(png, palette);
 		palette=NULL;
 	}
 
@@ -665,7 +782,7 @@ bool vtDIB::WritePNG(const char *fname)
 	free(row_pointers);
 
 	/* clean up after the write, and free any memory allocated */
-	png_destroy_write_struct(&png_ptr, &info_ptr);
+	png_destroy_write_struct(&png, &info_ptr);
 
 	/* close the file */
 	fclose(fp);
@@ -845,9 +962,9 @@ void vtDIB::SetPixel24(int x, int y, const RGBi &rgb)
 	// note: Most processors don't support unaligned int/float writes, and on
 	//	   those that do, it's slower than unaligned writes.
 	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	*((uint8_t *)(adr+0)) = (uchar) rgb.b;
+	*((uint8_t *)(adr+0)) = (uchar) rgb.r;
 	*((uint8_t *)(adr+1)) = (uchar) rgb.g;
-	*((uint8_t *)(adr+2)) = (uchar) rgb.r;
+	*((uint8_t *)(adr+2)) = (uchar) rgb.b;
 }
 
 void vtDIB::SetPixel32(int x, int y, const RGBAi &rgba)
@@ -857,9 +974,9 @@ void vtDIB::SetPixel32(int x, int y, const RGBAi &rgba)
 	// note: Most processors don't support unaligned int/float writes, and on
 	//	   those that do, it's slower than unaligned writes.
 	adr = ((uint8_t *)m_Data) + (m_iHeight-y-1)*m_iByteWidth + (x*m_iByteCount);
-	*((uint8_t *)(adr+0)) = (uchar) rgba.b;
+	*((uint8_t *)(adr+0)) = (uchar) rgba.r;
 	*((uint8_t *)(adr+1)) = (uchar) rgba.g;
-	*((uint8_t *)(adr+2)) = (uchar) rgba.r;
+	*((uint8_t *)(adr+2)) = (uchar) rgba.b;
 	if (m_iByteCount == 4)
 		*((uint8_t *)(adr+3)) = (uchar) rgba.a;
 }
