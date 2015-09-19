@@ -44,7 +44,7 @@ vtImage::vtImage(vtImage *copyfrom) :
 {
 }
 
-bool vtImage::Create(int width, int height, int bitdepth, bool create_palette)
+bool vtImage::Allocate(const IPoint2 &size, int bitdepth)
 {
 	GLenum pixelFormat;
 	GLenum dataType = GL_UNSIGNED_BYTE;
@@ -64,7 +64,7 @@ bool vtImage::Create(int width, int height, int bitdepth, bool create_palette)
 	else
 		return false;
 
-	allocateImage(width, height, 1, pixelFormat, dataType);
+	allocateImage(size.x, size.y, 1, pixelFormat, dataType);
 
 	return true;
 }
@@ -545,7 +545,7 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 
 	CPLErr Err;
 	bool bColorPalette = false;
-	int iXSize, iYSize;
+	IPoint2 imageSize;
 	int nxBlocks, nyBlocks;
 	int xBlockSize, yBlockSize;
 
@@ -556,8 +556,8 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 			throw "Couldn't open that file.";
 
 		// Get size
-		iXSize = pDataset->GetRasterXSize();
-		iYSize = pDataset->GetRasterYSize();
+		imageSize.x = pDataset->GetRasterXSize();
+		imageSize.y = pDataset->GetRasterYSize();
 
 		// Try getting CRS
 		vtCRS temp;
@@ -588,9 +588,9 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 		if (pDataset->GetGeoTransform(affineTransform) == CE_None)
 		{
 			m_extents.left = affineTransform[0];
-			m_extents.right = m_extents.left + affineTransform[1] * iXSize;
+			m_extents.right = m_extents.left + affineTransform[1] * imageSize.x;
 			m_extents.top = affineTransform[3];
-			m_extents.bottom = m_extents.top + affineTransform[5] * iYSize;
+			m_extents.bottom = m_extents.top + affineTransform[5] * imageSize.y;
 		}
 
 		// Raster count should be 3 for colour images (assume RGB)
@@ -629,8 +629,8 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 				throw "Unsupported color interpretation.";
 
 			pBand->GetBlockSize(&xBlockSize, &yBlockSize);
-			nxBlocks = (iXSize + xBlockSize - 1) / xBlockSize;
-			nyBlocks = (iYSize + yBlockSize - 1) / yBlockSize;
+			nxBlocks = (imageSize.x + xBlockSize - 1) / xBlockSize;
+			nyBlocks = (imageSize.y + yBlockSize - 1) / yBlockSize;
 			if (NULL == (pScanline = new uchar[xBlockSize * yBlockSize]))
 				throw "Couldnt allocate scan line.";
 		}
@@ -665,8 +665,8 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 				throw "Couldn't find bands for Red, Green, Blue.";
 
 			pRed->GetBlockSize(&xBlockSize, &yBlockSize);
-			nxBlocks = (iXSize + xBlockSize - 1) / xBlockSize;
-			nyBlocks = (iYSize + yBlockSize - 1) / yBlockSize;
+			nxBlocks = (imageSize.x + xBlockSize - 1) / xBlockSize;
+			nyBlocks = (imageSize.y + yBlockSize - 1) / yBlockSize;
 
 			pRedline = new uchar[xBlockSize * yBlockSize];
 			pGreenline = new uchar[xBlockSize * yBlockSize];
@@ -722,8 +722,8 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 				throw "Couldn't find bands for Red, Green, Blue, Alpha.";
 
 			pRed->GetBlockSize(&xBlockSize, &yBlockSize);
-			nxBlocks = (iXSize + xBlockSize - 1) / xBlockSize;
-			nyBlocks = (iYSize + yBlockSize - 1) / yBlockSize;
+			nxBlocks = (imageSize.x + xBlockSize - 1) / xBlockSize;
+			nyBlocks = (imageSize.y + yBlockSize - 1) / yBlockSize;
 
 			pRedline = new uchar[xBlockSize * yBlockSize];
 			pGreenline = new uchar[xBlockSize * yBlockSize];
@@ -734,18 +734,18 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 		// Allocate the image buffer
 		if (iRasterCount == 4)
 		{
-			Create(iXSize, iYSize, 32);
+			Allocate(imageSize, 32);
 		}
 		else if (iRasterCount == 3 || bColorPalette)
 		{
-			Create(iXSize, iYSize, 24);
+			Allocate(imageSize, 24);
 		}
 		else if (iRasterCount == 1)
-			Create(iXSize, iYSize, 8);
+			Allocate(imageSize, 8);
 
 		// Read the data
 #if LOG_IMAGE_LOAD
-		VTLOG("Reading the image data (%d x %d pixels)\n", iXSize, iYSize);
+		VTLOG("Reading the image data (%d x %d pixels)\n", imageSize.x, imageSize.y);
 #endif
 
 		int nxValid, nyValid;
@@ -769,13 +769,13 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 
 					// Compute the portion of the block that is valid
 					// for partial edge blocks.
-					if ((ixBlock+1) * xBlockSize > iXSize)
-						nxValid = iXSize - ixBlock * xBlockSize;
+					if ((ixBlock+1) * xBlockSize > imageSize.x)
+						nxValid = imageSize.x - ixBlock * xBlockSize;
 					else
 						nxValid = xBlockSize;
 
-					if( (iyBlock+1) * yBlockSize > iYSize)
-						nyValid = iYSize - iyBlock * yBlockSize;
+					if( (iyBlock+1) * yBlockSize > imageSize.y)
+						nyValid = imageSize.y - iyBlock * yBlockSize;
 					else
 						nyValid = yBlockSize;
 
@@ -827,13 +827,13 @@ bool vtImageGeo::ReadTIF(const char *filename, bool progress_callback(int))
 
 					// Compute the portion of the block that is valid
 					// for partial edge blocks.
-					if ((ixBlock+1) * xBlockSize > iXSize)
-						nxValid = iXSize - ixBlock * xBlockSize;
+					if ((ixBlock+1) * xBlockSize > imageSize.x)
+						nxValid = imageSize.x - ixBlock * xBlockSize;
 					else
 						nxValid = xBlockSize;
 
-					if( (iyBlock+1) * yBlockSize > iYSize)
-						nyValid = iYSize - iyBlock * yBlockSize;
+					if( (iyBlock+1) * yBlockSize > imageSize.y)
+						nyValid = imageSize.y - iyBlock * yBlockSize;
 					else
 						nyValid = yBlockSize;
 

@@ -48,7 +48,6 @@ void GLTexture::Draw(vtScaledView *pView, const DRECT &rect)
 	// Enable textures
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
-	glDisable(GL_LIGHTING);
 	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glBegin(GL_QUADS);

@@ -116,7 +116,7 @@ void SurfaceTexture::MakeDerivedTexture(const TParams &options, const vtHeightFi
 		cols, tmax, tsize);
 
 	vtImage *vti = new vtImage;
-	vti->Create(tsize, tsize, 24, false);
+	vti->Allocate(IPoint2(tsize, tsize), 24);
 	m_pUnshadedImage = vti;
 
 	// If they have not set a colormap (e.g. with vtTerrain::SetTextureColorMap)

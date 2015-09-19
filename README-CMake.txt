@@ -4,7 +4,7 @@ Instructions for CMake
 N.B. These instructions are for the windows GUI. On Linux you should follow a
 similar process using ccmake or one of the gui versions.
 
-1. You need at least CMake vesion 2.8. (Preferably 2.8.4)
+1. You need at least CMake vesion 3.0.
 
 2. Launch the cmake-gui program and set the "Where to build the binaries" 
 directory to the root of your VTP source tree. If the "Where is the source code"

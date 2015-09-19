@@ -220,7 +220,7 @@ void BuilderView::OnPaint(wxPaintEvent& event)  // overridden to draw this view
 	DrawAreaTool(g_bld->GetAtArea());
 
 	if (m_bShowGridMarks)
-		DrawGridMarks();	// erase
+		DrawGridMarks();
 
 	DrawDistanceTool();
 
@@ -708,7 +708,7 @@ void BuilderView::DrawAreaTool(const DRECT &area)
 
 	// dashed-line rectangle
 	glColor3f(1, 1, 1);
-	DrawInverseRect(area, true);
+	DrawInverseRect(area, true);	// true = Dashed.
 
 	DPoint2 d = PixelsToWorld(2);
 

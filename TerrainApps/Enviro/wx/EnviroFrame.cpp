@@ -852,7 +852,7 @@ void EnviroFrame::LoadClouds(const char *fname)
 			uint h = input->t();
 
 			vtImagePtr img2 = new vtImage;
-			img2->Create(w, h, 32);
+			img2->Allocate(IPoint2(w, h), 32);
 			RGBAi rgba(255,255,255,0);
 			for (uint i = 0; i < w; i++)
 				for (uint j = 0; j < h; j++)

@@ -393,7 +393,7 @@ void Enviro::MakeOverlayGlobe(vtImage *input, bool progress_callback(int))
 	for (int i = 0; i < 10; i++)
 	{
 		output[i] = new vtImage;
-		output[i]->Create(output_size, output_size, depth);
+		output[i]->Allocate(IPoint2(output_size, output_size), depth);
 
 		if (progress_callback != NULL)
 			progress_callback((i+1)*10);

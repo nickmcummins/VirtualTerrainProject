@@ -29,10 +29,10 @@ public:
 	vtImage(class vtDIB *pDIB);
 	vtImage(vtImage *copyfrom);
 
-	bool Create(int width, int height, int bitdepth, bool create_palette = false);
+	bool Allocate(const IPoint2 &size, int bitdepth);
 	bool WritePNG(const char *fname, bool progress_callback(int) = NULL);
 	bool WriteJPEG(const char *fname, int quality = 99, bool progress_callback(int) = NULL);
-	bool HasData() { return valid() && data() != NULL; }
+	bool IsAllocated() const { return valid() && data() != NULL; }
 	void Scale(int w, int h);
 
 	/// Return the name of the file, if any, from which the image was loaded.
@@ -73,6 +73,9 @@ public:
 	vtImageWrapper(osg::Image *image) { m_image = image; }
 
 	// Provide vtBitmapBase methods
+	bool Allocate(const IPoint2 &size, int bitdepth) { /* no-op */ return true; }
+	bool IsAllocated() const { return true;  }
+
 	uchar GetPixel8(int x, int y) const;
 	void GetPixel24(int x, int y, RGBi &rgb) const;
 	void GetPixel32(int x, int y, RGBAi &rgba) const;
