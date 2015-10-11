@@ -1,17 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Sep  8 2010)
+// C++ code generated with wxFormBuilder (version Jun 17 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef __VTBuilder_UI__
-#define __VTBuilder_UI__
+#ifndef __VTBUILDER_UI_H__
+#define __VTBUILDER_UI_H__
 
+#include <wx/artprov.h>
+#include <wx/xrc/xmlres.h>
 #include <wx/intl.h>
-
-class NodeDlgView;
-
 #include <wx/string.h>
 #include <wx/stattext.h>
 #include <wx/gdicmn.h>
@@ -34,7 +33,6 @@ class NodeDlgView;
 #include <wx/combobox.h>
 #include <wx/listbox.h>
 #include <wx/spinbutt.h>
-#include <wx/scrolwin.h>
 #include <wx/bmpbuttn.h>
 #include <wx/listctrl.h>
 #include <wx/panel.h>
@@ -159,125 +157,123 @@ class NodeDlgView;
 #define ID_INTTYPE 1114
 #define ID_ROADNUM 1115
 #define ID_BEHAVIOR 1116
-#define ID_SCROLLED 1117
-#define ID_MINUTES 1118
-#define ID_ELEVUNIT 1119
-#define ID_RADIO_OUTLINE_ONLY 1120
-#define ID_RADIO_COLOR 1121
-#define ID_RENDER_OPTIONS 1122
-#define ID_CHECK_HIDE_UNKNOWN 1123
-#define ID_CHECK_DRAW_TIN_SIMPLE 1124
-#define ID_CHECK_SHOW_ROAD_WIDTH 1125
-#define ID_CHECK_DRAW_RAW_SIMPLE 1126
-#define ID_PATHNAMES 1127
-#define ID_RADIO1 1128
-#define ID_RADIO2 1129
-#define ID_RADIO3 1130
-#define ID_RADIO4 1131
-#define ID_RADIO5 1132
-#define ID_MAX_MEGAPIXELS 1133
-#define ID_SAMPLING_N 1134
-#define ID_BLACK_TRANSP 1135
-#define ID_DEFLATE_TIFF 1136
-#define ID_RADIO6 1137
-#define ID_RADIO7 1138
-#define ID_RADIO8 1139
-#define ID_RADIO9 1140
-#define ID_RADIO10 1141
-#define ID_RADIO11 1142
-#define ID_ELEV_MAX_SIZE 1143
-#define ID_BT_GZIP 1144
-#define ID_DELAY_LOAD 1145
-#define ID_MAX_MEM_GRID 1146
-#define ID_BYTES 1147
-#define ID_LITTLE_ENDIAN 1148
-#define ID_BIG_ENDIAN 1149
-#define ID_VUNITS 1150
-#define ID_CRS_SIMPLE 1151
-#define ID_CRS_CURRENT 1152
-#define ID_CRS_EXACT 1153
-#define ID_EXT_SPACING 1154
-#define ID_SPACING 1155
-#define ID_EXT_EXACT 1156
-#define ID_EXTENTS 1157
-#define ID_GEOTIFF 1158
-#define ID_JPEG 1159
-#define ID_CHOICE_COLORS 1160
-#define ID_EDIT_COLORS 1161
-#define ID_SHADING 1162
-#define ID_COLOR_NODATA 1163
-#define ID_CONSTRAIN 1164
-#define ID_SMALLER 1165
-#define ID_BIGGER 1166
-#define ID_RADIO_SHADING_NONE 1167
-#define ID_RADIO_SHADING_QUICK 1168
-#define ID_RADIO_SHADING_DOT 1169
-#define ID_SPIN_CAST_ANGLE 1170
-#define ID_SPIN_CAST_DIRECTION 1171
-#define ID_AMBIENT 1172
-#define ID_GAMMA 1173
-#define ID_CHECK_SHADOWS 1174
-#define ID_NUMLANES 1175
-#define ID_HWYNAME 1176
-#define ID_SIDEWALK 1177
-#define ID_PARKING 1178
-#define ID_MARGIN 1179
-#define ID_LANE_WIDTH 1180
-#define ID_SIDEWALK_WIDTH 1181
-#define ID_CURB_HEIGHT 1182
-#define ID_PARKING_WIDTH 1183
-#define ID_MARGIN_WIDTH 1184
-#define ID_SURFTYPE 1185
-#define ID_CONDITION 1186
-#define ID_COMBO_VALUE 1187
-#define ID_FLOATS 1188
-#define ID_SHORTS 1189
-#define ID_FILL_GAPS 1190
-#define ID_AREAX 1191
-#define ID_AREAY 1192
-#define ID_ESTX 1193
-#define ID_ESTY 1194
-#define ID_SPLITTER1 1195
-#define ID_LISTCTRL_SPECIES 1196
-#define ID_LISTCTRL_APPEARANCES 1197
-#define ID_TEXT_TO_FOLDER 1198
-#define ID_COLUMNS 1199
-#define ID_ROWS 1200
-#define ID_CHOICE_LOD0_SIZE 1201
-#define ID_SPIN_NUM_LODS 1202
-#define ID_TOTALX 1203
-#define ID_TOTALY 1204
-#define ID_CURX 1205
-#define ID_CURY 1206
-#define ID_OMIT_FLAT 1207
-#define ID_MASK_UNKNOWN 1208
-#define ID_TEXTURE_ALPHA 1209
-#define ID_TC_NONE 1210
-#define ID_TC_OGL 1211
-#define ID_TC_SQUISH_FAST 1212
-#define ID_TC_SQUISH_SLOW 1213
-#define ID_TC_JPEG 1214
-#define ID_USE_SPECIES 1215
-#define ID_SPECIES_CHOICE 1216
-#define ID_SPECIES_USE_FIELD 1217
-#define ID_SPECIES_FIELD 1218
-#define ID_SPECIES_ID 1219
-#define ID_SPECIES_NAME 1220
-#define ID_COMMON_NAME 1221
-#define ID_BIOTYPE_INT 1222
-#define ID_BIOTYPE_STRING 1223
-#define ID_HEIGHT_RANDOM 1224
-#define ID_HEIGHT_FIXED 1225
-#define ID_HEIGHT_FIXED_VALUE 1226
-#define ID_HEIGHT_USE_FIELD 1227
-#define ID_HEIGHT_FIELD 1228
-#define ID_LAYER1 1229
-#define ID_OPERATION 1230
-#define ID_LAYER2 1231
-#define ID_SPACING_X 1232
-#define ID_SPACING_Y 1233
-#define ID_GRID_X 1234
-#define ID_GRID_Y 1235
+#define ID_MINUTES 1117
+#define ID_ELEVUNIT 1118
+#define ID_RADIO_OUTLINE_ONLY 1119
+#define ID_RADIO_COLOR 1120
+#define ID_RENDER_OPTIONS 1121
+#define ID_CHECK_DRAW_TIN_SIMPLE 1122
+#define ID_CHECK_SHOW_ROAD_WIDTH 1123
+#define ID_CHECK_DRAW_RAW_SIMPLE 1124
+#define ID_PATHNAMES 1125
+#define ID_RADIO1 1126
+#define ID_RADIO2 1127
+#define ID_RADIO3 1128
+#define ID_RADIO4 1129
+#define ID_RADIO5 1130
+#define ID_MAX_MEGAPIXELS 1131
+#define ID_SAMPLING_N 1132
+#define ID_BLACK_TRANSP 1133
+#define ID_DEFLATE_TIFF 1134
+#define ID_RADIO6 1135
+#define ID_RADIO7 1136
+#define ID_RADIO8 1137
+#define ID_RADIO9 1138
+#define ID_RADIO10 1139
+#define ID_RADIO11 1140
+#define ID_ELEV_MAX_SIZE 1141
+#define ID_BT_GZIP 1142
+#define ID_DELAY_LOAD 1143
+#define ID_MAX_MEM_GRID 1144
+#define ID_BYTES 1145
+#define ID_LITTLE_ENDIAN 1146
+#define ID_BIG_ENDIAN 1147
+#define ID_VUNITS 1148
+#define ID_CRS_SIMPLE 1149
+#define ID_CRS_CURRENT 1150
+#define ID_CRS_EXACT 1151
+#define ID_EXT_SPACING 1152
+#define ID_SPACING 1153
+#define ID_EXT_EXACT 1154
+#define ID_EXTENTS 1155
+#define ID_GEOTIFF 1156
+#define ID_JPEG 1157
+#define ID_CHOICE_COLORS 1158
+#define ID_EDIT_COLORS 1159
+#define ID_SHADING 1160
+#define ID_COLOR_NODATA 1161
+#define ID_CONSTRAIN 1162
+#define ID_SMALLER 1163
+#define ID_BIGGER 1164
+#define ID_RADIO_SHADING_NONE 1165
+#define ID_RADIO_SHADING_QUICK 1166
+#define ID_RADIO_SHADING_DOT 1167
+#define ID_SPIN_CAST_ANGLE 1168
+#define ID_SPIN_CAST_DIRECTION 1169
+#define ID_AMBIENT 1170
+#define ID_GAMMA 1171
+#define ID_CHECK_SHADOWS 1172
+#define ID_NUMLANES 1173
+#define ID_HWYNAME 1174
+#define ID_SIDEWALK 1175
+#define ID_PARKING 1176
+#define ID_MARGIN 1177
+#define ID_LANE_WIDTH 1178
+#define ID_SIDEWALK_WIDTH 1179
+#define ID_CURB_HEIGHT 1180
+#define ID_PARKING_WIDTH 1181
+#define ID_MARGIN_WIDTH 1182
+#define ID_SURFTYPE 1183
+#define ID_CONDITION 1184
+#define ID_COMBO_VALUE 1185
+#define ID_FLOATS 1186
+#define ID_SHORTS 1187
+#define ID_FILL_GAPS 1188
+#define ID_AREAX 1189
+#define ID_AREAY 1190
+#define ID_ESTX 1191
+#define ID_ESTY 1192
+#define ID_SPLITTER1 1193
+#define ID_LISTCTRL_SPECIES 1194
+#define ID_LISTCTRL_APPEARANCES 1195
+#define ID_TEXT_TO_FOLDER 1196
+#define ID_COLUMNS 1197
+#define ID_ROWS 1198
+#define ID_CHOICE_LOD0_SIZE 1199
+#define ID_SPIN_NUM_LODS 1200
+#define ID_TOTALX 1201
+#define ID_TOTALY 1202
+#define ID_CURX 1203
+#define ID_CURY 1204
+#define ID_OMIT_FLAT 1205
+#define ID_MASK_UNKNOWN 1206
+#define ID_TEXTURE_ALPHA 1207
+#define ID_TC_NONE 1208
+#define ID_TC_OGL 1209
+#define ID_TC_SQUISH_FAST 1210
+#define ID_TC_SQUISH_SLOW 1211
+#define ID_TC_JPEG 1212
+#define ID_USE_SPECIES 1213
+#define ID_SPECIES_CHOICE 1214
+#define ID_SPECIES_USE_FIELD 1215
+#define ID_SPECIES_FIELD 1216
+#define ID_SPECIES_ID 1217
+#define ID_SPECIES_NAME 1218
+#define ID_COMMON_NAME 1219
+#define ID_BIOTYPE_INT 1220
+#define ID_BIOTYPE_STRING 1221
+#define ID_HEIGHT_RANDOM 1222
+#define ID_HEIGHT_FIXED 1223
+#define ID_HEIGHT_FIXED_VALUE 1224
+#define ID_HEIGHT_USE_FIELD 1225
+#define ID_HEIGHT_FIELD 1226
+#define ID_LAYER1 1227
+#define ID_OPERATION 1228
+#define ID_LAYER2 1229
+#define ID_SPACING_X 1230
+#define ID_SPACING_Y 1231
+#define ID_GRID_X 1232
+#define ID_GRID_Y 1233
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ChunkDlgBase
@@ -296,7 +292,7 @@ class ChunkDlgBase : public wxDialog
 	
 	public:
 		
-		ChunkDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 337,124 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ChunkDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 337,124 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ChunkDlgBase();
 	
 };
@@ -338,7 +334,7 @@ class DistribVegDlgBase : public wxDialog
 	
 	public:
 		
-		DistribVegDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		DistribVegDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~DistribVegDlgBase();
 	
 };
@@ -355,7 +351,6 @@ class ExtentDlgBase : public wxDialog
 		wxTextCtrl* m_extent_n;
 		wxStaticText* m_text2;
 		wxTextCtrl* m_extent_w;
-		
 		wxTextCtrl* m_extent_e;
 		wxStaticText* m_text3;
 		wxTextCtrl* m_extent_s;
@@ -368,7 +363,7 @@ class ExtentDlgBase : public wxDialog
 	
 	public:
 		
-		ExtentDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ExtentDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ExtentDlgBase();
 	
 };
@@ -394,7 +389,7 @@ class GenGridDlgBase : public wxDialog
 	
 	public:
 		
-		GenGridDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 278,194 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		GenGridDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 278,194 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~GenGridDlgBase();
 	
 };
@@ -411,16 +406,13 @@ class GeocodeDlgBase : public wxDialog
 		wxButton* m_get_file_data;
 		wxCheckBox* m_check_use1;
 		wxCheckBox* m_check_use2;
-		
 		wxStaticText* m_text34;
 		wxTextCtrl* m_file_gaz;
 		wxButton* m_get_file_gaz;
-		
 		wxStaticText* m_text35;
 		wxTextCtrl* m_file_zip;
 		wxButton* m_get_file_zip;
 		wxCheckBox* m_check_use3;
-		
 		wxTextCtrl* m_file_gns;
 		wxButton* m_get_file_gns;
 		wxButton* m_ok;
@@ -428,7 +420,7 @@ class GeocodeDlgBase : public wxDialog
 	
 	public:
 		
-		GeocodeDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		GeocodeDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~GeocodeDlgBase();
 	
 };
@@ -449,7 +441,7 @@ class ImageMapDlgBase : public wxDialog
 	
 	public:
 		
-		ImageMapDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ImageMapDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ImageMapDlgBase();
 	
 };
@@ -482,7 +474,7 @@ class ImportPointDlgBase : public wxDialog
 	
 	public:
 		
-		ImportPointDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ImportPointDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ImportPointDlgBase();
 	
 };
@@ -498,36 +490,27 @@ class ImportStructDlgBase : public wxDialog
 		wxStaticText* m_text47;
 		wxRadioButton* m_type_linear;
 		wxRadioButton* m_type_instance;
-		
 		wxStaticText* m_text48;
 		wxChoice* m_choice_file_field;
 		wxRadioButton* m_type_center;
 		wxRadioButton* m_type_footprint;
-		
 		wxStaticText* m_text49;
 		wxChoice* m_choice_height_field;
 		wxChoice* m_choice_height_type;
-		
 		wxStaticText* m_text50;
-		
 		wxRadioButton* m_radio_color_default;
-		
 		wxRadioButton* m_radio_color_fixed;
 		wxStaticBitmap* m_color3;
 		wxButton* m_set_color1;
 		wxStaticText* m_text1;
 		wxStaticBitmap* m_color4;
 		wxButton* m_set_color2;
-		
 		wxStaticText* m_text2;
-		
 		wxRadioButton* m_radio_roof_default;
-		
 		wxRadioButton* m_radio_roof_single;
 		wxChoice* m_choice_roof_type;
 		wxStaticText* m_text3;
 		wxSpinCtrl* m_slopecntr;
-		
 		wxRadioButton* m_radio_roof_field;
 		wxChoice* m_choice_roof_field;
 		wxStaticText* m_text4;
@@ -538,7 +521,7 @@ class ImportStructDlgBase : public wxDialog
 	
 	public:
 		
-		ImportStructDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ImportStructDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ImportStructDlgBase();
 	
 };
@@ -557,11 +540,9 @@ class ImportStructOGRDlgBase : public wxDialog
 		wxChoice* m_choice_height_field;
 		wxChoice* m_choice_height_type;
 		wxRadioButton* m_type_building;
-		
 		wxCheckBox* m_build_foundations;
 		wxRadioButton* m_type_linear;
 		wxRadioButton* m_type_instance;
-		
 		wxStaticText* m_text7;
 		wxChoice* m_choice_file_field;
 		wxCheckBox* m_inside_area;
@@ -571,7 +552,7 @@ class ImportStructOGRDlgBase : public wxDialog
 	
 	public:
 		
-		ImportStructOGRDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ImportStructOGRDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ImportStructOGRDlgBase();
 	
 };
@@ -595,7 +576,7 @@ class ImportVegDlgBase : public wxDialog
 	
 	public:
 		
-		ImportVegDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ImportVegDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ImportVegDlgBase();
 	
 };
@@ -622,7 +603,7 @@ class LayerPropDlgBase : public wxDialog
 	
 	public:
 		
-		LayerPropDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		LayerPropDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~LayerPropDlgBase();
 	
 };
@@ -642,7 +623,7 @@ class LevelSelectionDlgBase : public wxDialog
 	
 	public:
 		
-		LevelSelectionDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		LevelSelectionDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~LevelSelectionDlgBase();
 	
 };
@@ -683,7 +664,7 @@ class MapServerDlgBase : public wxDialog
 	
 	public:
 		
-		MapServerDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		MapServerDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~MapServerDlgBase();
 	
 };
@@ -717,7 +698,7 @@ class MatchDlgBase : public wxDialog
 	
 	public:
 		
-		MatchDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 371,305 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		MatchDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 371,305 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~MatchDlgBase();
 	
 };
@@ -738,11 +719,10 @@ class NodeDlgBase : public wxDialog
 		wxListBox* m_behavior;
 		wxButton* m_ok;
 		wxButton* m_cancel;
-		NodeDlgView* m_scrolled;
 	
 	public:
 		
-		NodeDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		NodeDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~NodeDlgBase();
 	
 };
@@ -760,10 +740,7 @@ class OptionsDlgBase : public wxDialog
 		wxChoice* m_elevunit;
 		wxRadioButton* m_radio_outline_only;
 		wxRadioButton* m_radio_color;
-		
 		wxButton* m_render_options;
-		
-		wxCheckBox* m_check_hide_unknown;
 		wxCheckBox* m_check_draw_tin_simple;
 		wxCheckBox* m_check_show_road_width;
 		wxCheckBox* m_check_draw_raw_simple;
@@ -773,7 +750,7 @@ class OptionsDlgBase : public wxDialog
 	
 	public:
 		
-		OptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		OptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~OptionsDlgBase();
 	
 };
@@ -808,7 +785,6 @@ class PrefDlgBase : public wxDialog
 		wxTextCtrl* m_elev_max_size;
 		wxCheckBox* m_bt_gzip;
 		wxCheckBox* m_delay_load;
-		
 		wxStaticText* m_text63;
 		wxTextCtrl* m_max_mem_grid;
 		wxButton* m_ok;
@@ -816,7 +792,7 @@ class PrefDlgBase : public wxDialog
 	
 	public:
 		
-		PrefDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 623,376 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		PrefDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 623,376 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~PrefDlgBase();
 	
 };
@@ -852,7 +828,7 @@ class RawDlgBase : public wxDialog
 	
 	public:
 		
-		RawDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		RawDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~RawDlgBase();
 	
 };
@@ -867,7 +843,6 @@ class RenderDlgBase : public wxDialog
 	protected:
 		wxRadioButton* m_radio_create_new;
 		wxRadioButton* m_radio_to_file;
-		
 		wxTextCtrl* m_text_to_file;
 		wxButton* m_dotdotdot;
 		wxStaticText* m_text25;
@@ -876,9 +851,7 @@ class RenderDlgBase : public wxDialog
 		wxStaticText* m_text26;
 		wxChoice* m_choice_colors;
 		wxButton* m_edit_colors;
-		
 		wxCheckBox* m_shading;
-		
 		wxStaticText* m_text27;
 		wxBitmapButton* m_color_nodata;
 		wxStaticText* m_text28;
@@ -892,7 +865,7 @@ class RenderDlgBase : public wxDialog
 	
 	public:
 		
-		RenderDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		RenderDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~RenderDlgBase();
 	
 };
@@ -911,16 +884,12 @@ class RenderOptionsDlgBase : public wxDialog
 		wxRadioButton* m_radio_shading_none;
 		wxRadioButton* m_radio_shading_quick;
 		wxRadioButton* m_radio_shading_dot;
-		
 		wxStaticText* m_text48;
 		wxSpinCtrl* m_spin_cast_angle;
-		
 		wxStaticText* m_text49;
 		wxSpinCtrl* m_spin_cast_direction;
-		
 		wxStaticText* m_text50;
 		wxTextCtrl* m_ambient;
-		
 		wxStaticText* m_text51;
 		wxTextCtrl* m_gamma;
 		wxCheckBox* m_check_shadows;
@@ -929,7 +898,7 @@ class RenderOptionsDlgBase : public wxDialog
 	
 	public:
 		
-		RenderOptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 295,402 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		RenderOptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 295,402 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~RenderOptionsDlgBase();
 	
 };
@@ -969,7 +938,7 @@ class RoadDlgBase : public wxDialog
 	
 	public:
 		
-		RoadDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		RoadDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~RoadDlgBase();
 	
 };
@@ -991,7 +960,7 @@ class SelectDlgBase : public wxDialog
 	
 	public:
 		
-		SelectDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		SelectDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~SelectDlgBase();
 	
 };
@@ -1034,7 +1003,7 @@ class SampleElevationDlgBase : public wxDialog
 	
 	public:
 		
-		SampleElevationDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		SampleElevationDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~SampleElevationDlgBase();
 	
 };
@@ -1071,7 +1040,7 @@ class SampleImageDlgBase : public wxDialog
 	
 	public:
 		
-		SampleImageDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		SampleImageDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~SampleImageDlgBase();
 	
 };
@@ -1095,7 +1064,7 @@ class SpeciesListDlgBase : public wxDialog
 	
 	public:
 		
-		SpeciesListDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		SpeciesListDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~SpeciesListDlgBase();
 		
 		void m_splitter1OnIdle( wxIdleEvent& )
@@ -1150,7 +1119,7 @@ class TileDlgBase : public wxDialog
 	
 	public:
 		
-		TileDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 375,559 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		TileDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 375,559 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~TileDlgBase();
 	
 };
@@ -1182,7 +1151,7 @@ class VegFieldsDlgBase : public wxDialog
 	
 	public:
 		
-		VegFieldsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		VegFieldsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~VegFieldsDlgBase();
 	
 };
@@ -1211,9 +1180,9 @@ class ElevMathDlgBase : public wxDialog
 	
 	public:
 		
-		ElevMathDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		ElevMathDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE ); 
 		~ElevMathDlgBase();
 	
 };
 
-#endif //__VTBuilder_UI__
+#endif //__VTBUILDER_UI_H__

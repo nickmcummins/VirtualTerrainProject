@@ -52,8 +52,6 @@ NodeDlg::NodeDlg( wxWindow *parent, wxWindowID id, const wxString &title,
 	GetBehavior()->Append(_("Traffic Light"));	// IT_LIGHT
 	GetBehavior()->Append(_("Stop Sign"));		// IT_STOPSIGN
 
-	m_pView = (NodeDlgView *) FindWindow( ID_SCROLLED );
-
 	GetSizer()->SetSizeHints(this);
 }
 

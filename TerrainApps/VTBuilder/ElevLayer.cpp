@@ -481,7 +481,7 @@ void vtElevLayer::RenderBitmap()
 		SetupDefaultColors(cmap);
 
 	bool has_invalid = m_pGrid->ColorDibFromElevation(&m_Bitmap, &cmap,
-		8000, RGBi(255, 0, 0), progress_callback_minor);
+		8000, RGBAi(255, 0, 0, 0), progress_callback_minor);
 
 	if (m_draw.m_bShadingQuick)
 		m_pGrid->ShadeQuick(&m_Bitmap, SHADING_BIAS, true, progress_callback_minor);

@@ -29,14 +29,12 @@ bool DConvert(FILE *fp, int length, double &value, bool bDebug=false)
 		return false;
 	szCharString[length] = 0;
 
-#ifndef _MSC_VER
 	// Microsoft's C standard library documentation says that the exponent in
-	//  an atof() call can be {d,D,e,E}.  The ANSI C standard seems to agree.
-	//  But Unix and MacOSX don't like {d,D}.  So, for them, change it.
+	//  an atof() call can be {d,D,e,E}.   But Unix and MacOSX don't like {d,D}.
+	// And as of version 2015, MSVC wants "E" also. So, we change it.
 	for (int i=0; i < length; i++)
 		if (szCharString[i] == 'D' || szCharString[i] == 'd')
 			szCharString[i] = 'E';
-#endif
 
 	value = atof(szCharString);
 

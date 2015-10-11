@@ -39,7 +39,6 @@ private:
 	// WDR: member variable declarations for NodeDlg
 	NodeEdit *m_pNode;
 	vtRoadLayer *m_pLayer;
-	NodeDlgView *m_pView;
 
 private:
 	// WDR: handler declarations for NodeDlg

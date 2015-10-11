@@ -28,7 +28,6 @@ public:
 
 	// WDR: method declarations for OptionsDlg
 	wxButton* GetRenderOptions()  { return (wxButton*) FindWindow( ID_RENDER_OPTIONS ); }
-	wxCheckBox* GetCheckHideUnknown()  { return (wxCheckBox*) FindWindow( ID_CHECK_HIDE_UNKNOWN ); }
 	wxRadioButton* GetRadioColor()  { return (wxRadioButton*) FindWindow( ID_RADIO_COLOR ); }
 	wxRadioButton* GetRadioOutlineOnly()  { return (wxRadioButton*) FindWindow( ID_RADIO_OUTLINE_ONLY ); }
 	wxChoice* GetElevUnit()  { return (wxChoice*) FindWindow( ID_ELEVUNIT ); }
@@ -55,7 +54,6 @@ private:
 	void UpdateEnables();
 
 	// WDR: handler declarations for OptionsDlg
-	void OnHideUnknown( wxCommandEvent &event );
 	void OnRenderOptions( wxCommandEvent &event );
 	void OnRadio( wxCommandEvent &event );
 	void OnInitDialog(wxInitDialogEvent& event);

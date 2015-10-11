@@ -25,7 +25,6 @@ BEGIN_EVENT_TABLE(OptionsDlg, OptionsDlgBase)
 	EVT_RADIOBUTTON( ID_RADIO_OUTLINE_ONLY, OptionsDlg::OnRadio )
 	EVT_RADIOBUTTON( ID_RADIO_COLOR, OptionsDlg::OnRadio )
 	EVT_BUTTON( ID_RENDER_OPTIONS, OptionsDlg::OnRenderOptions )
-	EVT_CHECKBOX( ID_CHECK_HIDE_UNKNOWN, OptionsDlg::OnHideUnknown )
 END_EVENT_TABLE()
 
 OptionsDlg::OptionsDlg( wxWindow *parent, wxWindowID id, const wxString &title,
@@ -52,10 +51,6 @@ OptionsDlg::OptionsDlg( wxWindow *parent, wxWindowID id, const wxString &title,
 
 // WDR: handler implementations for OptionsDlg
 
-void OptionsDlg::OnHideUnknown( wxCommandEvent &event )
-{
-}
-
 void OptionsDlg::OnRenderOptions( wxCommandEvent &event )
 {
 	// Ask them how to render elevation layers
@@ -75,7 +70,6 @@ void OptionsDlg::OnRadio( wxCommandEvent &event )
 void OptionsDlg::UpdateEnables()
 {
 	GetRenderOptions()->Enable(m_opt.m_bShowElevation);
-	GetCheckHideUnknown()->Enable(m_opt.m_bShowElevation);
 }
 
 void OptionsDlg::OnInitDialog(wxInitDialogEvent& event)

@@ -67,6 +67,9 @@ void GLTexture::Draw(vtScaledView *pView, const DRECT &rect)
 	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
 	glColor3f(1.0f, 1.0f, 1.0f);
 
+	glAlphaFunc(GL_GREATER, 0.5);
+	glEnable(GL_ALPHA_TEST);
+
 	glBegin(GL_QUADS);
 	glTexCoord2d(0.0, 0.0);	pView->SendVertex(rect.left, rect.bottom);
 	glTexCoord2d(1.0, 0.0);	pView->SendVertex(rect.right, rect.bottom);
@@ -74,6 +77,7 @@ void GLTexture::Draw(vtScaledView *pView, const DRECT &rect)
 	glTexCoord2d(0.0, 1.0);	pView->SendVertex(rect.left, rect.top);
 	glEnd();
 
+	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
 }
 

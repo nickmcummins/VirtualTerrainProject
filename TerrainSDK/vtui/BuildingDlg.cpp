@@ -62,8 +62,6 @@ BuildingDlg::BuildingDlg( wxWindow *parent, wxWindowID id, const wxString &title
 	const wxPoint &position, const wxSize& size, long style ) :
 	BuildingDlgBase( parent, id, title, position, size, style )
 {
-	SetExtraStyle(GetExtraStyle()|wxWS_EX_VALIDATE_RECURSIVELY );
-
 	m_pSA = NULL;
 
 	m_bSetting = false;

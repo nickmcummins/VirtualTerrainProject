@@ -1,15 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Sep  8 2010)
+// C++ code generated with wxFormBuilder (version Jun 17 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef __EnviroUI__
-#define __EnviroUI__
+#ifndef __ENVIROUI_H__
+#define __ENVIROUI_H__
 
+#include <wx/artprov.h>
+#include <wx/xrc/xmlres.h>
 #include <wx/intl.h>
-
 #include <wx/string.h>
 #include <wx/stattext.h>
 #include <wx/gdicmn.h>
@@ -345,7 +346,6 @@ class CameraDlgBase : public wxDialog
 		wxSlider* m_speedslider;
 		wxStaticText* m_text57;
 		wxChoice* m_speed_units;
-		
 		wxCheckBox* m_accel;
 		wxStaticText* id_text81;
 		wxTextCtrl* m_damping;
@@ -362,7 +362,7 @@ class CameraDlgBase : public wxDialog
 	
 	public:
 		
-		CameraDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		CameraDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~CameraDlgBase();
 	
 };
@@ -397,7 +397,7 @@ class DriveDlgBase : public wxDialog
 	
 	public:
 		
-		DriveDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Drive"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE );
+		DriveDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Drive"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~DriveDlgBase();
 	
 };
@@ -411,18 +411,15 @@ class EphemDlgBase : public wxDialog
 	
 	protected:
 		wxCheckBox* m_oceanplane;
-		
 		wxStaticText* m_text204;
 		wxTextCtrl* m_oceanplaneoffset;
 		wxCheckBox* m_sky;
-		
 		wxComboBox* m_skytexture;
 		wxCheckBox* m_fog;
 		wxStaticText* m_text205;
 		wxTextCtrl* m_fog_distance;
 		wxSlider* m_slider_fog_distance;
 		wxCheckBox* m_shadows;
-		
 		wxStaticText* m_text206;
 		wxTextCtrl* m_ambient_bias;
 		wxSlider* m_slider_ambient_bias;
@@ -442,7 +439,7 @@ class EphemDlgBase : public wxDialog
 	
 	public:
 		
-		EphemDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		EphemDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~EphemDlgBase();
 	
 };
@@ -465,7 +462,7 @@ class LayerAnimDlgBase : public wxDialog
 	
 	public:
 		
-		LayerAnimDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		LayerAnimDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~LayerAnimDlgBase();
 	
 };
@@ -490,7 +487,6 @@ class LocationDlgBase : public wxDialog
 		wxButton* m_new_anim;
 		wxButton* m_save_anim;
 		wxButton* m_load_anim;
-		
 		wxBitmapButton* m_reset;
 		wxBitmapButton* m_stop;
 		wxBitmapButton* m_record1;
@@ -513,7 +509,7 @@ class LocationDlgBase : public wxDialog
 	
 	public:
 		
-		LocationDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		LocationDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~LocationDlgBase();
 	
 };
@@ -528,16 +524,11 @@ class OptionsDlgBase : public wxDialog
 	protected:
 		wxCheckBox* m_fullscreen;
 		wxCheckBox* m_stereo;
-		
 		wxRadioButton* m_stereo1;
-		
 		wxRadioButton* m_stereo2;
-		
 		wxRadioButton* m_stereo3;
-		
 		wxRadioButton* m_stereo4;
 		wxStaticText* m_staticText143;
-		
 		wxRadioButton* m_samples0;
 		wxRadioButton* m_samples4;
 		wxRadioButton* m_samples8;
@@ -569,13 +560,12 @@ class OptionsDlgBase : public wxDialog
 		wxCheckBox* m_fly_in;
 		wxCheckBox* m_fly_in1;
 		wxCheckBox* m_fly_in2;
-		
 		wxButton* m_ok;
 		wxButton* m_cancel;
 	
 	public:
 		
-		OptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		OptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~OptionsDlgBase();
 	
 };
@@ -629,7 +619,7 @@ class PagingDlgBase : public wxDialog
 	
 	public:
 		
-		PagingDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		PagingDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~PagingDlgBase();
 	
 };
@@ -651,7 +641,7 @@ class PerformanceMonitorDlgBase : public wxDialog
 	
 	public:
 		
-		PerformanceMonitorDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Performance Monitor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		PerformanceMonitorDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Performance Monitor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE ); 
 		~PerformanceMonitorDlgBase();
 	
 };
@@ -686,7 +676,7 @@ class PlantDlgBase : public wxDialog
 	
 	public:
 		
-		PlantDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		PlantDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~PlantDlgBase();
 	
 };
@@ -710,7 +700,7 @@ class ScenariosPaneBase : public wxDialog
 	
 	public:
 		
-		ScenariosPaneBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ScenariosPaneBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ScenariosPaneBase();
 	
 };
@@ -736,7 +726,7 @@ class ScenarioParamsDlgBase : public wxDialog
 	
 	public:
 		
-		ScenarioParamsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ScenarioParamsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ScenarioParamsDlgBase();
 	
 };
@@ -763,7 +753,7 @@ class ScenarioSelectDlgBase : public wxDialog
 	
 	public:
 		
-		ScenarioSelectDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		ScenarioSelectDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~ScenarioSelectDlgBase();
 	
 };
@@ -778,11 +768,9 @@ class StartupDlgBase : public wxDialog
 	protected:
 		wxStaticText* m_text1;
 		wxRadioButton* id_earthview;
-		
 		wxStaticText* m_imagetext;
 		wxComboBox* m_image;
 		wxRadioButton* m_terrain;
-		
 		wxChoice* m_tname;
 		wxButton* m_editprop;
 		wxButton* m_terrman;
@@ -793,7 +781,7 @@ class StartupDlgBase : public wxDialog
 	
 	public:
 		
-		StartupDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 364,241 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		StartupDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 364,241 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~StartupDlgBase();
 	
 };
@@ -859,7 +847,7 @@ class StyleDlgBase : public wxDialog
 	
 	public:
 		
-		StyleDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 480,-1 ), long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
+		StyleDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 480,-1 ), long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER ); 
 		~StyleDlgBase();
 	
 };
@@ -880,12 +868,11 @@ class TerrManDlgBase : public wxDialog
 		wxButton* m_delete;
 		wxStaticLine* m_line2;
 		wxButton* m_edit_params;
-		
 		wxButton* m_ok;
 	
 	public:
 		
-		TerrManDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		TerrManDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~TerrManDlgBase();
 	
 };
@@ -903,7 +890,7 @@ class TextDlgBase : public wxDialog
 	
 	public:
 		
-		TextDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		TextDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~TextDlgBase();
 	
 };
@@ -919,11 +906,9 @@ class TextureDlgBase : public wxDialog
 		wxRadioButton* m_single;
 		wxComboBox* m_tfile_single;
 		wxRadioButton* m_derived;
-		
 		wxChoice* m_choice_colors;
 		wxButton* id_edit_colors;
 		wxCheckBox* m_prelight;
-		
 		wxStaticText* m_text9;
 		wxTextCtrl* m_light_factor;
 		wxCheckBox* m_cast_shadows;
@@ -934,7 +919,7 @@ class TextureDlgBase : public wxDialog
 	
 	public:
 		
-		TextureDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		TextureDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~TextureDlgBase();
 	
 };
@@ -948,12 +933,10 @@ class TinTextureDlgBase : public wxDialog
 	
 	protected:
 		wxCheckBox* m_derive_color;
-		
 		wxChoice* m_choice_colors;
 		wxButton* m_edit_colors;
 		wxCheckBox* m_geotypical;
 		wxComboBox* m_tfile_geotypical;
-		
 		wxStaticText* m_staticText1491;
 		wxTextCtrl* m_geotypical_scale;
 		wxStaticText* m_staticText1501;
@@ -965,7 +948,7 @@ class TinTextureDlgBase : public wxDialog
 	
 	public:
 		
-		TinTextureDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		TinTextureDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~TinTextureDlgBase();
 	
 };
@@ -997,13 +980,10 @@ class TParamsDlgBase : public wxDialog
 		wxStaticText* m_text5;
 		wxTextCtrl* m_vtx_count;
 		wxCheckBox* m_tile_threading;
-		
 		wxStaticText* m_staticText1441;
 		wxComboBox* m_tfile_tileset;
-		
 		wxStaticText* id_text31;
 		wxTextCtrl* m_tex_lod;
-		
 		wxCheckBox* m_texture_gradual;
 		wxRadioButton* m_use_external;
 		wxTextCtrl* m_tt_external_data;
@@ -1042,7 +1022,6 @@ class TParamsDlgBase : public wxDialog
 		wxStaticText* m_text216;
 		wxComboBox* m_content_file;
 		wxCheckBox* mmheck_structure_shadows;
-		
 		wxStaticText* id_text5;
 		wxChoice* m_choice_shadow_rez;
 		wxStaticText* m_text21;
@@ -1053,10 +1032,8 @@ class TParamsDlgBase : public wxDialog
 		wxTextCtrl* m_shadow_limit_radius;
 		wxStaticText* m_text22;
 		wxCheckBox* m_check_structure_paging;
-		
 		wxStaticText* m_text23;
 		wxTextCtrl* m_paging_max_structures;
-		
 		wxStaticText* m_text24;
 		wxTextCtrl* m_page_out_distance;
 		wxStaticText* m_text25;
@@ -1065,19 +1042,15 @@ class TParamsDlgBase : public wxDialog
 		wxButton* m_style;
 		wxListBox* m_image_files;
 		wxPanel* TParamsPanel4;
-		
 		wxCheckBox* m_oceanplane;
-		
 		wxStaticText* m_text217;
 		wxTextCtrl* m_oceanplaneoffset;
 		wxCheckBox* m_water;
 		wxComboBox* m_filename_water;
 		wxCheckBox* m_depressocean;
-		
 		wxStaticText* m_text218;
 		wxTextCtrl* m_depressoceanoffset;
 		wxCheckBox* id_sky;
-		
 		wxComboBox* m_skytexture;
 		wxCheckBox* mmog;
 		wxStaticText* m_text26;
@@ -1092,7 +1065,6 @@ class TParamsDlgBase : public wxDialog
 		wxStaticText* m_text28;
 		wxTextCtrl* m_timespeed;
 		wxStaticText* m_text29;
-		
 		wxPanel* TParamsPanel6;
 		wxStaticText* id_text6;
 		wxTextCtrl* m_overlay_file;
@@ -1106,15 +1078,12 @@ class TParamsDlgBase : public wxDialog
 		wxPanel* TParamsPanel7;
 		wxStaticText* m_text32;
 		wxChoice* m_nav_style;
-		
 		wxStaticText* m_text33;
 		wxTextCtrl* m_minheight;
 		wxStaticText* m_text34;
-		
 		wxStaticText* id_text7;
 		wxTextCtrl* m_navspeed;
 		wxStaticText* m_text35;
-		
 		wxStaticText* id_text71;
 		wxTextCtrl* m_damping;
 		wxCheckBox* m_accel;
@@ -1142,7 +1111,7 @@ class TParamsDlgBase : public wxDialog
 	
 	public:
 		
-		TParamsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		TParamsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~TParamsDlgBase();
 	
 };
@@ -1160,7 +1129,7 @@ class UtilDlgBase : public wxDialog
 	
 	public:
 		
-		UtilDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		UtilDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~UtilDlgBase();
 	
 };
@@ -1180,7 +1149,7 @@ class VehicleDlgBase : public wxDialog
 	
 	public:
 		
-		VehicleDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 164,92 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL );
+		VehicleDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 164,92 ), long style = wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL ); 
 		~VehicleDlgBase();
 	
 };
@@ -1195,11 +1164,8 @@ class VIADlgBase : public wxDialog
 	protected:
 		wxStaticText* m_staticText142;
 		wxTextCtrl* m_VIFCtl;
-		
 		wxButton* m_button64;
-		
 		wxButton* m_button65;
-		
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnInitDialog( wxInitDialogEvent& event ) { event.Skip(); }
@@ -1209,7 +1175,7 @@ class VIADlgBase : public wxDialog
 	public:
 		wxString m_VIF; 
 		
-		VIADlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Visual Impact Calculation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE );
+		VIADlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Visual Impact Calculation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~VIADlgBase();
 	
 };
@@ -1230,11 +1196,9 @@ class VIAGDALOptionsDlgBase : public wxDialog
 		wxTextCtrl* m_textCtrl82;
 		wxStaticText* m_staticText140;
 		wxComboBox* m_pDataTypeChoice;
-		
 		wxStaticText* m_staticText141;
 		wxTextCtrl* m_textCtrl83;
 		wxButton* m_button66;
-		
 		wxButton* m_button67;
 	
 	public:
@@ -1244,9 +1208,9 @@ class VIAGDALOptionsDlgBase : public wxDialog
 		wxString m_DataType; 
 		wxString m_ScaleFactor; 
 		
-		VIAGDALOptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Creation Options"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 692,594 ), long style = wxDEFAULT_DIALOG_STYLE );
+		VIAGDALOptionsDlgBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Creation Options"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 692,594 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~VIAGDALOptionsDlgBase();
 	
 };
 
-#endif //__EnviroUI__
+#endif //__ENVIROUI_H__

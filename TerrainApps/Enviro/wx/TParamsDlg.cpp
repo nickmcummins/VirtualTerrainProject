@@ -157,8 +157,6 @@ TParamsDlg::TParamsDlg( wxWindow *parent, wxWindowID id, const wxString &title,
 	GetSizer()->SetSizeHints(this);
 
 	// make sure that validation gets down to the child windows
-	SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-
 	// including the children of the notebook
 	wxNotebook *notebook = (wxNotebook*) FindWindow( ID_NOTEBOOK );
 	notebook->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
