@@ -1,7 +1,5 @@
 // easyxml.cpp - implementation of EasyXML interfaces.
 
-#pragma warning( disable : 4786 )
-
 #include <string.h>		// strcmp()
 #include <fstream>
 using namespace std;

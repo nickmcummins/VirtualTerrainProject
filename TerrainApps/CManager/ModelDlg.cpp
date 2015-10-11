@@ -12,10 +12,6 @@
 #include "wx/wx.h"
 #endif
 
-#ifdef _MSC_VER
-#pragma warning( disable : 4786 )
-#endif
-
 #include "vtlib/vtlib.h"
 
 #include "ModelDlg.h"

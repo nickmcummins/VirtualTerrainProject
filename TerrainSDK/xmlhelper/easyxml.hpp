@@ -5,12 +5,7 @@
  * This file is in the Public Domain, and comes with NO WARRANTY of any kind.
  */
 
-#ifndef __EASYXML_HPP
-#define __EASYXML_HPP
-
-#ifdef _MSC_VER
-  #pragma warning(disable: 4100)	// Avoid picky compiler warning about unused params
-#endif
+#pragma once
 
 #include "exception.hpp"
 
@@ -381,6 +376,4 @@ extern void readCompressedXML(gzFile fp, XMLVisitor &visitor,
 extern void readXML (const string &path, XMLVisitor &visitor,
 					 bool progress_callback(int) = NULL);
 
-
-#endif // __EASYXML_HPP
 

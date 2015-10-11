@@ -21,6 +21,9 @@ void GLTexture::CreateFromBitmap(vtDIB *pDib)
 
 	const IPoint2 size = pDib->GetSize();
 
+	if (pDib->GetDepth() == 8)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, size.x, size.y, 0, GL_LUMINANCE,
+			GL_UNSIGNED_BYTE, pDib->GetData());
 	if (pDib->GetDepth() == 24)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, pDib->GetData());
@@ -39,8 +42,22 @@ void GLTexture::CopyImageFromBitmap(vtDIB *pDib)
 	glBindTexture(GL_TEXTURE_2D, m_iTextureId);
 
 	const IPoint2 size = pDib->GetSize();
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, GL_RGBA,
-		GL_UNSIGNED_BYTE, pDib->GetData());
+	int depth = pDib->GetDepth();
+	switch (depth)
+	{
+	case 8:
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, GL_LUMINANCE,
+			GL_UNSIGNED_BYTE, pDib->GetData());
+		break;
+	case 24:
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, GL_RGB,
+			GL_UNSIGNED_BYTE, pDib->GetData());
+		break;
+	case 32:
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, GL_RGBA,
+			GL_UNSIGNED_BYTE, pDib->GetData());
+		break;
+	}
 }
 
 void GLTexture::Draw(vtScaledView *pView, const DRECT &rect)

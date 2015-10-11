@@ -367,8 +367,8 @@ vtImage::vtImage()
 	SetDefaults();
 }
 
-vtImage::vtImage(const DRECT &area, const IPoint2 &size,
-				 const vtCRS &crs)
+vtImage::vtImage(const DRECT &area, const IPoint2 &pixelSize,
+				 const vtCRS &crs, int bitDepth)
 {
 	SetDefaults();
 	m_Extents = area;
@@ -376,9 +376,10 @@ vtImage::vtImage(const DRECT &area, const IPoint2 &size,
 
 	// yes, we could use some error-checking here
 	vtDIB *pBitmap = new vtDIB;
-	pBitmap->Allocate(size, 24);
-	SetupBitmapInfo(size);
+	pBitmap->Allocate(pixelSize, bitDepth);
+	SetupBitmapInfo(pixelSize);
 	m_Bitmaps[0].m_pBitmap = pBitmap;
+	m_BitDepth = bitDepth;
 }
 
 vtImage::~vtImage()
@@ -394,6 +395,9 @@ void vtImage::SetDefaults()
 {
 	m_pDataset = NULL;
 	m_pCanvas = NULL;
+	m_BitDepth = 24;	// Unless we know otherwise.
+	m_iTotal = 0;
+	m_iCompleted = 0;
 }
 
 bool vtImage::GetExtent(DRECT &rect) const
@@ -503,20 +507,20 @@ bool vtImage::ConvertCRS(vtImage *pOld, vtCRS &NewCRS,
 	const double fRows = m_Extents.Height() / new_step.y;
 
 	// round up to the nearest integer
-	const IPoint2 size(fColumns + 0.999, fRows + 0.999);
+	const IPoint2 pixelSize(fColumns + 0.999, fRows + 0.999);
 
 	// do safety checks
-	if (size.x < 1 || size.y < 1)
+	if (pixelSize.x < 1 || pixelSize.y < 1)
 		return false;
-	if (size.x > 40000 || size.y > 40000)
+	if (pixelSize.x > 40000 || pixelSize.y > 40000)
 		return false;
 
 	// Now we're ready to fill in the new image.
 	m_crs = NewCRS;
 	vtDIB *pBitmap = new vtDIB;
-	if (!pBitmap->Allocate(size, 24))
+	if (!pBitmap->Allocate(pixelSize, pOld->GetBitDepth()))
 		return false;
-	SetupBitmapInfo(size);
+	SetupBitmapInfo(pixelSize);
 	m_Bitmaps[0].m_pBitmap = pBitmap;
 
 	// Convert each bit of data from the old array to the new
@@ -537,12 +541,12 @@ bool vtImage::ConvertCRS(vtImage *pOld, vtCRS &NewCRS,
 	RGBAi value, sum;
 	int count;
 	DPoint2 mp;
-	for (int i = 0; i < size.x; i++)
+	for (int i = 0; i < pixelSize.x; i++)
 	{
 		if (progress_callback != NULL)
-			progress_callback(i * 99 / size.x);
+			progress_callback(i * 99 / pixelSize.x);
 
-		for (int j = 0; j < size.y; j++)
+		for (int j = 0; j < pixelSize.y; j++)
 		{
 			// Sample at pixel centers
 			const DPoint2 p(m_Extents.left + (step.x/2) + (i * step.x),
@@ -564,9 +568,9 @@ bool vtImage::ConvertCRS(vtImage *pOld, vtCRS &NewCRS,
 				}
 			}
 			if (count > 0)
-				SetRGBA(i, size.y-1-j, sum / count);
+				SetRGBA(i, pixelSize.y-1-j, sum / count);
 			else
-				SetRGBA(i, size.y-1-j, RGBAi(0,0,0,0));	// nodata
+				SetRGBA(i, pixelSize.y-1-j, RGBAi(0,0,0,0));	// nodata
 		}
 	}
 	return true;
@@ -770,9 +774,21 @@ void vtImage::GetRGBA(int x, int y, RGBAi &rgba, double dRes)
 	if (bm.m_pBitmap)
 	{
 		// get pixel from bitmap in memory
-		RGBi rgb;
-		bm.m_pBitmap->GetPixel24(x, y, rgb);
-		rgba = rgb;
+		if (bm.m_pBitmap->GetDepth() == 8)
+		{
+			uint8_t value = bm.m_pBitmap->GetPixel8(x, y);
+			rgba.Set(value, 0, 0, 255);		// Use Red for a single value.
+		}
+		else if (bm.m_pBitmap->GetDepth() == 24)
+		{
+			RGBi rgb;
+			bm.m_pBitmap->GetPixel24(x, y, rgb);
+			rgba = rgb;
+		}
+		else if (bm.m_pBitmap->GetDepth() == 32)
+		{
+			bm.m_pBitmap->GetPixel32(x, y, rgba);
+		}
 	}
 	else if (bm.m_bOnDisk)
 	{
@@ -785,15 +801,33 @@ void vtImage::GetRGBA(int x, int y, RGBAi &rgba, double dRes)
 void vtImage::SetRGBA(int x, int y, const RGBAi &rgba)
 {
 	// this method clearly only works for in-memory images
-	RGBi rgb;
-	rgb = rgba;
-	if (m_Bitmaps[0].m_pBitmap)
+	if (!m_Bitmaps[0].m_pBitmap)
+		return;
+
+	switch (m_Bitmaps[0].m_pBitmap->GetDepth())
+	{
+	case 8:
+		m_Bitmaps[0].m_pBitmap->SetPixel24(x, y, rgba.r);
+		break;
+	case 24:
+	{
+		RGBi rgb;
+		rgb = rgba;
 		m_Bitmaps[0].m_pBitmap->SetPixel24(x, y, rgb);
+		break;
+	}
+	case 32:
+		m_Bitmaps[0].m_pBitmap->SetPixel32(x, y, rgba);
+		break;
+	}
 }
 
 void vtImage::ReplaceColor(const RGBi &rgb1, const RGBi &rgb2)
 {
 	// this method only works for in-memory images
+	if (!m_Bitmaps[0].m_pBitmap)
+		return;
+
 	BitmapInfo &bmi = m_Bitmaps[0];
 	if (!bmi.m_pBitmap)
 		return;
@@ -1006,6 +1040,7 @@ bool vtImage::ReadPPM(const char *fname, bool progress_callback(int))
 	pBitmap->Allocate(size, 24);
 	SetupBitmapInfo(size);
 	m_Bitmaps[0].m_pBitmap = pBitmap;
+	m_BitDepth = pBitmap->GetDepth();
 
 	// read PPM binary
 	int offset_start = ftell(fp);
@@ -1122,7 +1157,9 @@ bool vtImage::SaveToFile(const char *fname) const
 	    papszOptions = CSLSetNameValue( papszOptions, "COMPRESS", "DEFLATE" );
 
 	GDALDataset *pDataset;
-	pDataset = pDriver->Create(fname, size.x, size.y, 3, GDT_Byte, papszOptions );
+	const int bitDepth = bm->GetDepth();
+	const int numBands = bitDepth / 8;
+	pDataset = pDriver->Create(fname, size.x, size.y, numBands, GDT_Byte, papszOptions );
     CSLDestroy(papszOptions);
 
 	if (!pDataset)
@@ -1144,8 +1181,9 @@ bool vtImage::SaveToFile(const char *fname) const
 	// TODO: ask Frank if there is a way to gave GDAL write the file without
 	// having to make another entire copy in memory, as it does now:
 	RGBi rgb;
+	RGBAi rgba;
 	GDALRasterBand *pBand;
-	for (int i = 1; i <= 3; i++)
+	for (int i = 1; i <= numBands; i++)
 	{
 		pBand = pDataset->GetRasterBand(i);
 
@@ -1155,10 +1193,25 @@ bool vtImage::SaveToFile(const char *fname) const
 
 			for (int x = 0; x < size.x; x++)
 			{
-				bm->GetPixel24(x, y, rgb);
-				if (i == 1) raster[y*size.x + x] = rgb.r;
-				if (i == 2) raster[y*size.x + x] = rgb.g;
-				if (i == 3) raster[y*size.x + x] = rgb.b;
+				if (bitDepth == 8)
+				{
+					int value = bm->GetPixel8(x, y);
+					raster[y*size.x + x] = value;
+				}
+				else if (bitDepth == 24)
+				{
+					bm->GetPixel24(x, y, rgb);
+					if (i == 1) raster[y*size.x + x] = rgb.r;
+					if (i == 2) raster[y*size.x + x] = rgb.g;
+					if (i == 3) raster[y*size.x + x] = rgb.b;
+				}
+				else if (bitDepth == 32)
+				{
+					bm->GetPixel32(x, y, rgba);
+					if (i == 1) raster[y*size.x + x] = rgb.r;
+					if (i == 2) raster[y*size.x + x] = rgb.g;
+					if (i == 3) raster[y*size.x + x] = rgb.b;
+				}
 			}
 		}
 		pBand->RasterIO( GF_Write, 0, 0, size.x, size.y,
@@ -1179,6 +1232,7 @@ bool vtImage::ReadPNGFromMemory(uchar *buf, int len)
 	{
 		SetupBitmapInfo(pBitmap->GetSize());
 		m_Bitmaps[0].m_pBitmap = pBitmap;
+		m_BitDepth = pBitmap->GetDepth();
 		return true;
 	}
 	else
@@ -1213,7 +1267,7 @@ bool vtImage::LoadFromGDAL(const char *fname)
 		}
 
 		vtCRS temp;
-		bool bHaveProj = false;
+		bool bHaveCRS = false;
 		pProjectionString = m_pDataset->GetProjectionRef();
 		if (pProjectionString)
 		{
@@ -1223,21 +1277,20 @@ bool vtImage::LoadFromGDAL(const char *fname)
 			if (err == OGRERR_NONE && !temp.IsLocal())
 			{
 				m_crs = temp;
-				bHaveProj = true;
+				bHaveCRS = true;
 			}
 		}
-		if (!bHaveProj)
+		if (!bHaveCRS)
 		{
 			// check for existence of .prj file
-			bool bSuccess = temp.ReadProjFile(fname_local);
-			if (bSuccess)
+			if (temp.ReadProjFile(fname_local))
 			{
 				m_crs = temp;
-				bHaveProj = true;
+				bHaveCRS = true;
 			}
 		}
 		// if we still don't have it
-		if (!bHaveProj)
+		if (!bHaveCRS)
 		{
 			if (!g_bld->ConfirmValidCRS(&m_crs))
 				throw "Import Cancelled.";
@@ -1285,6 +1338,7 @@ bool vtImage::LoadFromGDAL(const char *fname)
 
 		// GetRasterBand is 1-based.
 		int iNumOverviews = m_pDataset->GetRasterBand(1)->GetOverviewCount();
+		m_BitDepth = m_pDataset->GetRasterCount() * 8;
 
 		GDALRasterBand *b0 = m_pDataset->GetRasterBand(1);
 		GDALRasterBand *b1 = b0->GetOverview(0);
@@ -1324,7 +1378,7 @@ bool vtImage::LoadFromGDAL(const char *fname)
 			if (!bDefer)
 			{
 				vtDIB *pBitmap = new vtDIB;
-				if (!pBitmap->Allocate(imageSize, 24))
+				if (!pBitmap->Allocate(imageSize, m_BitDepth))
 				{
 					delete pBitmap;
 					wxString msg;
@@ -1356,7 +1410,20 @@ bool vtImage::LoadFromGDAL(const char *fname)
 						}
 						const RGBAi *data = m_Bitmaps[i].m_linebuf.GetScanlineFromBuffer(iY);
 						for (int iX = 0; iX < imageSize.x; iX++)
-							pBitmap->SetPixel24(iX, iY, data[iX]);
+						{
+							switch (pBitmap->GetDepth())
+							{
+							case 8:
+								pBitmap->SetPixel8(iX, iY, data[iX].r);
+								break;
+							case 24:
+								pBitmap->SetPixel24(iX, iY, RGBi(data[iX]));
+								break;
+							case 32:
+								pBitmap->SetPixel32(iX, iY, data[iX]);
+								break;
+							}
+						}
 					}
 					m_Bitmaps[i].m_pBitmap = pBitmap;
 				}
@@ -1685,27 +1752,44 @@ void SampleMipLevel(vtDIB *bigger, vtDIB *smaller)
 	const int xsmall = size.x / 2;
 	const int ysmall = size.y / 2;
 
-	RGBi rgb, sum;
-
 	for (int y = 0; y < ysmall; y++)
 	{
 		if ((y%32)==0)
 			progress_callback(y * 99 / ysmall);
 
-		for (int x = 0; x < xsmall; x++)
+		if (bigger->GetDepth() == 8)
 		{
-			sum.Set(0,0,0);
+			int sum;
+			for (int x = 0; x < xsmall; x++)
+			{
+				sum = 0;
 
-			bigger->GetPixel24(x*2, y*2, rgb);
-			sum += rgb;
-			bigger->GetPixel24(x*2+1, y*2, rgb);
-			sum += rgb;
-			bigger->GetPixel24(x*2, y*2+1, rgb);
-			sum += rgb;
-			bigger->GetPixel24(x*2, y*2, rgb);
-			sum += rgb;
+				sum += bigger->GetPixel8(x * 2, y * 2);
+				sum += bigger->GetPixel8(x * 2 + 1, y * 2);
+				sum += bigger->GetPixel8(x * 2, y * 2 + 1);
+				sum += bigger->GetPixel8(x * 2, y * 2);
 
-			smaller->SetPixel24(x, y, sum/4);
+				smaller->SetPixel8(x, y, sum / 4);
+			}
+		}
+		else if (bigger->GetDepth() == 24)
+		{
+			RGBi rgb, sum;
+			for (int x = 0; x < xsmall; x++)
+			{
+				sum.Set(0, 0, 0);
+
+				bigger->GetPixel24(x * 2, y * 2, rgb);
+				sum += rgb;
+				bigger->GetPixel24(x * 2 + 1, y * 2, rgb);
+				sum += rgb;
+				bigger->GetPixel24(x * 2, y * 2 + 1, rgb);
+				sum += rgb;
+				bigger->GetPixel24(x * 2, y * 2, rgb);
+				sum += rgb;
+
+				smaller->SetPixel24(x, y, sum / 4);
+			}
 		}
 	}
 }

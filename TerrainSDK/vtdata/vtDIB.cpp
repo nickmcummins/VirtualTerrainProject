@@ -130,7 +130,7 @@ bool vtDIB::Allocate(const IPoint2 &size, int bitdepth)
 {
 	m_iWidth = size.x;
 	m_iHeight = size.y;
-	m_iByteCount = bitdepth /8;
+	m_iByteCount = bitdepth / 8;
 
 	// compute the width in bytes of each scanline (with DIB padding)
 	m_iByteWidth = ((m_iWidth * bitdepth + 31) / 32 * 4);

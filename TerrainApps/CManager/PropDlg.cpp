@@ -14,10 +14,6 @@
 
 #include "vtlib/vtlib.h"
 
-#ifdef _MSC_VER
-#pragma warning( disable : 4786 )
-#endif
-
 #include "PropDlg.h"
 #include "vtdata/Content.h"
 #include "vtui/AutoDialog.h"

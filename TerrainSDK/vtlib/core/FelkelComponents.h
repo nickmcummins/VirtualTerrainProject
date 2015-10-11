@@ -26,7 +26,6 @@ class vtString;
 class vtMaterial;
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4786)	// prevent common warning about templates
 #include <limits>
 #endif
 

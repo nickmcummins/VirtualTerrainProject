@@ -88,8 +88,8 @@ class vtImage
 {
 public:
 	vtImage();
-	vtImage(const DRECT &area, const IPoint2 &size,
-		const vtCRS &crs);
+	vtImage(const DRECT &area, const IPoint2 &pixelSize,
+		const vtCRS &crs, int bitDepth);
 	virtual ~vtImage();
 
 	bool GetExtent(DRECT &rect) const;
@@ -149,6 +149,7 @@ public:
 	BitmapInfo &GetBitmapInfo(size_t i) { return m_Bitmaps[i]; }
 	int NumBitmapsInMemory();
 	int NumBitmapsOnDisk();
+	int GetBitDepth() const { return m_BitDepth; }
 
 	void AllocMipMaps();
 	void DrawMipMaps();
@@ -158,10 +159,12 @@ protected:
 	void SetDefaults();
 
 	vtCRS	m_crs;
-
 	DRECT   m_Extents;
-
 	std::vector<BitmapInfo> m_Bitmaps;
+
+	// The bitmaps each know their own depth, but in case none are in memory, we
+	// still need to know their depth in bits per pixel.
+	int		m_BitDepth;
 
 	// Used during writing of tilesets
 	int m_iTotal, m_iCompleted;

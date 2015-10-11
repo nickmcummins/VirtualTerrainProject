@@ -120,6 +120,7 @@ BuilderView::BuilderView(wxWindow *parent, wxWindowID id, const wxPoint& pos,
 
 BuilderView::~BuilderView()
 {
+	delete m_context;
 	delete m_pCursorPan;
 	delete m_pMapToCurrent;
 	delete m_pCurrentToMap;

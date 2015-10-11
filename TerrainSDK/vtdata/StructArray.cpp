@@ -8,10 +8,6 @@
 // Free for all uses, see license.txt for details.
 //
 
-#ifdef _MSC_VER
-#pragma warning( disable : 4786 )
-#endif
-
 #include <stdlib.h>
 #include <string.h>
 

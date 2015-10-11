@@ -160,9 +160,6 @@ MainFrame::MainFrame(wxFrame *frame, const wxString& title,
 MainFrame::~MainFrame()
 {
 	VTLOG1("Frame destructor\n");
-	WriteXML("VTBuilder.xml");
-
-	m_mgr.UnInit();
 }
 
 void MainFrame::CreateView()
@@ -290,6 +287,9 @@ void MainFrame::OnClose(wxCloseEvent &event)
 	}
 
 	Destroy();
+
+	WriteXML("VTBuilder.xml");
+	m_mgr.UnInit();
 }
 
 void MainFrame::ManageToolbar(const wxString &name, wxToolBar *bar, bool show)

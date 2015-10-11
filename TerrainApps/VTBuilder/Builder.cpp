@@ -1499,6 +1499,7 @@ void Builder::AreaSampleImages(BuilderView *pView)
 {
 	// sample spacing in meters/heixel or degrees/heixel
 	DPoint2 spacing(0, 0);
+	int iBitDepth = 0;
 	for (uint i = 0; i < m_Layers.size(); i++)
 	{
 		vtLayer *lay = m_Layers[i];
@@ -1506,6 +1507,10 @@ void Builder::AreaSampleImages(BuilderView *pView)
 		{
 			vtImageLayer *im = (vtImageLayer *) lay;
 			spacing = im->GetSpacing();
+
+			// Adopt bit depth from first layer. It would be better to ask the user, but
+			// this should do what they expect almost always.
+			iBitDepth = im->GetImage()->GetBitDepth();
 		}
 	}
 	if (spacing == DPoint2(0, 0))
@@ -1528,7 +1533,7 @@ void Builder::AreaSampleImages(BuilderView *pView)
 		return;
 
 	// Make new image
-	vtImageLayer *pOutputLayer = new vtImageLayer(dlg.m_area, dlg.m_Size, m_crs);
+	vtImageLayer *pOutputLayer = new vtImageLayer(dlg.m_area, dlg.m_Size, m_crs, iBitDepth);
 	vtImage *pOutput = pOutputLayer->GetImage();
 
 	if (!pOutput->GetBitmap())

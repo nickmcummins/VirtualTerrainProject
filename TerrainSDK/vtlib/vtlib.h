@@ -24,13 +24,6 @@
 	#include <GL/gl.h>
 #endif
 
-// MSVC warnings can be obnoxious
-#ifdef _MSC_VER
-	#pragma warning(disable: 4511) // turn off warning about copy constructors
-	#pragma warning(disable: 4512) // turn off warning about assignment operators
-	#pragma warning(disable: 4786)	// prevent common warning about templates
-#endif
-
 ///////////////////////////////// OSG //////////////////////////////
 
 #include "vtosg/Mesh.h"

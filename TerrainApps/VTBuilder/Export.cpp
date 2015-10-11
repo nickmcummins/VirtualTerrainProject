@@ -433,7 +433,7 @@ void Builder::ExportBitmap(vtElevLayer *pEL, RenderOptions &ropt)
 	}
 	else
 	{
-		pOutputLayer = new vtImageLayer(area, size, crs);
+		pOutputLayer = new vtImageLayer(area, size, crs, 24);
 		pBitmap = pOutputLayer->GetImage()->GetBitmap();
 	}
 

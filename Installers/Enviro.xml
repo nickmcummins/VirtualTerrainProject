@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <EnviroOptions>
 	<EarthView>0</EarthView>
-	<EarthImage>ev11656_512</EarthImage>
+	<EarthImage>ev11656_1024</EarthImage>
 	<InitialTerrain>Simple Terrain</InitialTerrain>
 	<FullScreen>0</FullScreen>
 	<Stereo>0</Stereo>

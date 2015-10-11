@@ -9,10 +9,8 @@
 #pragma once
 
 #ifdef _MSC_VER
-  #pragma warning(disable: 4786)
-  #pragma warning(disable: 4100)
 	#if _DEBUG
-	  #define CRTDBG_MAP_ALLOC
+	  #define _CRTDBG_MAP_ALLOC
 	  #include <crtdbg.h>
 	#endif
 #endif

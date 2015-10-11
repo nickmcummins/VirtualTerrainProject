@@ -10,10 +10,6 @@
 #include "SMTerrain.h"
 #include "FP8.h"
 
-#ifdef _DEBUG
-#include <crtdbg.h>
-#endif
-
 #define USE_VERTEX_BUFFER	0
 #define VERTEX_BUFFER_SIZE	960
 

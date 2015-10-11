@@ -19,7 +19,7 @@ class vtImageLayer : public vtLayer
 {
 public:
 	vtImageLayer();
-	vtImageLayer(const DRECT &area, const IPoint2 &size, const vtCRS &crs);
+	vtImageLayer(const DRECT &area, const IPoint2 &size, const vtCRS &crs, int bitDepth);
 	virtual ~vtImageLayer();
 
 	// overrides for vtLayer methods

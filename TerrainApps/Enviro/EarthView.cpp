@@ -134,6 +134,7 @@ void Enviro::SetupGlobe()
 		// Let the GUI know
 		SetTimeEngineToGUI(m_pGlobeTime);
 	}
+	VTLOG("SetupGlobe step %d finished\n", m_iInitStep);
 }
 
 // Helper
@@ -692,6 +693,7 @@ void Enviro::OnMouseLeftDownOrbit(vtMouseEvent &event)
 		return;
 	if (m_mode == MM_SELECT)
 	{
+		VTLOG("Calling FindTerrainOnEarth(%lf, %lf)\n", m_EarthPos.x, m_EarthPos.y);
 		vtTerrain *pTerr = FindTerrainOnEarth(DPoint2(m_EarthPos.x, m_EarthPos.y));
 		if (pTerr)
 			RequestTerrain(pTerr);

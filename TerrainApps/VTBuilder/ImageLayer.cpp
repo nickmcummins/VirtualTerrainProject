@@ -1,7 +1,7 @@
 //
 // ImageLayer.cpp
 //
-// Copyright (c) 2002-2012 Virtual Terrain Project
+// Copyright (c) 2002-2015 Virtual Terrain Project
 // Free for all uses, see license.txt for details.
 //
 
@@ -26,10 +26,10 @@ vtImageLayer::vtImageLayer() : vtLayer(LT_IMAGE)
 }
 
 vtImageLayer::vtImageLayer(const DRECT &area, const IPoint2 &size,
-						   const vtCRS &crs) : vtLayer(LT_IMAGE)
+						   const vtCRS &crs, int bitDepth) : vtLayer(LT_IMAGE)
 {
 	m_wsFilename = _("Untitled");
-	m_pImage = new vtImage(area, size, crs);
+	m_pImage = new vtImage(area, size, crs, bitDepth);
 }
 
 vtImageLayer::~vtImageLayer()
@@ -193,6 +193,10 @@ void vtImageLayer::GetPropertyText(wxString &strIn)
 	str += _T("\n");
 	strIn += str;
 
+	str.Printf(_("Bit depth: %d"), m_pImage->GetBitDepth());
+	strIn += str;
+	strIn += _T("\n");
+
 	strIn += _("Bitmaps:");
 	strIn += _T("\n");
 	for (size_t i = 0; i < m_pImage->NumBitmaps(); i++)
@@ -289,7 +293,7 @@ bool vtImageLayer::ImportFromDB(const char *szFileName, bool progress_callback(i
 	area.SetRect(dbuf.nwx, dbuf.nwy, dbuf.sex, dbuf.sey);
 
 	m_wsFilename = _("Untitled");
-	m_pImage = new vtImage(area, IPoint2(dbuf.xsize, dbuf.ysize), crs);
+	m_pImage = new vtImage(area, IPoint2(dbuf.xsize, dbuf.ysize), crs, 24);
 
 	RGBf rgb;
 	RGBAf rgba;

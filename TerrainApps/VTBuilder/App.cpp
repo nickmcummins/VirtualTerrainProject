@@ -47,8 +47,11 @@ void BuilderApp::Args(int argc, wxChar **argv)
 
 bool BuilderApp::OnInit()
 {
-#if WIN32 && defined(_MSC_VER) && DEBUG
+#if WIN32 && defined(_MSC_VER) && VTDEBUG
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	// Deliberate memleak to confirm leak testing is working.
+	void *leak = malloc(666);
+	//_crtBreakAlloc = 55230;
 #endif
 
 	VTSTARTLOG("debug.txt");
