@@ -919,7 +919,7 @@ void vtBuilding::SetNumStories(int iStories)
 		if (pLev->m_iStories == 0)
 		{
 			delete pLev;
-			m_Levels.SetSize(levels-1);
+			m_Levels.RemoveAt(levels - 2);
 			levels--;
 		}
 	}
