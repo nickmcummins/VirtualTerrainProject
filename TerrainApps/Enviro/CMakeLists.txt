@@ -39,6 +39,10 @@ install(TARGETS Enviro RUNTIME DESTINATION bin
 # Internal dependencies for this target
 target_link_libraries(Enviro envdlg wxosg vtlib vtui minidata vtdata xmlhelper)
 
+if (UNIX)
+    target_link_libraries(Enviro X11)
+endif(UNIX)
+
 # Performance monitoring
 if(NVPERFSDK_FOUND AND VTP_NVIDIA_PERFORMANCE_MONITORING)
 	set_property(TARGET Enviro APPEND PROPERTY COMPILE_DEFINITIONS VTP_NVIDIA_PERFORMANCE_MONITORING=1)
