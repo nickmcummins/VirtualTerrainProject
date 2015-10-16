@@ -70,6 +70,10 @@ target_link_libraries(VTBuilder BuilderLib vtui vtdata xmlhelper minidata unzip)
 # Specify common preprocessor definitions for this target
 set_property(TARGET VTBuilder APPEND PROPERTY COMPILE_DEFINITIONS USE_OPENGL=1)
 
+if (UNIX)
+    target_link_libraries(VTBuilder dl)
+endif(UNIX)
+
 # Windows specific stuff
 if (WIN32)
 	set_property(TARGET VTBuilder APPEND PROPERTY LINK_FLAGS_DEBUG "/NODEFAULTLIB:msvcrt")

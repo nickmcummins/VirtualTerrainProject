@@ -20,6 +20,10 @@ if (WIN32)
 	set_property(TARGET wxSimple APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt)
 endif (WIN32)
 
+if (UNIX)
+    target_link_libraries(wxSimple X11)
+endif(UNIX)
+
 # External libraries for this target
 if(wxWidgets_FOUND)
 	include(${wxWidgets_USE_FILE})

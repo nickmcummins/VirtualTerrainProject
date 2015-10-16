@@ -18,6 +18,10 @@ If you only want to run the software, there are [installers for Windows](http://
 
 * Optional: libbzip2, libcurl, QuikGrid, and a few more.
 
+### New Dependencies ###
+* Required: GDAL 2, OpenSceneGraph 3.5, libMini, wxWidgets, libjpeg, libpng.
+
+
 ### Contribution guidelines ###
 
 * Please send feedback to the [mailing list](https://groups.yahoo.com/neo/groups/vtp/info)

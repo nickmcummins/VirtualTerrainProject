@@ -24,6 +24,11 @@ install(TARGETS CManager RUNTIME DESTINATION bin
 # Internal library dependencies for this target
 target_link_libraries(CManager wxosg vtlib vtdata vtui xmlhelper minidata)
 
+
+if (UNIX)
+    target_link_libraries(CManager X11)
+endif(UNIX)
+
 # Windows specific stuff
 if (WIN32)
 	set_property(TARGET CManager APPEND PROPERTY LINK_FLAGS_DEBUG /NODEFAULTLIB:msvcrt;wxpngd;wxtiffd;wxjpegd;wxzlibd)
