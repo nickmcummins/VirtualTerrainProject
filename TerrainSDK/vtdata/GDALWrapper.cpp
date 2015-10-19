@@ -168,6 +168,10 @@ bool GDALWrapper::FindPROJ4SO()
 {
 #ifndef WIN32
 	vtStringArray dpso;
+    const char *proj4so = getenv("PROJSO");
+    VTLOG("getenv PROJSO: '%s'\n", proj4so ? proj4so : "NULL");
+    if (proj4so != NULL)
+        dpso.push_back(vtString(proj4so) + "/");
 	dpso.push_back(vtString(DEFAULT_LOCATION_PROJSO));
 	// add the usual unix paths
 
@@ -186,7 +190,7 @@ bool GDALWrapper::FindPROJ4SO()
 #if __APPLE__
 	soExtension = ".dylib";
 #else // other unixes
-	soExtension = ".so.0";
+    soExtension = ".so";
 #endif
 
 	vtString fname = FindFileOnPaths(dpso, soName + soExtension);
