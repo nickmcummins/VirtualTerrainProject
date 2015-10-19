@@ -2348,7 +2348,7 @@ TextDlgBase::TextDlgBase( wxWindow* parent, wxWindowID id, const wxString& title
 	bSizer118 = new wxBoxSizer( wxVERTICAL );
 	
 	m_text61 = new wxTextCtrl( this, ID_TEXT, wxEmptyString, wxDefaultPosition, wxSize( 450,250 ), wxTE_MULTILINE|wxTE_READONLY );
-	m_text61->SetMaxLength( 0 ); 
+    //m_text61->SetMaxLength( 0 );
 	bSizer118->Add( m_text61, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	ok = new wxButton( this, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
