@@ -1013,7 +1013,11 @@ int vtMesh::NumPrims() const
 // Override with ability to get OSG bounding box
 void vtMesh::GetBoundBox(FBox3 &box) const
 {
+#if OSG_VERSION_GREATER_THAN(3, 3, 0)
 	const osg::BoundingBox &osg_box = getBoundingBox();
+#else
+	const osg::BoundingBox &osg_box = getBound();
+#endif
 	s2v(osg_box, box);
 }
 
@@ -1439,7 +1443,11 @@ vtTextMesh::vtTextMesh(osgText::Font *font, float fSize, bool bCenter)
 // Override with ability to get OSG bounding box
 void vtTextMesh::GetBoundBox(FBox3 &box) const
 {
+#if OSG_VERSION_GREATER_THAN(3, 3, 0)
 	const osg::BoundingBox &osg_box = getBoundingBox();
+#else
+	const osg::BoundingBox &osg_box = getBound();
+#endif
 	s2v(osg_box, box);
 }
 
