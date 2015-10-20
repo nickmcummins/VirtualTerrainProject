@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jun 17 2015)
+// C++ code generated with wxFormBuilder (version Nov 10 2014)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -2348,7 +2348,6 @@ TextDlgBase::TextDlgBase( wxWindow* parent, wxWindowID id, const wxString& title
 	bSizer118 = new wxBoxSizer( wxVERTICAL );
 	
 	m_text61 = new wxTextCtrl( this, ID_TEXT, wxEmptyString, wxDefaultPosition, wxSize( 450,250 ), wxTE_MULTILINE|wxTE_READONLY );
-    //m_text61->SetMaxLength( 0 );
 	bSizer118->Add( m_text61, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	ok = new wxButton( this, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
