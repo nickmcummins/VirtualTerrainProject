@@ -14387,7 +14387,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="0">
+        <object class="Dialog" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -14449,7 +14449,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer15</property>
                 <property name="orient">wxVERTICAL</property>
@@ -14489,7 +14489,7 @@
                         <property name="max_size"></property>
                         <property name="maximize_button">0</property>
                         <property name="maximum_size"></property>
-                        <property name="maxlength">0</property>
+                        <property name="maxlength"></property>
                         <property name="min_size"></property>
                         <property name="minimize_button">0</property>
                         <property name="minimum_size"></property>
@@ -15926,7 +15926,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="0">
+        <object class="Dialog" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -15988,7 +15988,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer103</property>
                 <property name="orient">wxVERTICAL</property>
@@ -16560,7 +16560,7 @@
                                 <property name="max_size"></property>
                                 <property name="maximize_button">0</property>
                                 <property name="maximum_size"></property>
-                                <property name="maxlength">0</property>
+                                <property name="maxlength"></property>
                                 <property name="min_size"></property>
                                 <property name="minimize_button">0</property>
                                 <property name="minimum_size"></property>
@@ -16923,7 +16923,7 @@
                                 <property name="max_size"></property>
                                 <property name="maximize_button">0</property>
                                 <property name="maximum_size"></property>
-                                <property name="maxlength">0</property>
+                                <property name="maxlength"></property>
                                 <property name="min_size"></property>
                                 <property name="minimize_button">0</property>
                                 <property name="minimum_size"></property>
@@ -17629,7 +17629,7 @@
                         <property name="max_size"></property>
                         <property name="maximize_button">0</property>
                         <property name="maximum_size"></property>
-                        <property name="maxlength">0</property>
+                        <property name="maxlength"></property>
                         <property name="min_size"></property>
                         <property name="minimize_button">0</property>
                         <property name="minimum_size"></property>

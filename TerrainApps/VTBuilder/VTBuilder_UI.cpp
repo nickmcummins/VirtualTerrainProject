@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jun 17 2015)
+// C++ code generated with wxFormBuilder (version Nov 10 2014)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -1266,7 +1266,6 @@ LayerPropDlgBase::LayerPropDlgBase( wxWindow* parent, wxWindowID id, const wxStr
 	bSizer15 = new wxBoxSizer( wxVERTICAL );
 	
 	m_props = new wxTextCtrl( this, ID_PROPS, wxEmptyString, wxDefaultPosition, wxSize( 300,120 ), wxTE_MULTILINE );
-	m_props->SetMaxLength( 0 ); 
 	bSizer15->Add( m_props, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	wxStaticBoxSizer* sbSizer4;
@@ -1443,7 +1442,6 @@ MapServerDlgBase::MapServerDlgBase( wxWindow* parent, wxWindowID id, const wxStr
 	fgSizer6->Add( m_list_layers, 0, wxEXPAND|wxLEFT|wxRIGHT|wxBOTTOM, 5 );
 	
 	m_layer_desc = new wxTextCtrl( this, ID_LAYER_DESC, wxEmptyString, wxDefaultPosition, wxSize( -1,100 ), wxTE_MULTILINE );
-	m_layer_desc->SetMaxLength( 0 ); 
 	fgSizer6->Add( m_layer_desc, 1, wxEXPAND|wxLEFT|wxRIGHT|wxBOTTOM, 5 );
 	
 	
@@ -1469,7 +1467,6 @@ MapServerDlgBase::MapServerDlgBase( wxWindow* parent, wxWindowID id, const wxStr
 	fgSizer7->Add( m_list_styles, 0, wxEXPAND|wxLEFT|wxRIGHT|wxBOTTOM, 5 );
 	
 	m_style_desc = new wxTextCtrl( this, ID_STYLE_DESC, wxEmptyString, wxDefaultPosition, wxSize( -1,40 ), wxTE_MULTILINE );
-	m_style_desc->SetMaxLength( 0 ); 
 	fgSizer7->Add( m_style_desc, 1, wxEXPAND|wxLEFT|wxRIGHT|wxBOTTOM, 5 );
 	
 	
@@ -1511,7 +1508,6 @@ MapServerDlgBase::MapServerDlgBase( wxWindow* parent, wxWindowID id, const wxStr
 	bSizer103->Add( m_text21, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 5 );
 	
 	m_query = new wxTextCtrl( this, ID_QUERY, wxEmptyString, wxDefaultPosition, wxSize( -1,60 ), wxTE_MULTILINE );
-	m_query->SetMaxLength( 0 ); 
 	bSizer103->Add( m_query, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	wxStaticBoxSizer* sbSizer23;

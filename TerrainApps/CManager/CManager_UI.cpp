@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jun 17 2015)
+// C++ code generated with wxFormBuilder (version Nov 10 2014)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -169,7 +169,6 @@ ModelPanelBase::ModelPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& 
 	bSizer89->Add( m_text9, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
 	
 	m_status = new wxTextCtrl( sbSizer9->GetStaticBox(), ID_STATUS, wxEmptyString, wxDefaultPosition, wxSize( 80,40 ), wxTE_MULTILINE );
-	m_status->SetMaxLength( 0 ); 
 	bSizer89->Add( m_status, 1, wxALIGN_CENTER, 5 );
 	
 	

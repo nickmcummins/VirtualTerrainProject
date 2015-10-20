@@ -85,3 +85,4 @@ if(VTP_USE_CPACK)
 	include(CPack)
 endif(VTP_USE_CPACK)
 
+option(WITH_GLUT "Enable GLUT app" OFF)

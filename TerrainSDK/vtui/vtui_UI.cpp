@@ -108,7 +108,7 @@ BuildingDlgBase::BuildingDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer313->Add( m_text3, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_story_height = new wxTextCtrl( sbSizer57->GetStaticBox(), ID_STORY_HEIGHT, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), 0 );
-	m_story_height->SetMaxLength( 0 ); 
+    //m_story_height->SetMaxLength( 0 );
 	bSizer313->Add( m_story_height, 0, wxALIGN_CENTER|wxRIGHT|wxTOP|wxBOTTOM, 5 );
 	
 	m_text4 = new wxStaticText( sbSizer57->GetStaticBox(), ID_TEXT, _("meters"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -126,7 +126,7 @@ BuildingDlgBase::BuildingDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer314->Add( m_text5, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_material1 = new wxTextCtrl( sbSizer57->GetStaticBox(), ID_MATERIAL1, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), wxTE_READONLY );
-	m_material1->SetMaxLength( 0 ); 
+    //m_material1->SetMaxLength( 0 );
 	bSizer314->Add( m_material1, 0, wxALIGN_CENTER|wxRIGHT|wxTOP|wxBOTTOM, 5 );
 	
 	m_set_material = new wxButton( sbSizer57->GetStaticBox(), ID_SET_MATERIAL, _("Set"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -161,7 +161,7 @@ BuildingDlgBase::BuildingDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer316->Add( m_text7, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_edge_slopes = new wxTextCtrl( sbSizer57->GetStaticBox(), ID_EDGE_SLOPES, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), wxTE_READONLY );
-	m_edge_slopes->SetMaxLength( 0 ); 
+    //m_edge_slopes->SetMaxLength( 0 );
 	bSizer316->Add( m_edge_slopes, 0, wxALIGN_CENTER|wxRIGHT|wxTOP|wxBOTTOM, 5 );
 	
 	m_set_edge_slopes = new wxButton( sbSizer57->GetStaticBox(), ID_SET_EDGE_SLOPES, _("Set"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -204,7 +204,7 @@ BuildingDlgBase::BuildingDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer3241->Add( m_text131, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_material21 = new wxTextCtrl( g_pEdgeGroup1->GetStaticBox(), ID_MATERIAL2, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), wxTE_READONLY );
-	m_material21->SetMaxLength( 0 ); 
+    //m_material21->SetMaxLength( 0 );
 	bSizer3241->Add( m_material21, 1, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_set_material11 = new wxButton( g_pEdgeGroup1->GetStaticBox(), ID_SET_MATERIAL, _("Set"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -255,14 +255,14 @@ BuildingDlgBase::BuildingDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer3271->Add( m_text161, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_edge_slope1 = new wxTextCtrl( g_pEdgeGroup1->GetStaticBox(), ID_EDGE_SLOPE, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), 0 );
-	m_edge_slope1->SetMaxLength( 0 ); 
+    //m_edge_slope1->SetMaxLength( 0 );
 	bSizer3271->Add( m_edge_slope1, 0, wxALIGN_CENTER|wxRIGHT|wxBOTTOM, 5 );
 	
 	
-	g_pEdgeGroup1->Add( bSizer3271, 0, wxALIGN_CENTER_VERTICAL, 5 );
+    g_pEdgeGroup1->Add( bSizer3271, 0, wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_features1 = new wxTextCtrl( g_pEdgeGroup1->GetStaticBox(), ID_FEATURES, wxEmptyString, wxDefaultPosition, wxSize( -1,55 ), wxTE_MULTILINE );
-	m_features1->SetMaxLength( 0 ); 
+    //m_features1->SetMaxLength( 0 );
 	g_pEdgeGroup1->Add( m_features1, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 5 );
 	
 	wxBoxSizer* bSizer3281;
@@ -343,7 +343,7 @@ ColorMapDlgBase::ColorMapDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer353->Add( m_text38, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_cmap_file = new wxTextCtrl( this, ID_CMAP_FILE, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), wxTE_READONLY );
-	m_cmap_file->SetMaxLength( 0 ); 
+    //m_cmap_file->SetMaxLength( 0 );
 	bSizer353->Add( m_cmap_file, 1, wxALIGN_CENTER|wxALL, 5 );
 	
 	
@@ -394,7 +394,7 @@ ColorMapDlgBase::ColorMapDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	sbSizer63->Add( m_text39, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	mmeight_to_add = new wxTextCtrl( sbSizer63->GetStaticBox(), ID_HEIGHT_TO_ADD, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), 0 );
-	mmeight_to_add->SetMaxLength( 0 ); 
+    //mmeight_to_add->SetMaxLength( 0 );
 	sbSizer63->Add( mmeight_to_add, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_add = new wxButton( sbSizer63->GetStaticBox(), ID_ADD, _("Add"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -463,7 +463,7 @@ ContourDlgBase::ContourDlgBase( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer308->Add( m_radioBtn31, 0, wxALL, 5 );
 	
 	m_elev = new wxTextCtrl( this, ID_ELEV1, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), 0 );
-	m_elev->SetMaxLength( 0 ); 
+    //m_elev->SetMaxLength( 0 );
 	bSizer308->Add( m_elev, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_text211 = new wxStaticText( this, ID_TEXT, _("meters"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -480,7 +480,7 @@ ContourDlgBase::ContourDlgBase( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer3081->Add( m_radioBtn30, 0, wxALL, 5 );
 	
 	m_elev2 = new wxTextCtrl( this, ID_ELEV2, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), 0 );
-	m_elev2->SetMaxLength( 0 ); 
+    //m_elev2->SetMaxLength( 0 );
 	bSizer3081->Add( m_elev2, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_text2111 = new wxStaticText( this, ID_TEXT, _("meters"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -585,7 +585,7 @@ DistanceDlgBase::DistanceDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	fgSizer11->Add( m_text34, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_map_offset = new wxTextCtrl( this, ID_MAP_OFFSET, wxEmptyString, wxDefaultPosition, wxSize( 180,-1 ), 0 );
-	m_map_offset->SetMaxLength( 0 ); 
+    //m_map_offset->SetMaxLength( 0 );
 	fgSizer11->Add( m_map_offset, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	wxArrayString m_units1Choices;
@@ -598,7 +598,7 @@ DistanceDlgBase::DistanceDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	fgSizer11->Add( id_text, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_map_dist = new wxTextCtrl( this, ID_MAP_DIST, wxEmptyString, wxDefaultPosition, wxSize( 180,-1 ), 0 );
-	m_map_dist->SetMaxLength( 0 ); 
+    //m_map_dist->SetMaxLength( 0 );
 	fgSizer11->Add( m_map_dist, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	wxArrayString m_units2Choices;
@@ -611,7 +611,7 @@ DistanceDlgBase::DistanceDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	fgSizer11->Add( m_text35, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	mmeod_dist = new wxTextCtrl( this, ID_GEOD_DIST, wxEmptyString, wxDefaultPosition, wxSize( 180,-1 ), 0 );
-	mmeod_dist->SetMaxLength( 0 ); 
+    //mmeod_dist->SetMaxLength( 0 );
 	fgSizer11->Add( mmeod_dist, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	wxArrayString m_units3Choices;
@@ -624,7 +624,7 @@ DistanceDlgBase::DistanceDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	fgSizer11->Add( m_text36, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_ground_dist = new wxTextCtrl( this, ID_GROUND_DIST, wxEmptyString, wxDefaultPosition, wxSize( 180,-1 ), 0 );
-	m_ground_dist->SetMaxLength( 0 ); 
+    //m_ground_dist->SetMaxLength( 0 );
 	fgSizer11->Add( m_ground_dist, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	wxArrayString m_units4Choices;
@@ -637,7 +637,7 @@ DistanceDlgBase::DistanceDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	fgSizer11->Add( m_text37, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_vertical = new wxTextCtrl( this, ID_VERTICAL, wxEmptyString, wxDefaultPosition, wxSize( 180,-1 ), 0 );
-	m_vertical->SetMaxLength( 0 ); 
+    //m_vertical->SetMaxLength( 0 );
 	fgSizer11->Add( m_vertical, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	wxArrayString id_units5Choices;
@@ -791,7 +791,7 @@ InstanceDlgBase::InstanceDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer348->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_model_file = new wxTextCtrl( this, ID_MODEL_FILE, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), wxTE_READONLY );
-	m_model_file->SetMaxLength( 0 ); 
+    //m_model_file->SetMaxLength( 0 );
 	bSizer348->Add( m_model_file, 1, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_browse_model_file = new wxButton( this, ID_BROWSE_MODEL_FILE, _("..."), wxDefaultPosition, wxSize( 30,-1 ), 0 );
@@ -811,7 +811,7 @@ InstanceDlgBase::InstanceDlgBase( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer349->Add( m_text33, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_location = new wxTextCtrl( this, ID_LOCATION, wxEmptyString, wxDefaultPosition, wxSize( 200,-1 ), 0 );
-	m_location->SetMaxLength( 0 ); 
+    //m_location->SetMaxLength( 0 );
 	bSizer349->Add( m_location, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_create = new wxButton( this, ID_CREATE, _("Create"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -883,7 +883,7 @@ LinearStructDlgBase::LinearStructDlgBase( wxWindow* parent, wxWindowID id, const
 	bSizer333->Add( m_text19, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_post_spacing_edit = new wxTextCtrl( sbSizer60->GetStaticBox(), ID_POST_SPACING_EDIT, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), 0 );
-	m_post_spacing_edit->SetMaxLength( 0 ); 
+    //m_post_spacing_edit->SetMaxLength( 0 );
 	bSizer333->Add( m_post_spacing_edit, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_post_spacing_slider = new wxSlider( sbSizer60->GetStaticBox(), ID_POST_SPACING_SLIDER, 0, 0, 100, wxDefaultPosition, wxSize( 110,-1 ), wxSL_HORIZONTAL );
@@ -900,7 +900,7 @@ LinearStructDlgBase::LinearStructDlgBase( wxWindow* parent, wxWindowID id, const
 	bSizer334->Add( m_text20, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_post_height_edit = new wxTextCtrl( sbSizer60->GetStaticBox(), ID_POST_HEIGHT_EDIT, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), 0 );
-	m_post_height_edit->SetMaxLength( 0 ); 
+    //m_post_height_edit->SetMaxLength( 0 );
 	bSizer334->Add( m_post_height_edit, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_post_height_slider = new wxSlider( sbSizer60->GetStaticBox(), ID_POST_HEIGHT_SLIDER, 0, 0, 100, wxDefaultPosition, wxSize( 110,-1 ), wxSL_HORIZONTAL );
@@ -917,7 +917,7 @@ LinearStructDlgBase::LinearStructDlgBase( wxWindow* parent, wxWindowID id, const
 	bSizer335->Add( m_text21, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_post_size_edit = new wxTextCtrl( sbSizer60->GetStaticBox(), ID_POST_SIZE_EDIT, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), 0 );
-	m_post_size_edit->SetMaxLength( 0 ); 
+    //m_post_size_edit->SetMaxLength( 0 );
 	bSizer335->Add( m_post_size_edit, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_post_size_slider = new wxSlider( sbSizer60->GetStaticBox(), ID_POST_SIZE_SLIDER, 0, 0, 100, wxDefaultPosition, wxSize( 110,-1 ), wxSL_HORIZONTAL );
@@ -988,7 +988,7 @@ LinearStructDlgBase::LinearStructDlgBase( wxWindow* parent, wxWindowID id, const
 	bSizer339->Add( m_text25, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_conn_top_edit = new wxTextCtrl( sbSizer61->GetStaticBox(), ID_CONN_TOP_EDIT, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), 0 );
-	m_conn_top_edit->SetMaxLength( 0 ); 
+    //m_conn_top_edit->SetMaxLength( 0 );
 	bSizer339->Add( m_conn_top_edit, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_conn_top_slider = new wxSlider( sbSizer61->GetStaticBox(), ID_CONN_TOP_SLIDER, 0, 0, 100, wxDefaultPosition, wxSize( 110,-1 ), wxSL_HORIZONTAL );
@@ -1005,7 +1005,7 @@ LinearStructDlgBase::LinearStructDlgBase( wxWindow* parent, wxWindowID id, const
 	bSizer340->Add( m_text26, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_conn_bottom_edit = new wxTextCtrl( sbSizer61->GetStaticBox(), ID_CONN_BOTTOM_EDIT, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), 0 );
-	m_conn_bottom_edit->SetMaxLength( 0 ); 
+    //m_conn_bottom_edit->SetMaxLength( 0 );
 	bSizer340->Add( m_conn_bottom_edit, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_conn_bottom_slider = new wxSlider( sbSizer61->GetStaticBox(), ID_CONN_BOTTOM_SLIDER, 0, 0, 100, wxDefaultPosition, wxSize( 110,-1 ), wxSL_HORIZONTAL );
@@ -1022,7 +1022,7 @@ LinearStructDlgBase::LinearStructDlgBase( wxWindow* parent, wxWindowID id, const
 	bSizer341->Add( m_text27, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_conn_width_edit = new wxTextCtrl( sbSizer61->GetStaticBox(), ID_CONN_WIDTH_EDIT, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), 0 );
-	m_conn_width_edit->SetMaxLength( 0 ); 
+    //m_conn_width_edit->SetMaxLength( 0 );
 	bSizer341->Add( m_conn_width_edit, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_conn_width_slider = new wxSlider( sbSizer61->GetStaticBox(), ID_CONN_WIDTH_SLIDER, 0, 0, 100, wxDefaultPosition, wxSize( 110,-1 ), wxSL_HORIZONTAL );
@@ -1039,7 +1039,7 @@ LinearStructDlgBase::LinearStructDlgBase( wxWindow* parent, wxWindowID id, const
 	bSizer342->Add( m_text28, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_slope = new wxTextCtrl( sbSizer61->GetStaticBox(), ID_SLOPE, wxEmptyString, wxDefaultPosition, wxSize( 50,-1 ), 0 );
-	m_slope->SetMaxLength( 0 ); 
+    //m_slope->SetMaxLength( 0 );
 	bSizer342->Add( m_slope, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_slope_slider = new wxSlider( sbSizer61->GetStaticBox(), ID_SLOPE_SLIDER, 0, 0, 100, wxDefaultPosition, wxSize( 110,-1 ), wxSL_HORIZONTAL );
@@ -1140,7 +1140,7 @@ ProfileDlgBase::ProfileDlgBase( wxWindow* parent, wxWindowID id, const wxString&
 	fgSizer12->Add( m_text40, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_height1 = new wxTextCtrl( this, ID_HEIGHT1, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), 0 );
-	m_height1->SetMaxLength( 0 ); 
+    //m_height1->SetMaxLength( 0 );
 	fgSizer12->Add( m_height1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	id_text = new wxStaticText( this, ID_TEXT, _("End height:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1148,7 +1148,7 @@ ProfileDlgBase::ProfileDlgBase( wxWindow* parent, wxWindowID id, const wxString&
 	fgSizer12->Add( id_text, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_height2 = new wxTextCtrl( this, ID_HEIGHT2, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), 0 );
-	m_height2->SetMaxLength( 0 ); 
+    //m_height2->SetMaxLength( 0 );
 	fgSizer12->Add( m_height2, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxBOTTOM, 5 );
 	
 	m_text41 = new wxStaticText( this, ID_TEXT, _("Radio Frequency:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1159,7 +1159,7 @@ ProfileDlgBase::ProfileDlgBase( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer361 = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_rf = new wxTextCtrl( this, ID_RF, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), 0 );
-	m_rf->SetMaxLength( 0 ); 
+    //m_rf->SetMaxLength( 0 );
 	bSizer361->Add( m_rf, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxBOTTOM, 5 );
 	
 	m_text42 = new wxStaticText( this, ID_TEXT, _("MHz"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1189,7 +1189,7 @@ ProfileDlgBase::ProfileDlgBase( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer362 = new wxBoxSizer( wxVERTICAL );
 	
 	m_status_text = new wxTextCtrl( this, ID_STATUS_TEXT, wxEmptyString, wxDefaultPosition, wxSize( 210,-1 ), wxTE_MULTILINE );
-	m_status_text->SetMaxLength( 0 ); 
+    //m_status_text->SetMaxLength( 0 );
 	bSizer362->Add( m_status_text, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 5 );
 	
 	wxBoxSizer* bSizer363;
@@ -1351,7 +1351,7 @@ ProjectionDlgBase::ProjectionDlgBase( wxWindow* parent, wxWindowID id, const wxS
 	bSizer366->Add( id_text, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_ellipsoid = new wxTextCtrl( this, ID_ELLIPSOID, wxEmptyString, wxDefaultPosition, wxSize( 80,-1 ), wxTE_READONLY );
-	m_ellipsoid->SetMaxLength( 0 ); 
+    //m_ellipsoid->SetMaxLength( 0 );
 	bSizer366->Add( m_ellipsoid, 1, wxALIGN_CENTER|wxALL, 5 );
 	
 	
@@ -1443,7 +1443,7 @@ SizeDlgBase::SizeDlgBase( wxWindow* parent, wxWindowID id, const wxString& title
 	bSizer381 = new wxBoxSizer( wxVERTICAL );
 	
 	m_textctrl = new wxTextCtrl( this, ID_TEXTCTRL, wxEmptyString, wxDefaultPosition, wxSize( 320,60 ), wxTE_MULTILINE|wxTE_READONLY );
-	m_textctrl->SetMaxLength( 0 ); 
+    //m_textctrl->SetMaxLength( 0 );
 	bSizer381->Add( m_textctrl, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_slider_ratio = new wxSlider( this, ID_SLIDER_RATIO, 0, 0, 320, wxDefaultPosition, wxSize( 320,-1 ), wxSL_HORIZONTAL );
@@ -1453,11 +1453,11 @@ SizeDlgBase::SizeDlgBase( wxWindow* parent, wxWindowID id, const wxString& title
 	bSizer382 = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_text_x = new wxTextCtrl( this, ID_TEXT_X, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), 0 );
-	m_text_x->SetMaxLength( 0 ); 
+    //m_text_x->SetMaxLength( 0 );
 	bSizer382->Add( m_text_x, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	m_text_y = new wxTextCtrl( this, ID_TEXT_Y, wxEmptyString, wxDefaultPosition, wxSize( 60,-1 ), 0 );
-	m_text_y->SetMaxLength( 0 ); 
+    //m_text_y->SetMaxLength( 0 );
 	bSizer382->Add( m_text_y, 0, wxALIGN_CENTER|wxALL, 5 );
 	
 	
