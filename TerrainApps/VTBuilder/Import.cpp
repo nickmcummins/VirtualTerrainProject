@@ -2117,7 +2117,7 @@ void Builder::ImportDataFromS57(const wxString &strDirName)
 		while( (pFeature = pOGRLayer->GetNextFeature()) != NULL )
 		{
 			// make sure we delete the feature no matter how the loop exits
-			std::auto_ptr<OGRFeature> ensure_deletion(pFeature);
+			std::unique_ptr<OGRFeature> ensure_deletion(pFeature);
 
 			UpdateProgressDialog(100 * fcount / feature_count);
 

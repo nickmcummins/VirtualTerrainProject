@@ -228,10 +228,10 @@ void vtGLCanvas::OnSize(wxSizeEvent& event)
 		VTLOG("Canvas  OnSize: %d %d\n", event.GetSize().x, event.GetSize().y);
 		count++;
 	}
-	SetCurrent();
+	//SetCurrent();
 	wxSize size = GetClientSize();
 	vtGetScene()->SetWindowSize(size.x, size.y);
-	wxGLCanvas::OnSize(event);
+	//wxGLCanvas::OnSize(event);
 }
 
 void vtGLCanvas::OnChar(wxKeyEvent& event)
