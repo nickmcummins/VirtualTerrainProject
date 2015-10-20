@@ -341,9 +341,12 @@ int request_callback(int col,int row,const uchar *mapfile,int hlod,
 	return 1;
 }
 
-void mini_error_handler(const char *file, int line, int fatal)
+void mini_error_handler(const char *file, int line, int fatal, const char *msg)
 {
-	VTLOG("libMini error: file '%s', line %d, fatal %d\n", file, line, fatal);
+	VTLOG("libMini error: file '%s', line %d, fatal %d", file, line, fatal);
+	if (msg != NULL)
+		VTLOG(", msg: %s", msg);
+	VTLOG1("\n");
 }
 
 void request_callback_async(const uchar *mapfile, databuf *map,
