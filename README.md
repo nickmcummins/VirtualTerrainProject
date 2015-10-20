@@ -19,8 +19,13 @@ If you only want to run the software, there are [installers for Windows](http://
 * Optional: libbzip2, libcurl, QuikGrid, and a few more.
 
 ### New Dependencies ###
-* Required: GDAL 2, OpenSceneGraph 3.5, libMini, wxWidgets, libjpeg, libpng.
 
+* Required: GDAL 2, OpenSceneGraph (>= 3.2), libMini (>= 11.5.2), wxWidgets (>= 2.8), libjpeg, libpng.
+
+### Current Quirks on Ubuntu 15.04 ###
+
+* remove OsgEarth_include dir in ccmake
+* GDAL2 has no package yet, I suggest building it with ./configure --prefix=/usr/local/gdal2 so it doesnt interfere with your system gdal, then just set GDAL_INCLUDE and GDAL_LIBRARY in cmake
 
 ### Contribution guidelines ###
 
