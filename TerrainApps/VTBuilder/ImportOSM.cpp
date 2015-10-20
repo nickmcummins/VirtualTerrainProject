@@ -73,6 +73,9 @@ private:
 	NodeMap m_nodes;
 	std::vector<NodeIdType> m_refs;
 
+	// Also a map for the VTP nodes we create
+	std::map<NodeIdType, NodeEditPtr> m_NodeEditMap;
+
 	vtCRS m_crs;
 
 	vtString	m_Name, m_URL;
@@ -148,6 +151,9 @@ void VisitorOSM::startElement(const char *name, const XMLAttributes &atts)
 			node.p = p;
 			node.signal_lights = false;
 			m_nodes[m_id] = node;
+
+			if ((m_nodes.size() % 10000) == 0)
+				VTLOG("Added OSM node %d\n", m_nodes.size());
 
 			m_state = PS_NODE;
 
@@ -535,6 +541,10 @@ void VisitorOSM::MakeRoad()
 
 	LinkEdit *link = m_road_layer->AddNewLink();
 
+	int num = m_road_layer->NumLinks();
+	if ((num % 1000) == 0)
+		VTLOG("Making link %d\n", num);
+
 	link->m_iLanes = m_iRoadLanes;
 	link->m_iFlags = m_iRoadFlags;
 	link->m_Surface = m_eSurfaceType;
@@ -543,22 +553,31 @@ void VisitorOSM::MakeRoad()
 	NodeIdType ref_last = m_refs[m_refs.size() - 1];
 
 	// Make nodes at the first and last points.
-	NodeEdit *node0 = (NodeEdit *) m_road_layer->FindNodeByID(ref_first);
-	NodeEdit *node1 = (NodeEdit *) m_road_layer->FindNodeByID(ref_last);
-	if (!node0)
+	NodeEdit *node0, *node1;
+	auto iter1 = m_NodeEditMap.find(ref_first);
+	if (iter1 == m_NodeEditMap.end())
 	{
 		// No node there yet, create it
 		node0 = m_road_layer->AddNewNode();
 		node0->SetPos(m_nodes[ref_first].p);
 		node0->m_id = ref_first;
+		m_NodeEditMap[ref_first] = node0;
 	}
-	if (!node1)
+	else
+		node0 = iter1->second;
+
+	auto iter2 = m_NodeEditMap.find(ref_first);
+	if (iter2 == m_NodeEditMap.end())
 	{
 		// No node there yet, create it
 		node1 = m_road_layer->AddNewNode();
 		node1->SetPos(m_nodes[ref_last].p);
 		node1->m_id = ref_last;
+		m_NodeEditMap[ref_last] = node1;
 	}
+	else
+		node1 = iter2->second;
+
 	link->ConnectNodes(node0, node1);
 
 	// Copy all the points
@@ -569,6 +588,7 @@ void VisitorOSM::MakeRoad()
 	}
 	link->Dirtied();
 
+#if 1
 	// If either end of this link shares a node in the middle of another link,
 	// we need to split that link to maintain topology.
 	LinkEdit *next = NULL;
@@ -596,7 +616,9 @@ void VisitorOSM::MakeRoad()
 			}
 		}
 	}
+#endif
 
+#if 1
 	bool bMayNeedSplit = true;
 	while (bMayNeedSplit)
 	{
@@ -638,6 +660,7 @@ void VisitorOSM::MakeRoad()
 			}
 		}
 	}
+#endif
 }
 
 void VisitorOSM::MakeStructure()
@@ -647,6 +670,11 @@ void VisitorOSM::MakeStructure()
 		m_struct_layer = new vtStructureLayer;
 		m_struct_layer->SetCRS(m_crs);
 	}
+
+	size_t num = m_struct_layer->size();
+	if ((num % 1000) == 0)
+		 VTLOG("Making structure %d\n", num);
+
 	if (m_eStructureType == ST_BUILDING)
 		MakeBuilding();
 
@@ -660,12 +688,12 @@ void VisitorOSM::MakeBuilding()
 	// be the same as the first.  If not, something is wrong.
 	if (m_refs.size() < 4)
 	{
-		VTLOG("Bad building, id %d, only %d nodes\n", m_id, m_refs.size());
+		VTLOG("Bad building, id %llu, only %d nodes\n", m_id, m_refs.size());
 		return;
 	}
 	if (m_refs[0] != m_refs[m_refs.size()-1])
 	{
-		VTLOG("Bad building, id %d, not closed\n", m_id);
+		VTLOG("Bad building, id %llu, not closed\n", m_id);
 		return;
 	}
 
@@ -691,6 +719,8 @@ void VisitorOSM::MakeBuilding()
 	bld->SetFootprint(0, foot);
 	bld->SetFootprint(1, foot);
 
+	assert(bld->NumLevels() == 2);
+
 	// Apply a default style of building
 	vtBuilding *pDefBld = GetClosestDefault(bld);
 	if (pDefBld)
@@ -700,7 +730,7 @@ void VisitorOSM::MakeBuilding()
 
 	// Apply other building info, if we have it.
 	// Do we have both a height and a number of stories?
-	if (m_fHeight != -1 && m_iNumStories != -1 && m_iNumStories != 0)
+	if (m_fHeight != -1 && m_iNumStories > 0)
 	{
 		bld->SetNumStories(m_iNumStories);
 		bld->GetLevel(0)->m_fStoryHeight = m_fHeight / m_iNumStories;
@@ -714,8 +744,11 @@ void VisitorOSM::MakeBuilding()
 		bld->SetNumStories(num);
 		bld->GetLevel(0)->m_fStoryHeight = m_fHeight / num;
 	}
-	else if (m_iNumStories != -1)
+	else if (m_iNumStories > 1)
+	{
+		// We have number of stories, more than the (1 story) default
 		bld->SetNumStories(m_iNumStories);
+	}
 
 	if (m_RoofType != NUM_ROOFTYPES)
 		bld->SetRoofType(m_RoofType);
@@ -823,6 +856,8 @@ void Builder::ImportDataFromOSM(const wxString &strFileName, LayerArray &layers,
 	ScopedLocale normal_numbers(LC_NUMERIC, "C");
 
 	std::string fname_local = (const char *) strFileName.ToUTF8();
+	VTLOG("ImportDataFromOSM '%s'\n", fname_local.c_str());
+	clock_t t1 = clock();
 
 	VisitorOSM visitor;
 	try
@@ -834,6 +869,8 @@ void Builder::ImportDataFromOSM(const wxString &strFileName, LayerArray &layers,
 		DisplayAndLog(ex.getFormattedMessage().c_str());
 		return;
 	}
+	clock_t t2 = clock();
+	VTLOG("Imported in %.1f seconds\n", ((float)t2 - t1) / CLOCKS_PER_SEC);
 
 	if (visitor.m_road_layer)
 	{

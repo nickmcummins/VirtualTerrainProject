@@ -51,7 +51,11 @@ public:
 
 	virtual osg::BoundingBox computeBoundingBox() const
 	{
+#if OSG_VERSION_GREATER_THAN(3, 3, 0)
 		osg::BoundingBox geom_box = _geometry->getBoundingBox();
+#else
+		osg::BoundingBox geom_box = _geometry->getBound();
+#endif
 		osg::BoundingBox bb;
 		for (VecVec4::const_iterator itr = _psizelist.begin();
 			 itr != _psizelist.end(); ++itr)
