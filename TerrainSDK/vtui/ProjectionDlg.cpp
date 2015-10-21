@@ -179,6 +179,7 @@ void ProjectionDlg::UpdateControlStatus()
 		break;
 	case PT_ALBERS:
 	case PT_HOM:
+	case PT_HOMAC:
 	case PT_KROVAK:
 	case PT_LCC:
 	case PT_LCC1SP:
@@ -326,6 +327,9 @@ void ProjectionDlg::SetUIFromProjection()
 
 		else if (!strcmp(crs_string, SRS_PT_HOTINE_OBLIQUE_MERCATOR))
 			SetProjectionUI(PT_HOM);
+
+		else if (!strcmp(crs_string, SRS_PT_HOTINE_OBLIQUE_MERCATOR_AZIMUTH_CENTER))
+			SetProjectionUI(PT_HOMAC);
 
 		else if (!strcmp(crs_string, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP))
 			SetProjectionUI(PT_LCC1SP);
@@ -558,9 +562,14 @@ void ProjectionDlg::OnProjChoice( wxCommandEvent &event )
 		break;
 	case PT_HOM:
 		// Put in some default values; these are for Alaska Zone 1
-		m_crs.SetHOM( 57, -133.66666666666666,
+		m_crs.SetHOM(57, -133.66666666666666,
 			323.13010236111114, 323.13010236111114,
-			0.9999, 5000000, -5000000 );
+			0.9999, 5000000, -5000000);
+		break;
+	case PT_HOMAC:
+		// Put in some default values; these are for Swiss CH-LV03 (EPSG 21781)
+		m_crs.SetHOMAC(46.95240555555556, 7.439583333333333,
+			90, 90, 1, 600000, 200000);
 		break;
 	case PT_KROVAK:
 		// Put in some default values

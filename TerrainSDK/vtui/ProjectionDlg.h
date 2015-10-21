@@ -29,7 +29,8 @@ enum ProjType
 	PT_MERC,
 	PT_TM,
 	PT_UTM,
-	PT_DYMAX
+	PT_DYMAX,
+	PT_HOMAC		// Hotine_Oblique_Mercator_Azimuth_Center
 };
 
 // WDR: class declarations
