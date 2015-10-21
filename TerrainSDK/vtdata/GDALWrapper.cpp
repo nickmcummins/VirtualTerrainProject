@@ -101,7 +101,10 @@ bool GDALWrapper::Init()
 	m_initResult.hasGDAL_DATA = FindGDALData();
 	m_initResult.hasPROJ_LIB = FindPROJ4Data();
 	m_initResult.hasPROJSO = FindPROJ4SO();
-	VTLOG("GDAL_DATA/PROJ_LIB/PROJSO tests has: %d %d %d\n", m_initResult.hasGDAL_DATA, m_initResult.hasPROJ_LIB, m_initResult.hasPROJSO);
+	VTLOG("test results: GDAL_DATA %d, PROJ_LIB %d, PROJSO %d\n",
+		m_initResult.hasGDAL_DATA,
+		m_initResult.hasPROJ_LIB,
+		m_initResult.hasPROJSO);
 
 	return m_initResult.Success();
 }
@@ -192,13 +195,22 @@ bool GDALWrapper::FindPROJ4SO()
 #else // other unixes
     soExtension = ".so";
 #endif
+	soName += soExtension;
 
-	vtString fname = FindFileOnPaths(dpso, soName + soExtension);
+	VTLOG("Looking for '%s' on paths, ", (const char *)soName);
+	vtString fname = FindFileOnPaths(dpso, soName);
+	VTLOG("found: '%s', ", (fname != "") ? (const char *)fname : "");
 	FILE *fp = (fname != "") ? vtFileOpen((const char *)fname, "rb") : NULL;
 	if (fp == NULL)
+	{
+		VTLOG("not found.\n");
 		return false;
+	}
 	else
+	{
+		VTLOG("found.\n");
 		fclose(fp);
+	}
 
 	CPLSetConfigOption("PROJSO", fname);
 #endif	// WIN32
