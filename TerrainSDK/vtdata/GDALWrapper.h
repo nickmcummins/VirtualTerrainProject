@@ -50,10 +50,6 @@ extern GDALWrapper g_GDALWrapper;
 #else // other unixes
 #define DEFAULT_LOCATION_GDAL_DATA "/usr/local/share/gdal/"
 #define DEFAULT_LOCATION_PROJ_LIB "/usr/local/share/proj/"
-#  if _LP64
-#       define DEFAULT_LOCATION_PROJSO "/usr/local/lib64/"
-#  else
-#       define DEFAULT_LOCATION_PROJSO "/usr/local/lib/"
-#  endif
+#define DEFAULT_LOCATION_PROJSO "/usr/local/lib/"
 #endif
 

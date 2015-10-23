@@ -175,17 +175,22 @@ bool GDALWrapper::FindPROJ4SO()
     VTLOG("getenv PROJSO: '%s'\n", proj4so ? proj4so : "NULL");
     if (proj4so != NULL)
         dpso.push_back(vtString(proj4so) + "/");
-	dpso.push_back(vtString(DEFAULT_LOCATION_PROJSO));
-	// add the usual unix paths
 
-	// On 64-bit Linux, 64-bit libs are in lib64
+	// On 64-bit Linux, 64-bit libs are sometimes in a "64" folder
 #ifdef _LP64
+	dpso.push_back(vtString("/usr/local/lib/x86_64-linux-gnu/"));
 	dpso.push_back(vtString("/usr/local/lib64/"));
+	dpso.push_back(vtString("/usr/lib/x86_64-linux-gnu/"));
 	dpso.push_back(vtString("/usr/lib64/"));
 #else
+	dpso.push_back(vtString("/usr/local/lib/i386-linux-gnu/"));
+	dpso.push_back(vtString("/usr/local/lib32/"));
+	dpso.push_back(vtString("/usr/lib/i386-linux-gnu/"));
+	dpso.push_back(vtString("/usr/lib32/"));
+#endif
+	dpso.push_back(vtString(DEFAULT_LOCATION_PROJSO));
 	dpso.push_back(vtString("/usr/local/lib/"));
 	dpso.push_back(vtString("/usr/lib/"));
-#endif
 
 	// On non-Windows platform, we have to look for the library itself
 	vtString soExtension = ".unknown"; // for no platform.
