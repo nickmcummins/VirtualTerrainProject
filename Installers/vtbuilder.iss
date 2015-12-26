@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=VTBuilder
-AppVerName=VTBuilder 1.6 BETA (2015.09.09)
+AppVerName=VTBuilder 1.62 BETA (2015.10.21)
 AppPublisher=Virtual Terrain Project
 AppPublisherURL=http://vterrain.org/
 AppSupportURL=http://vterrain.org/
