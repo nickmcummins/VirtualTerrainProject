@@ -1,5 +1,0 @@
-^vc14$
-.tag$
-^TerrainSDK/Doc$
-^build/
-CMakeLists.txt.user
