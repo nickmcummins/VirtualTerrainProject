@@ -11,7 +11,7 @@
 #
 # Orginal source for OSG by Robert Osfield. Modified for osgEarth by Roger James 25/01/11
 
-SET(OSGEARTH_INSTALL_PREFIX "/usr/local" CACHE PATH "osgEarth install prefix")
+SET(OSGEARTH_INSTALL_PREFIX "/usr" CACHE PATH "osgEarth install prefix")
 
 SET(OSGEARTH_LIBRARY_NAMES
     osgEarth
